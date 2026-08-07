@@ -36,19 +36,23 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Remplacer le boilerplate Next.js par un shell applicatif minimal
 - [x] Préparer une interface mobile-first
 
+#### Base de données
+
+- [x] Configurer PostgreSQL en local
+- [x] Configurer Prisma
+- [x] Créer le premier schéma de données
+- [x] Créer les migrations initiales
+- [x] Ajouter les données de référence (`ActivityType`)
+
 ---
 
 ### En cours 🚧
 
-#### Base de données
+#### Gestion des activités
 
-Objectif : disposer du socle de données permettant de gérer les activités.
-
-- [ ] Configurer PostgreSQL en local
-- [ ] Configurer Prisma
-- [ ] Créer le premier schéma de données
-- [ ] Créer les migrations initiales
-- [ ] Ajouter les données de référence (`ActivityType`)
+- [x] Créer le concept d'activité (`Activity` + `ActivityType`)
+- [x] Permettre l'ajout d'une activité — vol uniquement pour l'instant, flux minimal `/flights/new`, sans authentification (utilisateur de développement créé par le seed)
+- [ ] Permettre de choisir un type d'activité (formulaire actuel limité au Vol)
 
 ---
 
@@ -62,12 +66,6 @@ Objectif : disposer du socle de données permettant de gérer les activités.
 
 ### Gestion des activités
 
-#### Activité générique
-
-- [ ] Créer le concept d'activité
-- [ ] Permettre l'ajout d'une activité
-- [ ] Permettre de choisir un type d'activité
-
 Types prévus :
 
 - Vol
@@ -78,23 +76,23 @@ Types prévus :
 
 ## Vols 🪂
 
-Informations obligatoires :
+Informations obligatoires (validées côté Zod) :
 
-- [ ] Date
-- [ ] Site
-- [ ] Altitude de décollage
-- [ ] Altitude d'atterrissage
-- [ ] Durée
-- [ ] Type de vol
-- [ ] Observations
-- [ ] Points d'amélioration
+- [x] Date
+- [x] Site
+- [x] Altitude de décollage
+- [x] Altitude d'atterrissage
+- [x] Durée
+- [x] Type de vol
+- [x] Observations
+- [x] Points d'amélioration
 
 Fonctionnalités :
 
-- [ ] Ajouter un vol
+- [x] Ajouter un vol — flux minimal `/flights/new`, sans authentification
 - [ ] Modifier un vol
 - [ ] Consulter l'historique des vols
-- [ ] Associer un vol à un stage
+- [ ] Associer un vol à un stage (`trainingCampId` prévu au schéma, non exposé dans le formulaire)
 
 ---
 
