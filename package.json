@@ -15,7 +15,11 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter web run typecheck",
     "test": "vitest run --passWithNoTests",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prisma:generate": "pnpm --filter web run prisma:generate",
+    "prisma:migrate": "pnpm --filter web run prisma:migrate",
+    "prisma:seed": "pnpm --filter web run prisma:seed",
+    "prisma:studio": "pnpm --filter web run prisma:studio"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.7",
@@ -27,6 +31,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/engines",
+      "esbuild",
       "prisma"
     ]
   }
