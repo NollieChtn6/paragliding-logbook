@@ -1,11 +1,16 @@
 import { prisma } from "@/lib/prisma";
-import type { FlightInput } from "@/lib/validations/flight";
+import { flightSchema } from "@/lib/validations/flight";
 
 const FLIGHT_ACTIVITY_TYPE_CODE = "FLIGHT";
 
-// Respecte le modèle Activity -> Flight (docs/decisions/001-activity-model.md) :
-// une Activity est toujours créée avant sa spécialisation, dans la même transaction.
-export async function createFlight(userId: string, input: FlightInput) {
+// Couche métier indépendante de l'UI : reçoit des données brutes, valide,
+// puis persiste. Respecte le modèle Activity -> Flight
+// (docs/decisions/001-activity-model.md) : une Activity est toujours créée
+// avant sa spécialisation, dans la même transaction. Les erreurs de
+// validation (ZodError) remontent telles quelles à l'appelant.
+export async function createFlight(userId: string, rawInput: unknown) {
+  const input = flightSchema.parse(rawInput);
+
   return prisma.$transaction(async (tx) => {
     const activityType = await tx.activityType.findUniqueOrThrow({
       where: { code: FLIGHT_ACTIVITY_TYPE_CODE },

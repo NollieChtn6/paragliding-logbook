@@ -1,9 +1,9 @@
 "use server";
 
+import { ZodError } from "zod";
+import { createFlight } from "@/features/flights";
 import { DEV_USER_EMAIL } from "@/lib/dev-fixtures";
 import { prisma } from "@/lib/prisma";
-import { flightSchema } from "@/lib/validations/flight";
-import { createFlight } from "@/repositories/flight-repository";
 
 export type CreateFlightActionState = { success: true } | { success: false; error: string };
 
@@ -11,12 +11,6 @@ export async function createFlightAction(
   _previousState: CreateFlightActionState | null,
   formData: FormData,
 ): Promise<CreateFlightActionState> {
-  const parsed = flightSchema.safeParse(Object.fromEntries(formData));
-
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
-  }
-
   // Pas d'Auth.js pour l'instant : utilisateur de développement créé par le seed.
   const devUser = await prisma.user.findUnique({ where: { email: DEV_USER_EMAIL } });
   if (!devUser) {
@@ -27,9 +21,12 @@ export async function createFlightAction(
   }
 
   try {
-    await createFlight(devUser.id, parsed.data);
+    await createFlight(devUser.id, Object.fromEntries(formData));
     return { success: true };
-  } catch {
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+    }
     return { success: false, error: "Erreur lors de la création du vol." };
   }
 }
