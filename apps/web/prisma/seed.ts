@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { DEV_USER_EMAIL, TEST_SITE_NAME } from "../src/lib/dev-fixtures";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -17,6 +18,26 @@ async function main() {
       update: { label: activityType.label },
       create: activityType,
     });
+  }
+
+  // Utilisateur et site de développement : pas d'Auth.js ni de gestion des
+  // sites pour l'instant, ces données de référence débloquent les premiers
+  // flux métier (ex. création d'un vol) sans construire ces features.
+  await prisma.user.upsert({
+    where: { email: DEV_USER_EMAIL },
+    update: {},
+    create: {
+      email: DEV_USER_EMAIL,
+      name: "Dev",
+      passwordHash: "dev-fixture-not-a-real-hash",
+    },
+  });
+
+  // Site.name n'est pas une contrainte unique en base (upsert impossible) :
+  // vérification manuelle pour rester idempotent.
+  const testSite = await prisma.site.findFirst({ where: { name: TEST_SITE_NAME } });
+  if (!testSite) {
+    await prisma.site.create({ data: { name: TEST_SITE_NAME } });
   }
 }
 
