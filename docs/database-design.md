@@ -5,7 +5,7 @@
 - PostgreSQL
 - Prisma ORM
 - UUID pour toutes les clés primaires
-- données isolées par utilisateur
+- données métier isolées par utilisateur (exception justifiée : `Site` et `School` sont des données de référence du monde réel, partagées entre utilisateurs)
 
 ---
 
@@ -51,7 +51,7 @@ Relations :
 
 - appartient à une Activity
 - appartient à un Site
-- peut appartenir à un Stage
+- peut appartenir à un TrainingCamp
 
 Champs :
 
@@ -128,7 +128,7 @@ Activity 1,1 ActivityType
 
 Activity 1,0..1 Flight
 
-Activity 1,0..1 Stage
+Activity 1,0..1 TrainingCamp
 
 Activity 1,0..1 GroundHandlingSession
 
@@ -136,6 +136,6 @@ Site 1,N Flight
 
 Site 1,N GroundHandlingSession
 
-Stage 1,N Flight
+TrainingCamp 1,N Flight
 
-School 1,N Stage
+School 1,N TrainingCamp

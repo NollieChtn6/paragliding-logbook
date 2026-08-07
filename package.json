@@ -23,5 +23,11 @@
     "lint-staged": "^17.3.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma"
+    ]
   }
 }
