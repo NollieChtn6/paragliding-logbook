@@ -37,14 +37,24 @@ Séance de gonflage ou de travail au sol.
 - latitude (optionnel)
 - longitude (optionnel)
 
-Les sites seront saisis manuellement dans un premier temps.
+Les sites seront saisis manuellement dans un premier temps. Donnée de référence partagée (pas de `userId`) : c'est un lieu du monde réel, pas une donnée privée à un utilisateur.
+
+---
+
+### School
+
+- id
+- name
+- website (optionnel)
+- location (optionnel)
+
+Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 
 ---
 
 ### Flight
 
 - id
-- userId
 - trainingCampId (nullable)
 - date
 - siteId
@@ -54,20 +64,22 @@ Les sites seront saisis manuellement dans un premier temps.
 - flightType
 - observations
 - improvementPoints
-- equipmentNotes (nullable)
+
+Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.userId`), pas de duplication sur `Flight`.
 
 ---
 
 ### TrainingCamp
 
 - id
-- userId
-- schoolName
+- schoolId
 - campType
 - startDate
 - endDate
 - summary
 - certification (nullable)
+
+Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de duplication sur `TrainingCamp`.
 
 Relation :
 
@@ -79,13 +91,12 @@ Relation :
 ### GroundHandlingSession
 
 - id
-- userId
 - date
 - siteId
 - durationMin
 - exercises
-- difficulties
-- feeling
+
+Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de duplication sur `GroundHandlingSession`.
 
 ---
 
@@ -115,14 +126,16 @@ Relation :
 
 - User
 - Site
+- School
 - Flight
 - TrainingCamp
 - GroundHandlingSession
 
 ### Plus tard
 
-- Equipment
+- Equipment (dont `Flight.equipmentNotes`)
 - WeatherObservation
 - IGCTrack
 - SiteTakeoff / SiteLanding
 - FlightStatisticsSnapshot
+- `GroundHandlingSession.difficulties` / `feeling` (ressenti détaillé)
