@@ -14,5 +14,5 @@
     "noEmit": true
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
-  "exclude": ["node_modules", ".next", "dist", "build", "coverage"]
+  "exclude": ["node_modules", ".next", "dist", "build", "coverage", "apps", "packages"]
 }
