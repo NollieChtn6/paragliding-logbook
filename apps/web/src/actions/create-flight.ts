@@ -2,8 +2,8 @@
 
 import { DEV_USER_EMAIL } from "@/lib/dev-fixtures";
 import { prisma } from "@/lib/prisma";
+import { flightSchema } from "@/lib/validations/flight";
 import { createFlight } from "@/repositories/flight-repository";
-import { createFlightSchema } from "@/schemas/flight";
 
 export type CreateFlightActionState = { success: true } | { success: false; error: string };
 
@@ -11,7 +11,7 @@ export async function createFlightAction(
   _previousState: CreateFlightActionState | null,
   formData: FormData,
 ): Promise<CreateFlightActionState> {
-  const parsed = createFlightSchema.safeParse(Object.fromEntries(formData));
+  const parsed = flightSchema.safeParse(Object.fromEntries(formData));
 
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };

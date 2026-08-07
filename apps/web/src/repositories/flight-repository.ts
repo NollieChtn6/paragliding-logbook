@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import type { CreateFlightInput } from "@/schemas/flight";
+import type { FlightInput } from "@/lib/validations/flight";
 
 const FLIGHT_ACTIVITY_TYPE_CODE = "FLIGHT";
 
 // Respecte le modèle Activity -> Flight (docs/decisions/001-activity-model.md) :
 // une Activity est toujours créée avant sa spécialisation, dans la même transaction.
-export async function createFlight(userId: string, input: CreateFlightInput) {
+export async function createFlight(userId: string, input: FlightInput) {
   return prisma.$transaction(async (tx) => {
     const activityType = await tx.activityType.findUniqueOrThrow({
       where: { code: FLIGHT_ACTIVITY_TYPE_CODE },
