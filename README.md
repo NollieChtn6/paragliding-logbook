@@ -19,10 +19,13 @@ pnpm install
 
 | Commande | Description |
 | --- | --- |
+| `pnpm dev` | Lance l'application Next.js (`apps/web`) en développement |
+| `pnpm build` | Build de production de `apps/web` |
+| `pnpm start` | Démarre le build de production de `apps/web` |
 | `pnpm lint` | Vérifie le code avec Biome |
 | `pnpm lint:fix` | Corrige automatiquement ce qui peut l'être |
 | `pnpm format` | Formate le code avec Biome |
-| `pnpm typecheck` | Vérifie les types TypeScript (`tsc --noEmit`) |
+| `pnpm typecheck` | Vérifie les types TypeScript (racine + `apps/web`) |
 | `pnpm test` | Exécute les tests avec Vitest |
 
 ## Qualité de code
@@ -33,4 +36,8 @@ pnpm install
 
 ## Structure
 
-Monorepo pnpm workspaces (`apps/*`, `packages/*`). Actuellement en phase bootstrap : seuls les outils de qualité et d'intégration continue sont configurés, aucune application n'est encore présente.
+Monorepo pnpm workspaces (`apps/*`, `packages/*`) :
+
+- `apps/web` : application Next.js (App Router, TypeScript strict, Tailwind CSS, shadcn/ui)
+
+Phase actuelle : scaffold Next.js. Aucune fonctionnalité métier (vols, stages, gonflages) n'est encore implémentée.
