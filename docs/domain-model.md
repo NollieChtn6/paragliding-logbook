@@ -106,7 +106,8 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 
 - la durée doit être **strictement positive** ;
 - l’altitude de décollage doit être **supérieure** à l’altitude d’atterrissage ;
-- les observations et points d’amélioration sont obligatoires afin d’encourager le suivi de progression.
+- les observations et points d’amélioration sont obligatoires afin d’encourager le suivi de progression ;
+- la date du vol ne peut pas être **dans le futur**.
 
 ### Stage
 

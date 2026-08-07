@@ -8,7 +8,8 @@ const FLIGHT_TYPES = ["LOCAL", "CROSS", "SOARING", "THERMAL", "TRAINING", "OTHER
 // Règles métier docs/domain-model.md (Vol) :
 // - durée strictement positive ;
 // - altitude de décollage supérieure à l'altitude d'atterrissage ;
-// - observations et points d'amélioration obligatoires (suivi de progression).
+// - observations et points d'amélioration obligatoires (suivi de progression) ;
+// - la date du vol ne peut pas être dans le futur.
 export const flightSchema = z
   .object({
     date: z.coerce.date(),
@@ -23,6 +24,12 @@ export const flightSchema = z
   .refine((data) => data.takeoffAltitudeM > data.landingAltitudeM, {
     message: "L'altitude de décollage doit être supérieure à l'altitude d'atterrissage.",
     path: ["takeoffAltitudeM"],
+  })
+  // `new Date()` évalué à chaque validation (et non figé au chargement du
+  // module) pour rester correct sur un process serveur longue durée.
+  .refine((data) => data.date <= new Date(), {
+    message: "La date du vol ne peut pas être dans le futur.",
+    path: ["date"],
   });
 
 export type FlightInput = z.infer<typeof flightSchema>;
