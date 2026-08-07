@@ -5,8 +5,7 @@
 // à valider côté Zod à l'implémentation des features.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -56,12 +55,14 @@ model Activity {
 /// Lieu de pratique. Donnée de référence partagée (pas de userId) : lieu du monde
 /// réel, pas une donnée privée à un utilisateur.
 model Site {
-  id        String  @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   name      String
   region    String?
   country   String?
   latitude  Float?
   longitude Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   flights                Flight[]
   groundHandlingSessions GroundHandlingSession[]
@@ -70,10 +71,12 @@ model Site {
 /// École fédérale de parapente. Donnée de référence partagée (pas de userId),
 /// au même titre que Site.
 model School {
-  id       String  @id @default(uuid()) @db.Uuid
-  name     String
-  website  String?
-  location String?
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  website   String?
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   trainingCamps TrainingCamp[]
 }
@@ -120,7 +123,7 @@ model TrainingCamp {
   campType      String
   startDate     DateTime
   endDate       DateTime
-  summary       String
+  summary       String?
   certification String?
 
   activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
@@ -132,12 +135,14 @@ model TrainingCamp {
 
 /// Spécialisation Gonflage. exercises obligatoire (règle métier docs/domain-model.md).
 model GroundHandlingSession {
-  id          String   @id @default(uuid()) @db.Uuid
-  activityId  String   @unique @db.Uuid
-  siteId      String   @db.Uuid
-  date        DateTime
-  durationMin Int
-  exercises   String
+  id           String   @id @default(uuid()) @db.Uuid
+  activityId   String   @unique @db.Uuid
+  siteId       String   @db.Uuid
+  date         DateTime
+  durationMin  Int
+  exercises    String
+  difficulties String?
+  feeling      String?
 
   activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
   site     Site     @relation(fields: [siteId], references: [id])
