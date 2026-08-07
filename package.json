@@ -18,7 +18,8 @@
     "prepare": "husky",
     "prisma:generate": "pnpm --filter web run prisma:generate",
     "prisma:migrate": "pnpm --filter web run prisma:migrate",
-    "prisma:seed": "pnpm --filter web run prisma:seed"
+    "prisma:seed": "pnpm --filter web run prisma:seed",
+    "prisma:studio": "pnpm --filter web run prisma:studio"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.7",
