@@ -1,5 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 // Réutilise une seule instance par process pour éviter d'épuiser le pool de
 // connexions PostgreSQL avec le hot-reload de Next.js en développement.
