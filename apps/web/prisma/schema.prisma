@@ -1,0 +1,146 @@
+// MLD : voir docs/database-design.md et docs/domain-model.md.
+// Activity reste l'entité racine (ADR 001, docs/decisions/001-activity-model.md) :
+// exactement une des relations Flight/TrainingCamp/GroundHandlingSession doit être
+// renseignée, en cohérence avec activityType — non contraignable nativement en SQL/Prisma,
+// à valider côté Zod à l'implémentation des features.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  activities Activity[]
+}
+
+/// Référentiel des types d'activité (table, pas un enum : extensible sans migration).
+/// Valeurs initiales prévues (docs/database-design.md) : FLIGHT, TRAINING_CAMP, GROUND_HANDLING.
+model ActivityType {
+  id    String @id @default(uuid()) @db.Uuid
+  code  String @unique
+  label String
+
+  activities Activity[]
+}
+
+/// Entrée générique du journal (timeline). Chaque Activity porte exactement une
+/// spécialisation (Flight, TrainingCamp ou GroundHandlingSession).
+model Activity {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  activityTypeId String   @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id])
+  activityType ActivityType @relation(fields: [activityTypeId], references: [id])
+
+  flight                Flight?
+  trainingCamp          TrainingCamp?
+  groundHandlingSession GroundHandlingSession?
+
+  @@index([userId])
+}
+
+/// Lieu de pratique. Donnée de référence partagée (pas de userId) : lieu du monde
+/// réel, pas une donnée privée à un utilisateur.
+model Site {
+  id        String  @id @default(uuid()) @db.Uuid
+  name      String
+  region    String?
+  country   String?
+  latitude  Float?
+  longitude Float?
+
+  flights                Flight[]
+  groundHandlingSessions GroundHandlingSession[]
+}
+
+/// École fédérale de parapente. Donnée de référence partagée (pas de userId),
+/// au même titre que Site.
+model School {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  website  String?
+  location String?
+
+  trainingCamps TrainingCamp[]
+}
+
+enum FlightType {
+  LOCAL
+  CROSS
+  SOARING
+  THERMAL
+  TRAINING
+  OTHER
+}
+
+/// Spécialisation Vol. observations/improvementPoints obligatoires (règle métier
+/// docs/domain-model.md : encourager le suivi de progression).
+model Flight {
+  id                String     @id @default(uuid()) @db.Uuid
+  activityId        String     @unique @db.Uuid
+  siteId            String     @db.Uuid
+  trainingCampId    String?    @db.Uuid
+  date              DateTime
+  takeoffAltitudeM  Int
+  landingAltitudeM  Int
+  durationMin       Int
+  flightType        FlightType
+  observations      String
+  improvementPoints String
+
+  activity     Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  site         Site          @relation(fields: [siteId], references: [id])
+  trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
+
+  @@index([siteId])
+  @@index([trainingCampId])
+}
+
+/// Spécialisation Stage (TrainingCamp). startDate <= endDate et les vols associés
+/// doivent avoir une date dans cet intervalle : règles applicatives (docs/domain-model.md),
+/// non exprimables nativement en Prisma.
+model TrainingCamp {
+  id            String   @id @default(uuid()) @db.Uuid
+  activityId    String   @unique @db.Uuid
+  schoolId      String   @db.Uuid
+  campType      String
+  startDate     DateTime
+  endDate       DateTime
+  summary       String
+  certification String?
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  school   School   @relation(fields: [schoolId], references: [id])
+  flights  Flight[]
+
+  @@index([schoolId])
+}
+
+/// Spécialisation Gonflage. exercises obligatoire (règle métier docs/domain-model.md).
+model GroundHandlingSession {
+  id          String   @id @default(uuid()) @db.Uuid
+  activityId  String   @unique @db.Uuid
+  siteId      String   @db.Uuid
+  date        DateTime
+  durationMin Int
+  exercises   String
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  site     Site     @relation(fields: [siteId], references: [id])
+
+  @@index([siteId])
+}
