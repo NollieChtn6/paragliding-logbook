@@ -14,7 +14,7 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter web run typecheck",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "prepare": "husky"
   },
   "devDependencies": {
