@@ -112,7 +112,7 @@ Informations prévues :
 - [ ] Nombre de vols réalisés
 - [ ] Certification obtenue
 
-## #Séances de gonflage
+### Séances de gonflage
 
 Informations prévues :
 
