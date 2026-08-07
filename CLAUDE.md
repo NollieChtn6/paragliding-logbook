@@ -62,6 +62,10 @@ Le backlog contient des idées potentielles mais ne fait pas partie du périmèt
 - Tailwind CSS
 - shadcn/ui
 
+Tous les formulaires doivent utiliser exclusivement les composants shadcn/ui.
+Ne pas utiliser directement les éléments HTML input/select/button sauf justification.
+Les styles doivent être cohérents Firefox, Safari et Chromium.
+
 ### Backend
 
 API intégrée Next.js
