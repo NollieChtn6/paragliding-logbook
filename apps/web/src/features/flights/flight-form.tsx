@@ -23,8 +23,8 @@ type FlightFormProps = {
 };
 
 // Formulaire de vol partagé (shadcn/ui exclusivement, cf. CLAUDE.md), utilisé
-// par /flights/new et /activities/new. createFlightAction redirige vers "/"
-// en cas de succès : il n'y a pas d'état "succès" à afficher ici.
+// par /flights/new et /activities/new. createFlightAction redirige vers
+// /activities en cas de succès : il n'y a pas d'état "succès" à afficher ici.
 export function FlightForm({ sites }: FlightFormProps) {
   const [state, formAction, isPending] = useActionState(createFlightAction, null);
 

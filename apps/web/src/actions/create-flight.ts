@@ -27,6 +27,9 @@ export async function createFlightAction(
   }
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
-  // catch générique ci-dessus ne doit pas intercepter.
-  redirect("/");
+  // catch générique ci-dessus ne doit pas intercepter. Vers /activities (pas
+  // "/") : la page d'accueil affiche un lien "Se connecter" qui prête à
+  // confusion juste après une création réussie, alors que la session est
+  // toujours valide.
+  redirect("/activities");
 }
