@@ -3,9 +3,8 @@ import { flightSchema } from "./flight";
 
 const validFlight = {
   date: "2025-01-15",
-  siteId: "550e8400-e29b-41d4-a716-446655440000",
-  takeoffAltitudeM: "1200",
-  landingAltitudeM: "450",
+  departurePointId: "550e8400-e29b-41d4-a716-446655440000",
+  arrivalPointId: "660e8400-e29b-41d4-a716-446655440001",
   durationMin: "35",
   flightType: "LOCAL",
   observations: "Quiet evening flight.",
@@ -18,19 +17,18 @@ describe("flightSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects a flight without takeoff or landing altitude", () => {
-    const { takeoffAltitudeM, landingAltitudeM, ...rest } = validFlight;
+  it("rejects a flight without a departure or arrival point", () => {
+    const { departurePointId, arrivalPointId, ...rest } = validFlight;
     const result = flightSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
-  it("rejects a takeoff altitude lower than the landing altitude", () => {
+  it("accepts the same point as both departure and arrival (top-landing)", () => {
     const result = flightSchema.safeParse({
       ...validFlight,
-      takeoffAltitudeM: "450",
-      landingAltitudeM: "1200",
+      arrivalPointId: validFlight.departurePointId,
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("rejects a negative duration", () => {

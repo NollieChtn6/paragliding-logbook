@@ -5,36 +5,58 @@ import { getDashboardData } from "./get-dashboard-data.service";
 let userId: string;
 let otherUserId: string;
 let siteId: string;
+let pointId: string;
 let schoolId: string;
 const activityIds: string[] = [];
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school, flightType, groundHandlingType, trainingCampType] =
-    await Promise.all([
-      prisma.user.create({
-        data: {
-          email: `dashboard-${suffix}@paragliding-logbook.local`,
-          name: "Dashboard Test User",
-        },
-      }),
-      prisma.user.create({
-        data: {
-          email: `dashboard-other-${suffix}@paragliding-logbook.local`,
-          name: "Other User",
-        },
-      }),
-      prisma.site.create({ data: { name: `Dashboard Test Site ${suffix}` } }),
-      prisma.school.create({ data: { name: `Dashboard Test School ${suffix}` } }),
-      prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
-      prisma.activityType.findUniqueOrThrow({ where: { code: "GROUND_HANDLING" } }),
-      prisma.activityType.findUniqueOrThrow({ where: { code: "TRAINING_CAMP" } }),
-    ]);
+  const [
+    user,
+    otherUser,
+    site,
+    school,
+    flightType,
+    groundHandlingType,
+    trainingCampType,
+    takeoffType,
+  ] = await Promise.all([
+    prisma.user.create({
+      data: {
+        email: `dashboard-${suffix}@paragliding-logbook.local`,
+        name: "Dashboard Test User",
+      },
+    }),
+    prisma.user.create({
+      data: {
+        email: `dashboard-other-${suffix}@paragliding-logbook.local`,
+        name: "Other User",
+      },
+    }),
+    prisma.site.create({ data: { name: `Dashboard Test Site ${suffix}` } }),
+    prisma.school.create({ data: { name: `Dashboard Test School ${suffix}` } }),
+    prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
+    prisma.activityType.findUniqueOrThrow({ where: { code: "GROUND_HANDLING" } }),
+    prisma.activityType.findUniqueOrThrow({ where: { code: "TRAINING_CAMP" } }),
+    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+  ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
   schoolId = school.id;
+
+  const point = await prisma.sitePoint.create({
+    data: {
+      label: "Point de test",
+      siteId,
+      sitePointTypeId: takeoffType.id,
+      latitude: 45.9,
+      longitude: 6.9,
+      altitudeM: 1200,
+    },
+  });
+  pointId = point.id;
 
   // 3 vols (20 + 30 + 40 = 90 min, moyenne 30) + 2 séances de gonflage
   // (15 + 25 = 40 min) = 5 activités "comptabilisables" + 1 stage = 6
@@ -51,10 +73,9 @@ beforeAll(async () => {
     await prisma.flight.create({
       data: {
         activityId: activity.id,
-        siteId,
+        departurePointId: pointId,
+        arrivalPointId: pointId,
         date: new Date(date),
-        takeoffAltitudeM: 1000,
-        landingAltitudeM: 400,
         durationMin,
         flightType: "LOCAL",
         observations: "RAS",
@@ -106,10 +127,9 @@ beforeAll(async () => {
   await prisma.flight.create({
     data: {
       activityId: otherUserActivity.id,
-      siteId,
+      departurePointId: pointId,
+      arrivalPointId: pointId,
       date: new Date("2025-06-01"),
-      takeoffAltitudeM: 1000,
-      landingAltitudeM: 400,
       durationMin: 999,
       flightType: "LOCAL",
       observations: "Vol d'un autre utilisateur",
@@ -124,6 +144,7 @@ afterAll(async () => {
   await prisma.groundHandlingSession.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.trainingCamp.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.activity.deleteMany({ where: { id: { in: activityIds } } });
+  await prisma.sitePoint.deleteMany({ where: { siteId } });
   await prisma.site.delete({ where: { id: siteId } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });

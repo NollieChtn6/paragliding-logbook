@@ -9,8 +9,45 @@ const site = {
   country: null,
   latitude: null,
   longitude: null,
+  primaryTakeoffPointId: null,
+  primaryLandingPointId: null,
   createdAt: new Date("2025-01-01"),
   updatedAt: new Date("2025-01-01"),
+};
+
+const otherSite = {
+  ...site,
+  id: "site-2",
+  name: "Autre site",
+};
+
+const takeoffType = { id: "spt-takeoff", code: "TAKEOFF", label: "Décollage" };
+const landingType = { id: "spt-landing", code: "LANDING", label: "Atterrissage" };
+
+const departurePoint = {
+  id: "point-1",
+  label: "Décollage principal",
+  siteId: site.id,
+  sitePointTypeId: takeoffType.id,
+  latitude: 45.9,
+  longitude: 6.9,
+  altitudeM: 1200,
+  orientationDeg: null,
+  site,
+  sitePointType: takeoffType,
+};
+
+const arrivalPoint = {
+  id: "point-2",
+  label: "Atterrissage principal",
+  siteId: site.id,
+  sitePointTypeId: landingType.id,
+  latitude: 45.8,
+  longitude: 6.8,
+  altitudeM: 450,
+  orientationDeg: null,
+  site,
+  sitePointType: landingType,
 };
 
 const school = {
@@ -34,23 +71,23 @@ const baseActivity = {
 };
 
 describe("getActivitySummary", () => {
-  it("summarizes a Flight", () => {
+  it("summarizes a Flight departing and arriving at the same site", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
       activityType: { id: "at-1", code: "FLIGHT", label: "Vol" },
       flight: {
         id: "flight-1",
         activityId: "activity-1",
-        siteId: site.id,
+        departurePointId: departurePoint.id,
+        arrivalPointId: arrivalPoint.id,
         trainingCampId: null,
         date: new Date("2025-06-15"),
-        takeoffAltitudeM: 1200,
-        landingAltitudeM: 450,
         durationMin: 35,
         flightType: "LOCAL",
         observations: "RAS",
         improvementPoints: "RAS",
-        site,
+        departurePoint,
+        arrivalPoint,
         trainingCamp: null,
       },
     };
@@ -58,6 +95,33 @@ describe("getActivitySummary", () => {
     expect(getActivitySummary(activity)).toEqual({
       title: "Vol",
       subtitle: "Site de test · 15/06/2025 · 35 min",
+    });
+  });
+
+  it("summarizes a Flight departing and arriving at different sites", () => {
+    const activity: ActivityWithDetails = {
+      ...baseActivity,
+      activityType: { id: "at-1", code: "FLIGHT", label: "Vol" },
+      flight: {
+        id: "flight-2",
+        activityId: "activity-1",
+        departurePointId: departurePoint.id,
+        arrivalPointId: arrivalPoint.id,
+        trainingCampId: null,
+        date: new Date("2025-06-15"),
+        durationMin: 90,
+        flightType: "CROSS",
+        observations: "RAS",
+        improvementPoints: "RAS",
+        departurePoint,
+        arrivalPoint: { ...arrivalPoint, site: otherSite },
+        trainingCamp: null,
+      },
+    };
+
+    expect(getActivitySummary(activity)).toEqual({
+      title: "Vol",
+      subtitle: "Site de test → Autre site · 15/06/2025 · 90 min",
     });
   });
 

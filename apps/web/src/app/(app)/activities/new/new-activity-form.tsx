@@ -13,6 +13,13 @@ import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
 type NewActivityFormProps = {
   activityTypes: { code: string; label: string }[];
   sites: { id: string; name: string }[];
+  points: {
+    id: string;
+    label: string;
+    altitudeM: number;
+    site: { id: string; name: string };
+    sitePointType: { label: string };
+  }[];
   schools: { id: string; name: string }[];
   trainingCamps: {
     id: string;
@@ -35,6 +42,7 @@ const NO_SELECTION = "";
 export function NewActivityForm({
   activityTypes,
   sites,
+  points,
   schools,
   trainingCamps,
 }: NewActivityFormProps) {
@@ -56,7 +64,7 @@ export function NewActivityForm({
       )}
 
       {selectedCode === "FLIGHT" && (
-        <FlightForm sites={sites} trainingCamps={trainingCamps} action={createFlightAction} />
+        <FlightForm points={points} trainingCamps={trainingCamps} action={createFlightAction} />
       )}
       {selectedCode === "TRAINING_CAMP" && (
         <TrainingCampForm schools={schools} action={createTrainingCampAction} />

@@ -2,13 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { getActivityById } from "@/features/activities";
+import { formatFlightLocation, getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
 
 export const dynamic = "force-dynamic";
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("fr-FR");
+}
+
+function formatSitePoint(point: {
+  label: string;
+  altitudeM: number;
+  site: { name: string };
+}): string {
+  return `${point.site.name} — ${point.label} (${point.altitudeM} m)`;
 }
 
 export default async function ActivityDetailPage(props: PageProps<"/activities/[id]">) {
@@ -38,9 +46,8 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
       {activity.flight && (
         <dl className="flex flex-col gap-3">
           <Field label="Date" value={formatDate(activity.flight.date)} />
-          <Field label="Site" value={activity.flight.site.name} />
-          <Field label="Altitude décollage" value={`${activity.flight.takeoffAltitudeM} m`} />
-          <Field label="Altitude atterrissage" value={`${activity.flight.landingAltitudeM} m`} />
+          <Field label="Point de départ" value={formatSitePoint(activity.flight.departurePoint)} />
+          <Field label="Point d'arrivée" value={formatSitePoint(activity.flight.arrivalPoint)} />
           <Field label="Durée" value={`${activity.flight.durationMin} min`} />
           <Field label="Type de vol" value={activity.flight.flightType} />
           <Field label="Observations" value={activity.flight.observations} />
@@ -75,7 +82,9 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                     key={flight.id}
                     className="flex flex-col gap-0.5 rounded-2xl border border-border bg-card p-4 shadow-sm"
                   >
-                    <span className="font-medium text-foreground">{flight.site.name}</span>
+                    <span className="font-medium text-foreground">
+                      {formatFlightLocation(flight)}
+                    </span>
                     <span className="text-sm text-muted-foreground">
                       {formatDate(flight.date)} · {flight.durationMin} min
                     </span>

@@ -1,15 +1,30 @@
 import type { Prisma } from "@prisma/client";
 
+// Réutilisé pour departurePoint/arrivalPoint, à deux niveaux (Flight direct
+// et TrainingCamp.flights) : évite de dupliquer le même include.
+const SITE_POINT_INCLUDE = { include: { site: true, sitePointType: true } } satisfies {
+  include: Prisma.SitePointInclude;
+};
+
 // Inclusion partagée entre listActivities et getActivityById : Activity n'a
 // pas de champ propre au-delà de son type, il faut toujours charger la
 // spécialisation correspondante pour l'afficher.
 export const ACTIVITY_WITH_DETAILS_INCLUDE = {
   activityType: true,
-  flight: { include: { site: true, trainingCamp: true } },
+  flight: {
+    include: {
+      departurePoint: SITE_POINT_INCLUDE,
+      arrivalPoint: SITE_POINT_INCLUDE,
+      trainingCamp: true,
+    },
+  },
   trainingCamp: {
     include: {
       school: true,
-      flights: { include: { site: true }, orderBy: { date: "asc" } },
+      flights: {
+        include: { departurePoint: SITE_POINT_INCLUDE, arrivalPoint: SITE_POINT_INCLUDE },
+        orderBy: { date: "asc" },
+      },
       groundHandlingSessions: { include: { site: true }, orderBy: { date: "asc" } },
     },
   },

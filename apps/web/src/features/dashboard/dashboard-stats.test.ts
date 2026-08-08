@@ -9,8 +9,25 @@ const site = {
   country: null,
   latitude: null,
   longitude: null,
+  primaryTakeoffPointId: null,
+  primaryLandingPointId: null,
   createdAt: new Date("2025-01-01"),
   updatedAt: new Date("2025-01-01"),
+};
+
+const takeoffType = { id: "spt-takeoff", code: "TAKEOFF", label: "Décollage" };
+
+const point = {
+  id: "point-1",
+  label: "Point de test",
+  siteId: site.id,
+  sitePointTypeId: takeoffType.id,
+  latitude: 45.9,
+  longitude: 6.9,
+  altitudeM: 1200,
+  orientationDeg: null,
+  site,
+  sitePointType: takeoffType,
 };
 
 const baseActivity = {
@@ -31,16 +48,16 @@ function flightActivity(id: string, durationMin: number): ActivityWithDetails {
     flight: {
       id: `flight-${id}`,
       activityId: id,
-      siteId: site.id,
+      departurePointId: point.id,
+      arrivalPointId: point.id,
       trainingCampId: null,
       date: new Date("2025-06-15"),
-      takeoffAltitudeM: 1200,
-      landingAltitudeM: 450,
       durationMin,
       flightType: "LOCAL",
       observations: "RAS",
       improvementPoints: "RAS",
-      site,
+      departurePoint: point,
+      arrivalPoint: point,
       trainingCamp: null,
     },
   };
