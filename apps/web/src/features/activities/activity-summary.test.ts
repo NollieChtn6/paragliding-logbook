@@ -75,6 +75,7 @@ describe("getActivitySummary", () => {
         summary: null,
         certification: null,
         school,
+        flights: [],
       },
     };
 

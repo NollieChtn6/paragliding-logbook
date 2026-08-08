@@ -6,7 +6,9 @@ import type { Prisma } from "@prisma/client";
 export const ACTIVITY_WITH_DETAILS_INCLUDE = {
   activityType: true,
   flight: { include: { site: true, trainingCamp: true } },
-  trainingCamp: { include: { school: true } },
+  trainingCamp: {
+    include: { school: true, flights: { include: { site: true }, orderBy: { date: "asc" } } },
+  },
   groundHandlingSession: { include: { site: true } },
 } satisfies Prisma.ActivityInclude;
 

@@ -1,0 +1,59 @@
+import { describe, expect, it } from "vitest";
+import { trainingCampSchema } from "./training-camp";
+
+const validTrainingCamp = {
+  startDate: "2025-01-10",
+  endDate: "2025-01-15",
+  schoolId: "550e8400-e29b-41d4-a716-446655440000",
+  campType: "Perfectionnement",
+};
+
+describe("trainingCampSchema", () => {
+  it("accepts a valid training camp", () => {
+    const result = trainingCampSchema.safeParse(validTrainingCamp);
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts optional summary and certification", () => {
+    const result = trainingCampSchema.safeParse({
+      ...validTrainingCamp,
+      summary: "Progression rapide.",
+      certification: "Brevet de pilote",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("treats an empty summary as absent", () => {
+    const result = trainingCampSchema.safeParse({ ...validTrainingCamp, summary: "" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.summary).toBeUndefined();
+    }
+  });
+
+  it("rejects a training camp without a start or end date", () => {
+    const { startDate, endDate, ...rest } = validTrainingCamp;
+    const result = trainingCampSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a training camp without a school", () => {
+    const { schoolId, ...rest } = validTrainingCamp;
+    const result = trainingCampSchema.safeParse(rest);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects an empty camp type", () => {
+    const result = trainingCampSchema.safeParse({ ...validTrainingCamp, campType: "  " });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a start date after the end date", () => {
+    const result = trainingCampSchema.safeParse({
+      ...validTrainingCamp,
+      startDate: "2025-01-15",
+      endDate: "2025-01-10",
+    });
+    expect(result.success).toBe(false);
+  });
+});

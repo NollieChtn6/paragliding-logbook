@@ -53,6 +53,27 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
               <Field label="Certification" value={activity.trainingCamp.certification} />
             )}
           </dl>
+
+          {activity.trainingCamp.flights.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                Vols associés
+              </h2>
+              <ul className="flex flex-col gap-2">
+                {activity.trainingCamp.flights.map((flight) => (
+                  <li
+                    key={flight.id}
+                    className="flex flex-col gap-0.5 rounded-lg border border-input px-3 py-2"
+                  >
+                    <span className="font-medium text-foreground">{flight.site.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {formatDate(flight.date)} · {flight.durationMin} min
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       )}
 

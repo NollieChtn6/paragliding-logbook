@@ -46,15 +46,16 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 #### Validation et couche métier
 
-- [x] Architecture de validations Zod par domaine (`src/lib/validations/`) — schéma `Flight` complet et testé (tests unitaires) ; `Activity`/`TrainingCamp`/`GroundHandlingSession` en structure seule, sans règle pour l'instant
+- [x] Architecture de validations Zod par domaine (`src/lib/validations/`) — schémas `Flight` et `TrainingCamp` complets et testés (tests unitaires) ; `Activity`/`GroundHandlingSession` en structure seule, sans règle pour l'instant
 - [x] Service métier `createFlight` organisé par feature (`src/features/flights/`), indépendant de l'UI — validation + transaction Prisma Activity/Flight, testé en intégration contre une vraie base
+- [x] Service métier `createTrainingCamp` (`src/features/training-camps/`), même structure que `createFlight` — validation + transaction Prisma Activity/TrainingCamp, testé en intégration
 - [x] Hash des mots de passe avec Argon2 (`src/lib/password.ts`)
 - [x] `getCurrentUser()` (`src/lib/current-user.ts`) : résolution de l'utilisateur courant à partir de la vraie session Better Auth
 
 #### Gestion des activités
 
 - [x] Créer le concept d'activité (`Activity` + `ActivityType`)
-- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire réellement disponible pour Vol uniquement (Stage/Gonflage affichent "Bientôt disponible"), route protégée (connexion requise)
+- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire disponible pour Vol et Stage (Gonflage affiche "Bientôt disponible"), route protégée (connexion requise)
 - [x] Permettre de choisir un type d'activité
 - [x] Consultation des activités : page `/activities` (historique trié par date d'événement, du plus récent au plus ancien) et `/activities/[id]` (détail complet), lecture via `src/features/activities/` (`listActivities`, `getActivityById`), gestion propre du cas "activité introuvable", routes protégées (connexion requise)
 
@@ -104,23 +105,32 @@ Fonctionnalités :
 - [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
 - [ ] Modifier un vol
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
-- [ ] Associer un vol à un stage (`trainingCampId` prévu au schéma, non exposé dans le formulaire)
+- [ ] Associer un vol à un stage depuis l'interface — `trainingCampId` supporté côté schéma/service (règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`), non exposé dans le formulaire pour l'instant
+
+---
+
+## Stages 🎓
+
+Informations obligatoires (validées côté Zod) :
+
+- [x] Date de début
+- [x] Date de fin (`startDate <= endDate`)
+- [x] École
+- [x] Type de stage
+- [x] Bilan (optionnel)
+- [x] Certification obtenue (optionnelle)
+
+Fonctionnalités :
+
+- [x] Ajouter un stage — `/activities/new`, service `createTrainingCamp` (`src/features/training-camps/`), route protégée (connexion requise)
+- [x] Consulter l'historique des stages — `/activities` (liste) et `/activities/[id]` (détail)
+- [x] Afficher les vols associés à un stage sur `/activities/[id]`, quand il y en a
+- [ ] Modifier un stage
+- [ ] Rattacher un vol existant à un stage depuis l'interface
 
 ---
 
 ## Rappels importants sur les notions
-
-### Stages 🎓
-
-Informations prévues :
-
-- [ ] Date de début
-- [ ] Date de fin
-- [ ] École
-- [ ] Type de stage / niveau
-- [ ] Bilan
-- [ ] Nombre de vols réalisés
-- [ ] Certification obtenue
 
 ### Séances de gonflage
 

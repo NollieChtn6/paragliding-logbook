@@ -5,15 +5,28 @@ import { z } from "zod";
 // données, donc pas d'import de @prisma/client ici.
 const FLIGHT_TYPES = ["LOCAL", "CROSS", "SOARING", "THERMAL", "TRAINING", "OTHER"] as const;
 
+// FormData renvoie une chaîne vide (pas undefined) pour un champ optionnel
+// laissé vide : on la normalise en undefined avant validation.
+const optionalUuid = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  z.string().uuid().optional(),
+);
+
 // Règles métier docs/domain-model.md (Vol) :
 // - durée strictement positive ;
 // - altitude de décollage supérieure à l'altitude d'atterrissage ;
 // - observations et points d'amélioration obligatoires (suivi de progression) ;
 // - la date du vol ne peut pas être dans le futur.
+// trainingCampId : pas encore exposé dans FlightForm (aucune fonctionnalité de
+// rattachement d'un vol à un stage depuis l'interface pour l'instant), mais le
+// champ existe déjà sur Flight (schema.prisma) — la règle "date du vol dans
+// l'intervalle du stage" est validée dans create-flight.service.ts (nécessite
+// de lire le TrainingCamp en base, hors de portée d'un .refine() Zod pur).
 export const flightSchema = z
   .object({
     date: z.coerce.date(),
     siteId: z.string().uuid(),
+    trainingCampId: optionalUuid,
     takeoffAltitudeM: z.coerce.number().int(),
     landingAltitudeM: z.coerce.number().int(),
     durationMin: z.coerce.number().int().positive(),
