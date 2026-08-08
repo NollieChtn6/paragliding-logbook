@@ -18,14 +18,27 @@ import { Textarea } from "@/components/ui/textarea";
 // tirer @prisma/client dans le bundle client pour un simple select.
 const FLIGHT_TYPES = ["LOCAL", "CROSS", "SOARING", "THERMAL", "TRAINING", "OTHER"] as const;
 
+type TrainingCampOption = {
+  id: string;
+  campType: string;
+  startDate: Date;
+  endDate: Date;
+  school: { name: string };
+};
+
 type FlightFormProps = {
   sites: { id: string; name: string }[];
+  trainingCamps?: TrainingCampOption[];
 };
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("fr-FR");
+}
 
 // Formulaire de vol partagé (shadcn/ui exclusivement, cf. CLAUDE.md), utilisé
 // par /flights/new et /activities/new. createFlightAction redirige vers
 // /activities en cas de succès : il n'y a pas d'état "succès" à afficher ici.
-export function FlightForm({ sites }: FlightFormProps) {
+export function FlightForm({ sites, trainingCamps = [] }: FlightFormProps) {
   const [state, formAction, isPending] = useActionState(createFlightAction, null);
 
   return (
@@ -50,6 +63,26 @@ export function FlightForm({ sites }: FlightFormProps) {
           </SelectContent>
         </Select>
       </div>
+
+      {trainingCamps.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+          <Select name="trainingCampId" defaultValue="">
+            <SelectTrigger id="trainingCampId" className="w-full">
+              <SelectValue placeholder="Aucun" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Aucun</SelectItem>
+              {trainingCamps.map((trainingCamp) => (
+                <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
+                  {trainingCamp.campType} — {trainingCamp.school.name} (
+                  {formatDate(trainingCamp.startDate)} → {formatDate(trainingCamp.endDate)})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="flex flex-col gap-1">
         <Label htmlFor="takeoffAltitudeM">Altitude décollage (m)</Label>

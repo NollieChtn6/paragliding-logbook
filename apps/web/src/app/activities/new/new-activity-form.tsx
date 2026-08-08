@@ -10,6 +10,13 @@ type NewActivityFormProps = {
   activityTypes: { code: string; label: string }[];
   sites: { id: string; name: string }[];
   schools: { id: string; name: string }[];
+  trainingCamps: {
+    id: string;
+    campType: string;
+    startDate: Date;
+    endDate: Date;
+    school: { name: string };
+  }[];
 };
 
 // FLIGHT et TRAINING_CAMP ont un formulaire disponible ; GROUND_HANDLING pas
@@ -22,7 +29,12 @@ const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT", "TRAINING_CAMP"]);
 // value doit donc rester une string dès le premier rendu.
 const NO_SELECTION = "";
 
-export function NewActivityForm({ activityTypes, sites, schools }: NewActivityFormProps) {
+export function NewActivityForm({
+  activityTypes,
+  sites,
+  schools,
+  trainingCamps,
+}: NewActivityFormProps) {
   const [selectedCode, setSelectedCode] = useState<string>(NO_SELECTION);
 
   return (
@@ -40,7 +52,7 @@ export function NewActivityForm({ activityTypes, sites, schools }: NewActivityFo
         <p className="text-muted-foreground">Bientôt disponible.</p>
       )}
 
-      {selectedCode === "FLIGHT" && <FlightForm sites={sites} />}
+      {selectedCode === "FLIGHT" && <FlightForm sites={sites} trainingCamps={trainingCamps} />}
       {selectedCode === "TRAINING_CAMP" && <TrainingCampForm schools={schools} />}
     </div>
   );

@@ -105,7 +105,7 @@ Fonctionnalités :
 - [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
 - [ ] Modifier un vol
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
-- [ ] Associer un vol à un stage depuis l'interface — `trainingCampId` supporté côté schéma/service (règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`), non exposé dans le formulaire pour l'instant
+- [x] Associer un vol à un stage à la création — champ optionnel "Stage associé" dans `FlightForm` (limité aux stages de l'utilisateur courant, `listTrainingCamps`), règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`
 
 ---
 

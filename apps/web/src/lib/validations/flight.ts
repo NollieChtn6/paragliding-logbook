@@ -17,11 +17,10 @@ const optionalUuid = z.preprocess(
 // - altitude de décollage supérieure à l'altitude d'atterrissage ;
 // - observations et points d'amélioration obligatoires (suivi de progression) ;
 // - la date du vol ne peut pas être dans le futur.
-// trainingCampId : pas encore exposé dans FlightForm (aucune fonctionnalité de
-// rattachement d'un vol à un stage depuis l'interface pour l'instant), mais le
-// champ existe déjà sur Flight (schema.prisma) — la règle "date du vol dans
-// l'intervalle du stage" est validée dans create-flight.service.ts (nécessite
-// de lire le TrainingCamp en base, hors de portée d'un .refine() Zod pur).
+// trainingCampId : optionnel, exposé dans FlightForm ("Stage associé") — la
+// règle "date du vol dans l'intervalle du stage" est validée dans
+// create-flight.service.ts, pas ici (nécessite de lire le TrainingCamp en
+// base, hors de portée d'un .refine() Zod pur).
 export const flightSchema = z
   .object({
     date: z.coerce.date(),
