@@ -33,7 +33,7 @@ describe("createFlightAction", () => {
       CURRENT_USER.id,
       expect.objectContaining({ siteId: "some-site" }),
     );
-    expect(redirect).toHaveBeenCalledWith("/");
+    expect(redirect).toHaveBeenCalledWith("/activities");
   });
 
   it("maps a ZodError from createFlight to a validation error message", async () => {
