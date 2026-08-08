@@ -44,6 +44,12 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Créer les migrations initiales
 - [x] Ajouter les données de référence (`ActivityType`)
 
+#### Validation et couche métier
+
+- [x] Architecture de validations Zod par domaine (`src/lib/validations/`) — schéma `Flight` complet et testé (tests unitaires) ; `Activity`/`TrainingCamp`/`GroundHandlingSession` en structure seule, sans règle pour l'instant
+- [x] Service métier `createFlight` organisé par feature (`src/features/flights/`), indépendant de l'UI — validation + transaction Prisma Activity/Flight, testé en intégration contre une vraie base
+- [x] Hash des mots de passe avec Argon2, y compris pour l'utilisateur de développement créé par le seed (jamais de mot de passe en clair en base)
+
 ---
 
 ### En cours 🚧

@@ -15,6 +15,15 @@
 
 Utilisateur de l'application.
 
+Champs :
+
+- id
+- name
+- email
+- passwordHash (hashé avec Argon2, jamais en clair)
+- createdAt
+- updatedAt
+
 ---
 
 ### Activity
@@ -33,9 +42,15 @@ Attributs :
 
 ### ActivityType
 
-Référentiel des types d'activité.
+Référentiel des types d'activité (table, pas un enum : extensible sans migration).
 
-Valeurs initiales :
+Champs :
+
+- id
+- code (unique)
+- label
+
+Valeurs initiales (peuplées par le seed) :
 
 - FLIGHT
 - TRAINING_CAMP
@@ -56,12 +71,12 @@ Relations :
 Champs :
 
 - date
-- takeoffAltitude
-- landingAltitude
-- durationMinutes
+- takeoffAltitudeM
+- landingAltitudeM
+- durationMin
 - flightType
 - observations
-- improvements
+- improvementPoints
 
 ---
 
@@ -74,9 +89,9 @@ Champs :
 - startDate
 - endDate
 - schoolId
-- stageType
-- assessment
-- certification
+- campType
+- summary (optionnel)
+- certification (optionnel)
 
 ---
 
@@ -88,10 +103,10 @@ Champs :
 
 - date
 - siteId
-- durationMinutes
+- durationMin
 - exercises
-- difficulties
-- feeling
+- difficulties (optionnel)
+- feeling (optionnel)
 
 ---
 
@@ -102,9 +117,12 @@ Lieu de pratique.
 Champs :
 
 - name
-- location
-- latitude
-- longitude
+- region (optionnel)
+- country (optionnel)
+- latitude (optionnel)
+- longitude (optionnel)
+- createdAt
+- updatedAt
 
 ---
 
@@ -115,8 +133,10 @@ Champs :
 Champs :
 
 - name
-- website
-- location
+- website (optionnel)
+- location (optionnel)
+- createdAt
+- updatedAt
 
 ---
 
