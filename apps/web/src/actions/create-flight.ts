@@ -3,8 +3,7 @@
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createFlight } from "@/features/flights";
-import { DEV_USER_EMAIL } from "@/lib/dev-fixtures";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/current-user";
 
 export type CreateFlightActionState = { success: true } | { success: false; error: string };
 
@@ -12,8 +11,7 @@ export async function createFlightAction(
   _previousState: CreateFlightActionState | null,
   formData: FormData,
 ): Promise<CreateFlightActionState> {
-  // Pas d'Auth.js pour l'instant : utilisateur de développement créé par le seed.
-  const devUser = await prisma.user.findUnique({ where: { email: DEV_USER_EMAIL } });
+  const devUser = await getCurrentUser();
   if (!devUser) {
     return {
       success: false,

@@ -2,18 +2,16 @@ import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createFlight } from "@/features/flights";
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/current-user";
 import { createFlightAction } from "./create-flight";
 
 // Ne re-teste pas les règles métier Flight (déjà couvertes par
 // lib/validations/flight.test.ts et create-flight.service.integration.test.ts) :
 // createFlight est mocké, on ne vérifie ici que le comportement propre à
-// l'action (résolution de l'utilisateur de dev, mapping des erreurs, redirect).
+// l'action (résolution de l'utilisateur courant, mapping des erreurs, redirect).
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/flights", () => ({ createFlight: vi.fn() }));
-vi.mock("@/lib/prisma", () => ({
-  prisma: { user: { findUnique: vi.fn() } },
-}));
+vi.mock("@/lib/current-user", () => ({ getCurrentUser: vi.fn() }));
 
 const DEV_USER = { id: "dev-user-id" };
 
@@ -23,7 +21,7 @@ describe("createFlightAction", () => {
   });
 
   it("returns an error when the development user does not exist", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
+    vi.mocked(getCurrentUser).mockResolvedValue(null);
 
     const result = await createFlightAction(null, new FormData());
 
@@ -35,7 +33,7 @@ describe("createFlightAction", () => {
   });
 
   it("calls createFlight with the development user id and redirects on success", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(DEV_USER as never);
+    vi.mocked(getCurrentUser).mockResolvedValue(DEV_USER as never);
     vi.mocked(createFlight).mockResolvedValue({} as never);
     const formData = new FormData();
     formData.set("siteId", "some-site");
@@ -50,7 +48,7 @@ describe("createFlightAction", () => {
   });
 
   it("maps a ZodError from createFlight to a validation error message", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(DEV_USER as never);
+    vi.mocked(getCurrentUser).mockResolvedValue(DEV_USER as never);
     const zodError = z.string().safeParse(123).error;
     if (!zodError) throw new Error("expected a ZodError for this test fixture");
     vi.mocked(createFlight).mockRejectedValue(zodError);
@@ -62,7 +60,7 @@ describe("createFlightAction", () => {
   });
 
   it("maps an unexpected error to a generic message", async () => {
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(DEV_USER as never);
+    vi.mocked(getCurrentUser).mockResolvedValue(DEV_USER as never);
     vi.mocked(createFlight).mockRejectedValue(new Error("boom"));
 
     const result = await createFlightAction(null, new FormData());
