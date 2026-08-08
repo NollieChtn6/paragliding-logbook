@@ -20,7 +20,47 @@ Champs :
 - id
 - name
 - email
-- passwordHash (hashé avec Argon2, jamais en clair)
+- emailVerified
+- image (optionnel)
+- createdAt
+- updatedAt
+
+Pas de mot de passe sur `User` : le hash Argon2 vit sur `Account` (voir ci-dessous).
+
+---
+
+### Session, Account, Verification
+
+Modèles imposés par Better Auth (authentification), voir `apps/web/src/lib/auth.ts`.
+
+**Session** : session active d'un utilisateur.
+
+- id
+- userId
+- token (unique)
+- expiresAt
+- ipAddress (optionnel)
+- userAgent (optionnel)
+- createdAt
+- updatedAt
+
+**Account** : compte de connexion. Un seul provider utilisé pour l'instant, `credential` (email + mot de passe) — un `User` a un `Account` de ce type.
+
+- id
+- userId
+- accountId
+- providerId (`credential` pour l'instant)
+- password (hash Argon2, uniquement pour le provider `credential`)
+- accessToken, refreshToken, accessTokenExpiresAt, refreshTokenExpiresAt, scope, idToken (optionnels, providers OAuth non utilisés pour l'instant)
+- createdAt
+- updatedAt
+
+**Verification** : jetons de vérification (ex. vérification d'email) — table prévue par Better Auth, non utilisée activement pour l'instant (pas de vérification d'email dans le MVP).
+
+- id
+- identifier
+- value
+- expiresAt
 - createdAt
 - updatedAt
 
@@ -143,6 +183,10 @@ Champs :
 ## Relations
 
 User 1,N Activity
+
+User 1,N Session
+
+User 1,N Account
 
 Activity 1,1 ActivityType
 

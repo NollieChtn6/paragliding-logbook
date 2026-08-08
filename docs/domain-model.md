@@ -23,9 +23,14 @@ Séance de gonflage ou de travail au sol.
 - id
 - name
 - email
-- passwordHash (hashé avec Argon2, jamais en clair — y compris pour l'utilisateur de développement créé par le seed)
+- emailVerified
+- image (optionnel)
 - createdAt
 - updatedAt
+
+Authentification email + mot de passe via Better Auth : le hash Argon2 vit
+sur `Account` (provider `credential`), pas sur `User` — voir
+docs/database-design.md pour le détail des modèles `Session`/`Account`/`Verification`.
 
 ---
 
