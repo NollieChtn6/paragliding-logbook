@@ -1,7 +1,6 @@
 // Identifiants de développement partagés entre le seed (prisma/seed.ts) et le
-// code applicatif, tant qu'Auth.js n'est pas en place (pas de vraie session).
+// code applicatif, tant qu'une vraie session (Better Auth) n'est pas en place
+// côté requêtes. Le mot de passe n'est jamais en dur ici : voir DEV_USER_PASSWORD
+// dans prisma/seed.ts, lu depuis une variable d'environnement.
 export const DEV_USER_EMAIL = "dev@paragliding-logbook.local";
-// Mot de passe en clair uniquement ici, dans le code de seed : jamais stocké
-// tel quel en base (voir hashPassword dans src/lib/password.ts).
-export const DEV_USER_PASSWORD = "dev-fixture-password";
 export const TEST_SITE_NAME = "Site de test";

@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { DEV_USER_EMAIL, DEV_USER_PASSWORD, TEST_SITE_NAME } from "../src/lib/dev-fixtures";
+import { DEV_USER_EMAIL, TEST_SITE_NAME } from "../src/lib/dev-fixtures";
 import { hashPassword } from "../src/lib/password";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -12,6 +12,18 @@ const activityTypes = [
   { code: "GROUND_HANDLING", label: "Gonflage" },
 ];
 
+// Jamais de mot de passe en dur dans le repository (CLAUDE.md > Authentification) :
+// le compte de développement lit son mot de passe depuis l'environnement.
+function getDevUserPassword(): string {
+  const password = process.env.DEV_USER_PASSWORD;
+  if (!password) {
+    throw new Error(
+      "DEV_USER_PASSWORD manquant : définissez-le dans apps/web/.env (voir .env.example).",
+    );
+  }
+  return password;
+}
+
 async function main() {
   for (const activityType of activityTypes) {
     await prisma.activityType.upsert({
@@ -21,11 +33,11 @@ async function main() {
     });
   }
 
-  // Utilisateur et site de développement : pas d'Auth.js ni de gestion des
-  // sites pour l'instant, ces données de référence débloquent les premiers
-  // flux métier (ex. création d'un vol) sans construire ces features.
-  const devPasswordHash = await hashPassword(DEV_USER_PASSWORD);
-  await prisma.user.upsert({
+  // Utilisateur et site de développement : pas de page de connexion ni de
+  // gestion des sites pour l'instant, ces données de référence débloquent les
+  // premiers flux métier (ex. création d'un vol) sans construire ces features.
+  const devPasswordHash = await hashPassword(getDevUserPassword());
+  const devUser = await prisma.user.upsert({
     where: { email: DEV_USER_EMAIL },
     update: { passwordHash: devPasswordHash },
     create: {
@@ -34,6 +46,31 @@ async function main() {
       passwordHash: devPasswordHash,
     },
   });
+
+  // Account "credential" : c'est cette table que Better Auth lit pour
+  // l'authentification email + mot de passe (voir src/lib/auth.ts), pas
+  // User.passwordHash (conservé temporairement, voir schema.prisma). Pas de
+  // contrainte unique (providerId, accountId) dans le schéma généré par
+  // Better Auth (vérifié via `better-auth generate`) : recherche manuelle
+  // pour rester idempotent, comme pour Site plus bas.
+  const devCredentialAccount = await prisma.account.findFirst({
+    where: { userId: devUser.id, providerId: "credential" },
+  });
+  if (devCredentialAccount) {
+    await prisma.account.update({
+      where: { id: devCredentialAccount.id },
+      data: { password: devPasswordHash },
+    });
+  } else {
+    await prisma.account.create({
+      data: {
+        userId: devUser.id,
+        providerId: "credential",
+        accountId: devUser.id,
+        password: devPasswordHash,
+      },
+    });
+  }
 
   // Site.name n'est pas une contrainte unique en base (upsert impossible) :
   // vérification manuelle pour rester idempotent.
