@@ -54,10 +54,11 @@ Monorepo pnpm workspaces (`apps/*`, `packages/*`) :
   - `prisma/` : schéma Prisma (dont les modèles Better Auth : `Session`/`Account`/`Verification`), migrations, seed
   - `src/lib/auth.ts` : instance serveur Better Auth (adaptateur Prisma, hash Argon2, inscription publique désactivée)
   - `src/lib/current-user.ts` : résolution de l'utilisateur courant à partir de la vraie session (`getCurrentUser`) et variante qui redirige vers `/sign-in` si absente (`requireCurrentUser`)
-  - `src/proxy.ts` : protection des routes `/activities`, `/activities/:path*` et `/flights/new` (vérification optimiste de session, redirige vers `/sign-in`)
-  - `src/lib/validations/` : schémas Zod par domaine métier (Flight complet et testé ; Activity/TrainingCamp/GroundHandlingSession en structure seule pour l'instant)
-  - `src/features/` : couche métier par feature, indépendante de l'UI — `flights/` (création d'un vol) et `activities/` (lecture : liste et détail, tous types d'activité confondus)
+  - `src/proxy.ts` : protection des routes `/`, `/activities`, `/activities/:path*` et `/flights/new` (vérification optimiste de session, redirige vers `/sign-in`)
+  - `src/lib/validations/` : schémas Zod par domaine métier — `Flight`, `TrainingCamp` et `GroundHandlingSession` complets et testés ; `Activity` en structure seule pour l'instant
+  - `src/features/` : couche métier par feature, indépendante de l'UI — `flights/`, `training-camps/`, `ground-handling-sessions/` (création), `activities/` (lecture : liste et détail, tous types d'activité confondus) et `dashboard/` (statistiques + activités récentes, dérivées de `activities/` sans requête Prisma supplémentaire)
   - `src/actions/` : Server Actions Next.js (dont `sign-in.ts`)
+  - `src/app/page.tsx` : dashboard (page d'accueil authentifiée)
   - `src/app/sign-in` : page de connexion email + mot de passe (pas d'inscription publique)
   - `src/app/activities` : parcours applicatif — `new` (choix du type d'activité puis formulaire), liste et `[id]` (détail)
   - `src/app/flights/new` : route de test historique (même formulaire partagé que `/activities/new`)

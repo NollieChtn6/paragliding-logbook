@@ -14,6 +14,7 @@ Nécessite `apps/web/.env` (copié depuis `.env.example`) et PostgreSQL local d�
 
 ## Routes
 
+- `/` : dashboard — cartes de statistiques (vols, gonflage, total d'activités) et 5 activités les plus récentes, lecture via `src/features/dashboard/`. **Protégée.**
 - `/sign-in` : connexion email + mot de passe (pas d'inscription publique — comptes créés par le seed). Accepte un paramètre `redirectTo` (validé côté serveur contre les open redirects) pour revenir à la page initialement demandée après connexion.
 - `/activities` : historique des activités de l'utilisateur, triées de la plus récente à la plus ancienne. **Protégée.**
 - `/activities/[id]` : détail d'une activité (page "introuvable" dédiée si elle n'existe pas ou n'appartient pas à l'utilisateur). **Protégée.**
