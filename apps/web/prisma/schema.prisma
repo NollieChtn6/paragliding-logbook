@@ -12,14 +12,10 @@ datasource db {
   provider = "postgresql"
 }
 
-/// passwordHash conservé temporairement en parallèle de Account.password (Better
-/// Auth) le temps de valider la migration complète de l'authentification -
-/// retrait prévu dans une PR ultérieure (voir CLAUDE.md > Authentification).
 model User {
   id            String   @id @default(uuid()) @db.Uuid
   name          String
   email         String   @unique
-  passwordHash  String
   emailVerified Boolean  @default(false)
   image         String?
   createdAt     DateTime @default(now())
@@ -50,8 +46,8 @@ model Session {
 }
 
 /// Compte de connexion (provider "credential" pour email + mot de passe).
-/// password porte le hash Argon2 - c'est ici, pas sur User.passwordHash, que
-/// Better Auth lit/écrit le mot de passe (voir apps/web/src/lib/auth.ts).
+/// password porte le hash Argon2 : c'est le seul endroit où Better Auth
+/// lit/écrit le mot de passe (voir apps/web/src/lib/auth.ts).
 model Account {
   id                    String    @id @default(uuid()) @db.Uuid
   userId                String    @db.Uuid

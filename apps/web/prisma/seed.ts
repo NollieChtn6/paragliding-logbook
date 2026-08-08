@@ -39,17 +39,15 @@ async function main() {
   const devPasswordHash = await hashPassword(getDevUserPassword());
   const devUser = await prisma.user.upsert({
     where: { email: DEV_USER_EMAIL },
-    update: { passwordHash: devPasswordHash },
+    update: {},
     create: {
       email: DEV_USER_EMAIL,
       name: "Dev",
-      passwordHash: devPasswordHash,
     },
   });
 
   // Account "credential" : c'est cette table que Better Auth lit pour
-  // l'authentification email + mot de passe (voir src/lib/auth.ts), pas
-  // User.passwordHash (conservé temporairement, voir schema.prisma). Pas de
+  // l'authentification email + mot de passe (voir src/lib/auth.ts). Pas de
   // contrainte unique (providerId, accountId) dans le schéma généré par
   // Better Auth (vérifié via `better-auth generate`) : recherche manuelle
   // pour rester idempotent, comme pour Site plus bas.
