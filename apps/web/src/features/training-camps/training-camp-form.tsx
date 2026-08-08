@@ -53,7 +53,7 @@ export function TrainingCampForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="startDate">Date de début</Label>
         <Input
           id="startDate"
@@ -66,7 +66,7 @@ export function TrainingCampForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="endDate">Date de fin</Label>
         <Input
           id="endDate"
@@ -79,11 +79,15 @@ export function TrainingCampForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="schoolId">École</Label>
         <Select name="schoolId" defaultValue={defaultValues?.schoolId} required>
           <SelectTrigger id="schoolId" className="w-full">
-            <SelectValue placeholder="Choisir une école" />
+            <SelectValue placeholder="Choisir une école">
+              {(value: string | null) =>
+                schools.find((school) => school.id === value)?.name ?? "Choisir une école"
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {schools.map((school) => (
@@ -95,17 +99,17 @@ export function TrainingCampForm({
         </Select>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="campType">Type de stage</Label>
         <Input id="campType" name="campType" defaultValue={defaultValues?.campType} required />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="summary">Bilan</Label>
         <Textarea id="summary" name="summary" defaultValue={defaultValues?.summary} />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="certification">Certification</Label>
         <Input
           id="certification"
@@ -114,7 +118,7 @@ export function TrainingCampForm({
         />
       </div>
 
-      <Button type="submit" disabled={isPending}>
+      <Button type="submit" className="mt-2" disabled={isPending}>
         {isPending ? "Enregistrement..." : submitLabel}
       </Button>
 
