@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createFlight } from "@/features/flights";
 import { DEV_USER_EMAIL } from "@/lib/dev-fixtures";
@@ -22,11 +23,14 @@ export async function createFlightAction(
 
   try {
     await createFlight(devUser.id, Object.fromEntries(formData));
-    return { success: true };
   } catch (error) {
     if (error instanceof ZodError) {
       return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
     }
     return { success: false, error: "Erreur lors de la création du vol." };
   }
+
+  // Hors du try/catch : redirect() lève une erreur interne spéciale que le
+  // catch générique ci-dessus ne doit pas intercepter.
+  redirect("/");
 }
