@@ -88,7 +88,8 @@ Champs :
 
 - id
 - code (unique)
-- label
+
+Pas de `label` : catégorie technique traduisible, le libellé affiché vit dans `apps/web/src/lib/reference-labels.ts` (voir `docs/decisions/003-reference-table-codes.md`).
 
 Valeurs initiales (peuplées par le seed) :
 
@@ -107,16 +108,38 @@ Relations :
 - appartient à une Activity
 - departurePoint et arrivalPoint : chacun un SitePoint, potentiellement de sites différents (voir SitePoint ci-dessous)
 - peut appartenir à un TrainingCamp
+- appartient à un FlightType
 
 Champs :
 
 - date
 - durationMin
-- flightType
 - observations
 - improvementPoints
 
 Pas de `siteId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `departurePoint.altitudeM`/`arrivalPoint.altitudeM`.
+
+---
+
+### FlightType
+
+Référentiel des types de vol (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`).
+
+Champs :
+
+- id
+- code (unique)
+
+Pas de `label`, même principe que `ActivityType`/`SitePointType`.
+
+Valeurs initiales (peuplées par le seed) :
+
+- LOCAL
+- CROSS_COUNTRY
+- SOARING
+- THERMAL
+- TRAINING
+- OTHER
 
 ---
 
@@ -203,7 +226,8 @@ Champs :
 
 - id
 - code (unique)
-- label
+
+Pas de `label`, même principe que `ActivityType`.
 
 Valeurs initiales (peuplées par le seed) :
 
@@ -253,6 +277,8 @@ SitePointType 1,N SitePoint
 SitePoint 1,N Flight (departurePoint)
 
 SitePoint 1,N Flight (arrivalPoint)
+
+FlightType 1,N Flight
 
 Site 1,N GroundHandlingSession
 

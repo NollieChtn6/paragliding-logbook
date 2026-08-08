@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 
 export default async function NewActivityPage() {
   const user = await requireCurrentUser();
-  const [activityTypes, sites, points, schools, trainingCamps] = await Promise.all([
-    prisma.activityType.findMany({ select: { code: true, label: true } }),
+  const [activityTypes, sites, points, flightTypes, schools, trainingCamps] = await Promise.all([
+    prisma.activityType.findMany({ select: { code: true } }),
     prisma.site.findMany({ select: { id: true, name: true } }),
     prisma.sitePoint.findMany({
       select: {
@@ -19,9 +19,10 @@ export default async function NewActivityPage() {
         label: true,
         altitudeM: true,
         site: { select: { id: true, name: true } },
-        sitePointType: { select: { label: true } },
+        sitePointType: { select: { code: true } },
       },
     }),
+    prisma.flightType.findMany({ select: { id: true, code: true } }),
     prisma.school.findMany({ select: { id: true, name: true } }),
     listTrainingCamps(user.id),
   ]);
@@ -33,6 +34,7 @@ export default async function NewActivityPage() {
         activityTypes={activityTypes}
         sites={sites}
         points={points}
+        flightTypes={flightTypes}
         schools={schools}
         trainingCamps={trainingCamps}
       />

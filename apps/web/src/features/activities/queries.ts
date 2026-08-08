@@ -15,6 +15,7 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
     include: {
       departurePoint: SITE_POINT_INCLUDE,
       arrivalPoint: SITE_POINT_INCLUDE,
+      flightType: true,
       trainingCamp: true,
     },
   },

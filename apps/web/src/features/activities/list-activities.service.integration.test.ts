@@ -11,7 +11,7 @@ const activityIds: string[] = [];
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, flightType, takeoffType] = await Promise.all([
+  const [user, otherUser, site, activityType, takeoffType, flightType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `list-activities-${suffix}@paragliding-logbook.local`,
@@ -27,6 +27,7 @@ beforeAll(async () => {
     prisma.site.create({ data: { name: `List Activities Test Site ${suffix}` } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
@@ -47,7 +48,7 @@ beforeAll(async () => {
   // Créées dans un ordre différent de leur date de vol, pour prouver que le
   // tri se fait bien sur la date de l'événement et pas sur createdAt.
   const olderActivity = await prisma.activity.create({
-    data: { userId, activityTypeId: flightType.id },
+    data: { userId, activityTypeId: activityType.id },
   });
   await prisma.flight.create({
     data: {
@@ -56,14 +57,14 @@ beforeAll(async () => {
       arrivalPointId: pointId,
       date: new Date("2024-01-10"),
       durationMin: 20,
-      flightType: "LOCAL",
+      flightTypeId: flightType.id,
       observations: "Vol le plus ancien",
       improvementPoints: "RAS",
     },
   });
 
   const newerActivity = await prisma.activity.create({
-    data: { userId, activityTypeId: flightType.id },
+    data: { userId, activityTypeId: activityType.id },
   });
   await prisma.flight.create({
     data: {
@@ -72,14 +73,14 @@ beforeAll(async () => {
       arrivalPointId: pointId,
       date: new Date("2025-06-15"),
       durationMin: 35,
-      flightType: "LOCAL",
+      flightTypeId: flightType.id,
       observations: "Vol le plus récent",
       improvementPoints: "RAS",
     },
   });
 
   const otherUserActivity = await prisma.activity.create({
-    data: { userId: otherUserId, activityTypeId: flightType.id },
+    data: { userId: otherUserId, activityTypeId: activityType.id },
   });
   await prisma.flight.create({
     data: {
@@ -88,7 +89,7 @@ beforeAll(async () => {
       arrivalPointId: pointId,
       date: new Date("2025-01-01"),
       durationMin: 20,
-      flightType: "LOCAL",
+      flightTypeId: flightType.id,
       observations: "Vol d'un autre utilisateur",
       improvementPoints: "RAS",
     },

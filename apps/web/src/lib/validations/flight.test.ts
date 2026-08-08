@@ -6,7 +6,7 @@ const validFlight = {
   departurePointId: "550e8400-e29b-41d4-a716-446655440000",
   arrivalPointId: "660e8400-e29b-41d4-a716-446655440001",
   durationMin: "35",
-  flightType: "LOCAL",
+  flightTypeId: "770e8400-e29b-41d4-a716-446655440002",
   observations: "Quiet evening flight.",
   improvementPoints: "Work on approach phases.",
 };
@@ -36,8 +36,8 @@ describe("flightSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects an invalid flight type", () => {
-    const result = flightSchema.safeParse({ ...validFlight, flightType: "AEROBATIC" });
+  it("rejects a malformed flight type id", () => {
+    const result = flightSchema.safeParse({ ...validFlight, flightTypeId: "not-a-uuid" });
     expect(result.success).toBe(false);
   });
 

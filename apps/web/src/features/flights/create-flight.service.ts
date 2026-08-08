@@ -41,6 +41,18 @@ export async function createFlight(userId: string, rawInput: unknown) {
       throw new ZodError([issue]);
     }
 
+    // FlightType est une donnée de référence partagée, même traitement que
+    // SitePoint ci-dessus (docs/decisions/003-reference-table-codes.md).
+    const flightType = await tx.flightType.findUnique({ where: { id: input.flightTypeId } });
+    if (!flightType) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["flightTypeId"],
+        message: "Ce type de vol n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+
     // Règle métier docs/domain-model.md (Stage) : un vol rattaché à un stage
     // doit avoir une date dans l'intervalle [startDate, endDate] du stage.
     // Pas exprimable en Zod pur (nécessite de lire le TrainingCamp en base) :
@@ -88,7 +100,7 @@ export async function createFlight(userId: string, rawInput: unknown) {
         trainingCampId: input.trainingCampId,
         date: input.date,
         durationMin: input.durationMin,
-        flightType: input.flightType,
+        flightTypeId: input.flightTypeId,
         observations: input.observations,
         improvementPoints: input.improvementPoints,
       },

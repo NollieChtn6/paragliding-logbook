@@ -1,3 +1,4 @@
+import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 import type { ActivityWithDetails } from "./queries";
 
 export type ActivitySummary = {
@@ -50,5 +51,8 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     };
   }
 
-  return { title: activity.activityType.label, subtitle: "" };
+  return {
+    title: ACTIVITY_TYPE_LABELS[activity.activityType.code] ?? activity.activityType.code,
+    subtitle: "",
+  };
 }

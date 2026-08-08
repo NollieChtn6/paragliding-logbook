@@ -9,6 +9,7 @@ let otherUserId: string;
 let siteId: string;
 let departurePointId: string;
 let arrivalPointId: string;
+let flightTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
@@ -16,7 +17,6 @@ let otherUserTrainingCampId: string;
 const validFlightInput = {
   date: "2025-01-15",
   durationMin: "35",
-  flightType: "LOCAL",
   observations: "Integration test flight.",
   improvementPoints: "Work on approach phases.",
 };
@@ -24,7 +24,7 @@ const validFlightInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, takeoffType, landingType] = await Promise.all([
+  const [user, otherUser, takeoffType, landingType, flightType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `integration-test-${suffix}@paragliding-logbook.local`,
@@ -39,9 +39,11 @@ beforeAll(async () => {
     }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
+  flightTypeId = flightType.id;
 
   const site = await prisma.site.create({
     data: { name: `Integration Test Site ${suffix}` },
@@ -120,6 +122,7 @@ describe("createFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId,
+        flightTypeId,
       });
       flightId = flight.id;
       activityId = flight.activityId;
@@ -139,7 +142,7 @@ describe("createFlight (integration)", () => {
       expect(flight.departurePointId).toBe(departurePointId);
       expect(flight.arrivalPointId).toBe(arrivalPointId);
       expect(flight.durationMin).toBe(35);
-      expect(flight.flightType).toBe("LOCAL");
+      expect(flight.flightTypeId).toBe(flightTypeId);
     });
 
     it("links the Flight to its Activity", async () => {
@@ -157,6 +160,7 @@ describe("createFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId,
+        flightTypeId,
         durationMin: "-10",
       }),
     ).rejects.toThrow();
@@ -168,6 +172,7 @@ describe("createFlight (integration)", () => {
         ...validFlightInput,
         departurePointId: crypto.randomUUID(),
         arrivalPointId,
+        flightTypeId,
       }),
     ).rejects.toThrow();
   });
@@ -178,6 +183,18 @@ describe("createFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId: crypto.randomUUID(),
+        flightTypeId,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the flight type does not exist", async () => {
+    await expect(
+      createFlight(userId, {
+        ...validFlightInput,
+        departurePointId,
+        arrivalPointId,
+        flightTypeId: crypto.randomUUID(),
       }),
     ).rejects.toThrow();
   });
@@ -190,6 +207,7 @@ describe("createFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId,
+        flightTypeId,
         trainingCampId,
         date: "2025-01-12",
       });
@@ -202,6 +220,7 @@ describe("createFlight (integration)", () => {
           ...validFlightInput,
           departurePointId,
           arrivalPointId,
+          flightTypeId,
           trainingCampId,
           date: "2025-01-05",
         }),
@@ -214,6 +233,7 @@ describe("createFlight (integration)", () => {
           ...validFlightInput,
           departurePointId,
           arrivalPointId,
+          flightTypeId,
           trainingCampId,
           date: "2025-01-25",
         }),
@@ -226,6 +246,7 @@ describe("createFlight (integration)", () => {
           ...validFlightInput,
           departurePointId,
           arrivalPointId,
+          flightTypeId,
           trainingCampId: otherUserTrainingCampId,
           date: "2025-01-12",
         }),

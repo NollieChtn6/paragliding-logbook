@@ -73,9 +73,8 @@ Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 
 - id
 - code (unique) — `TAKEOFF`, `LANDING`
-- label
 
-Table de référence (pas un enum), même principe qu'`ActivityType` : extensible sans migration si un nouveau type de point est nécessaire.
+Table de référence (pas un enum), même principe qu'`ActivityType` : extensible sans migration si un nouveau type de point est nécessaire. Pas de `label` : catégorie technique traduisible, le libellé affiché vit dans `apps/web/src/lib/reference-labels.ts` (voir `docs/decisions/003-reference-table-codes.md`).
 
 ---
 
@@ -100,7 +99,7 @@ Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 - departurePointId — `SitePoint` de départ
 - arrivalPointId — `SitePoint` d'arrivée
 - durationMin
-- flightType
+- flightTypeId — type de vol, table de référence (`FlightType` : LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER), pas de `label` — voir `SitePointType`
 - observations
 - improvementPoints
 

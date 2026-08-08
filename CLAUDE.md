@@ -167,7 +167,7 @@ Un site peut avoir plusieurs points (décollage, atterrissage), avec coordonnée
 Type de vol :
 
 - LOCAL
-- CROSS
+- CROSS_COUNTRY
 - SOARING
 - THERMAL
 - TRAINING

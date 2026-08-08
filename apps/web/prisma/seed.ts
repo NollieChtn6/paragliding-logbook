@@ -13,18 +13,22 @@ import { hashPassword } from "../src/lib/password";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const activityTypes = [
-  { code: "FLIGHT", label: "Vol" },
-  { code: "TRAINING_CAMP", label: "Stage" },
-  { code: "GROUND_HANDLING", label: "Gonflage" },
-];
+// Tables de référence (ActivityType/SitePointType/FlightType) : pas de label
+// ici, le libellé affiché vit côté application
+// (src/lib/reference-labels.ts, docs/decisions/003-reference-table-codes.md).
+const activityTypes = [{ code: "FLIGHT" }, { code: "TRAINING_CAMP" }, { code: "GROUND_HANDLING" }];
 
-// Table de référence des types de point (même principe qu'activityTypes
-// ci-dessus) : extensible sans migration si un nouveau type de point est
-// nécessaire plus tard (docs/decisions, cf. schema.prisma).
-const sitePointTypes = [
-  { code: "TAKEOFF", label: "Décollage" },
-  { code: "LANDING", label: "Atterrissage" },
+const sitePointTypes = [{ code: "TAKEOFF" }, { code: "LANDING" }];
+
+// Remplace l'ancien enum Prisma FlightType (ADR 003). CROSS renommé en
+// CROSS_COUNTRY, plus explicite (docs/decisions/003-reference-table-codes.md).
+const flightTypes = [
+  { code: "LOCAL" },
+  { code: "CROSS_COUNTRY" },
+  { code: "SOARING" },
+  { code: "THERMAL" },
+  { code: "TRAINING" },
+  { code: "OTHER" },
 ];
 
 // Jamais de mot de passe en dur dans le repository (CLAUDE.md > Authentification) :
@@ -133,7 +137,7 @@ async function main() {
   for (const activityType of activityTypes) {
     await prisma.activityType.upsert({
       where: { code: activityType.code },
-      update: { label: activityType.label },
+      update: {},
       create: activityType,
     });
   }
@@ -141,8 +145,16 @@ async function main() {
   for (const sitePointType of sitePointTypes) {
     await prisma.sitePointType.upsert({
       where: { code: sitePointType.code },
-      update: { label: sitePointType.label },
+      update: {},
       create: sitePointType,
+    });
+  }
+
+  for (const flightType of flightTypes) {
+    await prisma.flightType.upsert({
+      where: { code: flightType.code },
+      update: {},
+      create: flightType,
     });
   }
 

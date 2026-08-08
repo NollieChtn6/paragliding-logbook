@@ -1,10 +1,5 @@
 import { z } from "zod";
 
-// Valeurs alignées manuellement sur l'enum Prisma FlightType (schema.prisma) :
-// cette couche de validation reste volontairement indépendante de la base de
-// données, donc pas d'import de @prisma/client ici.
-const FLIGHT_TYPES = ["LOCAL", "CROSS", "SOARING", "THERMAL", "TRAINING", "OTHER"] as const;
-
 // FormData renvoie une chaîne vide (pas undefined) pour un champ optionnel
 // laissé vide : on la normalise en undefined avant validation.
 const optionalUuid = z.preprocess(
@@ -25,8 +20,10 @@ const optionalUuid = z.preprocess(
 // règle "date du vol dans l'intervalle du stage" est validée dans
 // create-flight.service.ts, pas ici (nécessite de lire le TrainingCamp en
 // base, hors de portée d'un .refine() Zod pur). departurePointId/
-// arrivalPointId : même limitation, leur existence est vérifiée dans le
-// service (nécessite une lecture en base).
+// arrivalPointId/flightTypeId : même limitation, leur existence est vérifiée
+// dans le service (nécessite une lecture en base) — FlightType est
+// désormais une table de référence (docs/decisions/003-reference-table-codes.md),
+// plus un enum Prisma validable en mémoire.
 export const flightSchema = z
   .object({
     date: z.coerce.date(),
@@ -34,7 +31,7 @@ export const flightSchema = z
     arrivalPointId: z.string().uuid(),
     trainingCampId: optionalUuid,
     durationMin: z.coerce.number().int().positive(),
-    flightType: z.enum(FLIGHT_TYPES),
+    flightTypeId: z.string().uuid(),
     observations: z.string().trim().min(1),
     improvementPoints: z.string().trim().min(1),
   })

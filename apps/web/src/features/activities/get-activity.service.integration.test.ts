@@ -11,7 +11,7 @@ let activityId: string;
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, flightType, takeoffType] = await Promise.all([
+  const [user, otherUser, site, activityType, takeoffType, flightType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `get-activity-${suffix}@paragliding-logbook.local`,
@@ -27,6 +27,7 @@ beforeAll(async () => {
     prisma.site.create({ data: { name: `Get Activity Test Site ${suffix}` } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
@@ -45,7 +46,7 @@ beforeAll(async () => {
   pointId = point.id;
 
   const activity = await prisma.activity.create({
-    data: { userId, activityTypeId: flightType.id },
+    data: { userId, activityTypeId: activityType.id },
   });
   await prisma.flight.create({
     data: {
@@ -54,7 +55,7 @@ beforeAll(async () => {
       arrivalPointId: pointId,
       date: new Date("2025-06-15"),
       durationMin: 35,
-      flightType: "LOCAL",
+      flightTypeId: flightType.id,
       observations: "Vol de test",
       improvementPoints: "RAS",
     },

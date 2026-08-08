@@ -81,10 +81,12 @@ model Verification {
 
 /// Référentiel des types d'activité (table, pas un enum : extensible sans migration).
 /// Valeurs initiales prévues (docs/database-design.md) : FLIGHT, TRAINING_CAMP, GROUND_HANDLING.
+/// Pas de label : catégorie technique traduisible, le libellé affiché vit
+/// côté application (docs/decisions/003-reference-table-codes.md), pas en
+/// base — à distinguer d'une donnée métier éditoriale comme Site.name.
 model ActivityType {
-  id    String @id @default(uuid()) @db.Uuid
-  code  String @unique
-  label String
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
 
   activities Activity[]
 }
@@ -142,13 +144,24 @@ model Site {
 
 /// Référentiel des types de point (table, pas un enum : extensible sans
 /// migration, même principe qu'ActivityType). Valeurs initiales (peuplées par
-/// le seed) : TAKEOFF, LANDING.
+/// le seed) : TAKEOFF, LANDING. Pas de label, même raison qu'ActivityType.
 model SitePointType {
-  id    String @id @default(uuid()) @db.Uuid
-  code  String @unique
-  label String
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
 
   points SitePoint[]
+}
+
+/// Référentiel des types de vol (table, pas un enum Prisma : extensible sans
+/// migration, même principe qu'ActivityType/SitePointType — remplace l'ancien
+/// enum FlightType, docs/decisions/003-reference-table-codes.md). Pas de
+/// label. Valeurs initiales (peuplées par le seed) : LOCAL, CROSS_COUNTRY,
+/// SOARING, THERMAL, TRAINING, OTHER.
+model FlightType {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+
+  flights Flight[]
 }
 
 /// Point physique appartenant à un Site (décollage, atterrissage...). Un Site
@@ -195,15 +208,6 @@ model School {
   trainingCamps TrainingCamp[]
 }
 
-enum FlightType {
-  LOCAL
-  CROSS
-  SOARING
-  THERMAL
-  TRAINING
-  OTHER
-}
-
 /// Spécialisation Vol (ADR 002, docs/decisions/002-site-point-model.md).
 /// observations/improvementPoints obligatoires (règle métier
 /// docs/domain-model.md : encourager le suivi de progression). departurePoint et
@@ -211,16 +215,17 @@ enum FlightType {
 /// atterrit sur le décollage d'un autre site) : aucune contrainte ne les lie au
 /// même Site, et aucune règle ne compare plus leurs altitudes (l'arrivée peut être
 /// plus haute que le départ). takeoffAltitudeM/landingAltitudeM retirés : redondants
-/// avec departurePoint.altitudeM/arrivalPoint.altitudeM.
+/// avec departurePoint.altitudeM/arrivalPoint.altitudeM. flightTypeId remplace
+/// l'ancien enum FlightType (ADR 003, docs/decisions/003-reference-table-codes.md).
 model Flight {
-  id                String     @id @default(uuid()) @db.Uuid
-  activityId        String     @unique @db.Uuid
-  trainingCampId    String?    @db.Uuid
-  departurePointId  String     @db.Uuid
-  arrivalPointId    String     @db.Uuid
+  id                String   @id @default(uuid()) @db.Uuid
+  activityId        String   @unique @db.Uuid
+  trainingCampId    String?  @db.Uuid
+  departurePointId  String   @db.Uuid
+  arrivalPointId    String   @db.Uuid
+  flightTypeId      String   @db.Uuid
   date              DateTime
   durationMin       Int
-  flightType        FlightType
   observations      String
   improvementPoints String
 
@@ -228,10 +233,12 @@ model Flight {
   trainingCamp   TrainingCamp? @relation(fields: [trainingCampId], references: [id])
   departurePoint SitePoint     @relation("FlightDeparturePoint", fields: [departurePointId], references: [id])
   arrivalPoint   SitePoint     @relation("FlightArrivalPoint", fields: [arrivalPointId], references: [id])
+  flightType     FlightType    @relation(fields: [flightTypeId], references: [id])
 
   @@index([trainingCampId])
   @@index([departurePointId])
   @@index([arrivalPointId])
+  @@index([flightTypeId])
 }
 
 /// Spécialisation Stage (TrainingCamp). startDate <= endDate et les vols et

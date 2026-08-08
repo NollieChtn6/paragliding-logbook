@@ -11,23 +11,29 @@ export const dynamic = "force-dynamic";
 
 export default async function NewFlightPage() {
   const user = await requireCurrentUser();
-  const [points, trainingCamps] = await Promise.all([
+  const [points, flightTypes, trainingCamps] = await Promise.all([
     prisma.sitePoint.findMany({
       select: {
         id: true,
         label: true,
         altitudeM: true,
         site: { select: { id: true, name: true } },
-        sitePointType: { select: { label: true } },
+        sitePointType: { select: { code: true } },
       },
     }),
+    prisma.flightType.findMany({ select: { id: true, code: true } }),
     listTrainingCamps(user.id),
   ]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Nouveau vol" />
-      <FlightForm points={points} trainingCamps={trainingCamps} action={createFlightAction} />
+      <FlightForm
+        points={points}
+        flightTypes={flightTypes}
+        trainingCamps={trainingCamps}
+        action={createFlightAction}
+      />
     </div>
   );
 }

@@ -14,10 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
-// Dupliqué depuis l'enum Prisma FlightType plutôt qu'importé, pour ne pas
-// tirer @prisma/client dans le bundle client pour un simple select.
-const FLIGHT_TYPES = ["LOCAL", "CROSS", "SOARING", "THERMAL", "TRAINING", "OTHER"] as const;
+import { FLIGHT_TYPE_LABELS, SITE_POINT_TYPE_LABELS } from "@/lib/reference-labels";
 
 type TrainingCampOption = {
   id: string;
@@ -32,8 +29,10 @@ type SitePointOption = {
   label: string;
   altitudeM: number;
   site: { id: string; name: string };
-  sitePointType: { label: string };
+  sitePointType: { code: string };
 };
+
+type FlightTypeOption = { id: string; code: string };
 
 type FlightFormActionState = { success: true } | { success: false; error: string };
 
@@ -43,13 +42,14 @@ type FlightFormDefaultValues = {
   arrivalPointId?: string;
   trainingCampId?: string;
   durationMin?: number;
-  flightType?: (typeof FLIGHT_TYPES)[number];
+  flightTypeId?: string;
   observations?: string;
   improvementPoints?: string;
 };
 
 type FlightFormProps = {
   points: SitePointOption[];
+  flightTypes: FlightTypeOption[];
   trainingCamps?: TrainingCampOption[];
   action: (
     prevState: FlightFormActionState | null,
@@ -67,18 +67,30 @@ function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
   return `${trainingCamp.campType} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
 }
 
+// Repli sur le code brut si un code existe en base sans entrée dans le
+// dictionnaire (docs/decisions/003-reference-table-codes.md) : ne doit pas
+// arriver en pratique (ces tables ne sont pas éditables en dehors du seed),
+// mais reste lisible plutôt que silencieusement vide.
+function formatFlightTypeOption(flightType: FlightTypeOption): string {
+  return FLIGHT_TYPE_LABELS[flightType.code] ?? flightType.code;
+}
+
+function sitePointTypeLabel(point: SitePointOption): string {
+  return SITE_POINT_TYPE_LABELS[point.sitePointType.code] ?? point.sitePointType.code;
+}
+
 // Un point peut être choisi comme départ ou arrivée quel que soit son
 // SitePointType habituel (un décollage peut être utilisé comme point
 // d'arrivée d'un cross) : le libellé garde le type à titre indicatif, sans
 // filtrer la liste.
 function formatSitePointOption(point: SitePointOption): string {
-  return `${point.site.name} — ${point.label} (${point.sitePointType.label}, ${point.altitudeM} m)`;
+  return `${point.site.name} — ${point.label} (${sitePointTypeLabel(point)}, ${point.altitudeM} m)`;
 }
 
 // Libellé d'un point à l'intérieur de son groupe (le nom du site est déjà le
 // SelectLabel du groupe, pas besoin de le répéter).
 function formatSitePointItemLabel(point: SitePointOption): string {
-  return `${point.label} (${point.sitePointType.label}, ${point.altitudeM} m)`;
+  return `${point.label} (${sitePointTypeLabel(point)}, ${point.altitudeM} m)`;
 }
 
 type SitePointGroup = { site: { id: string; name: string }; points: SitePointOption[] };
@@ -115,6 +127,7 @@ function toDateInputValue(date: Date): string {
 // a pas d'état "succès" à afficher ici.
 export function FlightForm({
   points,
+  flightTypes,
   trainingCamps = [],
   action,
   defaultValues,
@@ -225,15 +238,20 @@ export function FlightForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="flightType">Type de vol</Label>
-        <Select name="flightType" defaultValue={defaultValues?.flightType} required>
-          <SelectTrigger id="flightType" className="w-full">
-            <SelectValue placeholder="Choisir un type de vol" />
+        <Label htmlFor="flightTypeId">Type de vol</Label>
+        <Select name="flightTypeId" defaultValue={defaultValues?.flightTypeId} required>
+          <SelectTrigger id="flightTypeId" className="w-full">
+            <SelectValue placeholder="Choisir un type de vol">
+              {(value: string | null) => {
+                const flightType = flightTypes.find((ft) => ft.id === value);
+                return flightType ? formatFlightTypeOption(flightType) : "Choisir un type de vol";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {FLIGHT_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
+            {flightTypes.map((flightType) => (
+              <SelectItem key={flightType.id} value={flightType.id}>
+                {formatFlightTypeOption(flightType)}
               </SelectItem>
             ))}
           </SelectContent>

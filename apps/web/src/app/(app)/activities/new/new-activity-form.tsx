@@ -9,17 +9,19 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FlightForm } from "@/features/flights/flight-form";
 import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/ground-handling-session-form";
 import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
+import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 
 type NewActivityFormProps = {
-  activityTypes: { code: string; label: string }[];
+  activityTypes: { code: string }[];
   sites: { id: string; name: string }[];
   points: {
     id: string;
     label: string;
     altitudeM: number;
     site: { id: string; name: string };
-    sitePointType: { label: string };
+    sitePointType: { code: string };
   }[];
+  flightTypes: { id: string; code: string }[];
   schools: { id: string; name: string }[];
   trainingCamps: {
     id: string;
@@ -43,6 +45,7 @@ export function NewActivityForm({
   activityTypes,
   sites,
   points,
+  flightTypes,
   schools,
   trainingCamps,
 }: NewActivityFormProps) {
@@ -54,7 +57,9 @@ export function NewActivityForm({
         {activityTypes.map((activityType) => (
           <div key={activityType.code} className="flex items-center gap-2">
             <RadioGroupItem value={activityType.code} id={activityType.code} />
-            <Label htmlFor={activityType.code}>{activityType.label}</Label>
+            <Label htmlFor={activityType.code}>
+              {ACTIVITY_TYPE_LABELS[activityType.code] ?? activityType.code}
+            </Label>
           </div>
         ))}
       </RadioGroup>
@@ -64,7 +69,12 @@ export function NewActivityForm({
       )}
 
       {selectedCode === "FLIGHT" && (
-        <FlightForm points={points} trainingCamps={trainingCamps} action={createFlightAction} />
+        <FlightForm
+          points={points}
+          flightTypes={flightTypes}
+          trainingCamps={trainingCamps}
+          action={createFlightAction}
+        />
       )}
       {selectedCode === "TRAINING_CAMP" && (
         <TrainingCampForm schools={schools} action={createTrainingCampAction} />

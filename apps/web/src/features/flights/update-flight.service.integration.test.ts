@@ -11,6 +11,7 @@ let otherUserId: string;
 let siteId: string;
 let departurePointId: string;
 let arrivalPointId: string;
+let flightTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
@@ -20,7 +21,6 @@ let activityId: string;
 const validFlightInput = {
   date: "2025-01-15",
   durationMin: "35",
-  flightType: "LOCAL",
   observations: "Integration test flight.",
   improvementPoints: "Work on approach phases.",
 };
@@ -28,7 +28,7 @@ const validFlightInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school, takeoffType, landingType] = await Promise.all([
+  const [user, otherUser, site, school, takeoffType, landingType, flightType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `update-flight-${suffix}@paragliding-logbook.local`,
@@ -45,11 +45,13 @@ beforeAll(async () => {
     prisma.school.create({ data: { name: `Update Flight Test School ${suffix}` } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
   schoolId = school.id;
+  flightTypeId = flightType.id;
 
   const [departurePoint, arrivalPoint] = await Promise.all([
     prisma.sitePoint.create({
@@ -96,6 +98,7 @@ beforeAll(async () => {
     ...validFlightInput,
     departurePointId,
     arrivalPointId,
+    flightTypeId,
   });
   flightId = flight.id;
   activityId = flight.activityId;
@@ -122,6 +125,7 @@ describe("updateFlight (integration)", () => {
       ...validFlightInput,
       departurePointId,
       arrivalPointId,
+      flightTypeId,
       durationMin: "50",
       observations: "Updated observations.",
     });
@@ -136,6 +140,7 @@ describe("updateFlight (integration)", () => {
       ...validFlightInput,
       departurePointId,
       arrivalPointId,
+      flightTypeId,
       trainingCampId,
       date: "2025-01-12",
     });
@@ -144,6 +149,7 @@ describe("updateFlight (integration)", () => {
       ...validFlightInput,
       departurePointId,
       arrivalPointId,
+      flightTypeId,
     });
 
     expect(withCamp.trainingCampId).toBeNull();
@@ -155,6 +161,7 @@ describe("updateFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId,
+        flightTypeId,
         durationMin: "-10",
       }),
     ).rejects.toThrow();
@@ -166,6 +173,18 @@ describe("updateFlight (integration)", () => {
         ...validFlightInput,
         departurePointId: crypto.randomUUID(),
         arrivalPointId,
+        flightTypeId,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the flight type does not exist", async () => {
+    await expect(
+      updateFlight(userId, activityId, {
+        ...validFlightInput,
+        departurePointId,
+        arrivalPointId,
+        flightTypeId: crypto.randomUUID(),
       }),
     ).rejects.toThrow();
   });
@@ -176,6 +195,7 @@ describe("updateFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId,
+        flightTypeId,
       }),
     ).rejects.toThrow(ActivityNotFoundError);
   });
@@ -186,6 +206,7 @@ describe("updateFlight (integration)", () => {
         ...validFlightInput,
         departurePointId,
         arrivalPointId,
+        flightTypeId,
       }),
     ).rejects.toThrow(ActivityNotFoundError);
   });
@@ -198,6 +219,7 @@ describe("updateFlight (integration)", () => {
           ...validFlightInput,
           departurePointId,
           arrivalPointId,
+          flightTypeId,
           trainingCampId,
           date: "2025-01-25",
         }),
@@ -210,6 +232,7 @@ describe("updateFlight (integration)", () => {
           ...validFlightInput,
           departurePointId,
           arrivalPointId,
+          flightTypeId,
           trainingCampId: otherUserTrainingCampId,
           date: "2025-01-12",
         }),

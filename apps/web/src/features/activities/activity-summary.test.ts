@@ -21,8 +21,10 @@ const otherSite = {
   name: "Autre site",
 };
 
-const takeoffType = { id: "spt-takeoff", code: "TAKEOFF", label: "Décollage" };
-const landingType = { id: "spt-landing", code: "LANDING", label: "Atterrissage" };
+const takeoffType = { id: "spt-takeoff", code: "TAKEOFF" };
+const landingType = { id: "spt-landing", code: "LANDING" };
+const localFlightType = { id: "ft-local", code: "LOCAL" };
+const crossCountryFlightType = { id: "ft-cross-country", code: "CROSS_COUNTRY" };
 
 const departurePoint = {
   id: "point-1",
@@ -74,20 +76,21 @@ describe("getActivitySummary", () => {
   it("summarizes a Flight departing and arriving at the same site", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
-      activityType: { id: "at-1", code: "FLIGHT", label: "Vol" },
+      activityType: { id: "at-1", code: "FLIGHT" },
       flight: {
         id: "flight-1",
         activityId: "activity-1",
         departurePointId: departurePoint.id,
         arrivalPointId: arrivalPoint.id,
+        flightTypeId: localFlightType.id,
         trainingCampId: null,
         date: new Date("2025-06-15"),
         durationMin: 35,
-        flightType: "LOCAL",
         observations: "RAS",
         improvementPoints: "RAS",
         departurePoint,
         arrivalPoint,
+        flightType: localFlightType,
         trainingCamp: null,
       },
     };
@@ -101,20 +104,21 @@ describe("getActivitySummary", () => {
   it("summarizes a Flight departing and arriving at different sites", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
-      activityType: { id: "at-1", code: "FLIGHT", label: "Vol" },
+      activityType: { id: "at-1", code: "FLIGHT" },
       flight: {
         id: "flight-2",
         activityId: "activity-1",
         departurePointId: departurePoint.id,
         arrivalPointId: arrivalPoint.id,
+        flightTypeId: crossCountryFlightType.id,
         trainingCampId: null,
         date: new Date("2025-06-15"),
         durationMin: 90,
-        flightType: "CROSS",
         observations: "RAS",
         improvementPoints: "RAS",
         departurePoint,
         arrivalPoint: { ...arrivalPoint, site: otherSite },
+        flightType: crossCountryFlightType,
         trainingCamp: null,
       },
     };
@@ -128,7 +132,7 @@ describe("getActivitySummary", () => {
   it("summarizes a TrainingCamp", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
-      activityType: { id: "at-2", code: "TRAINING_CAMP", label: "Stage" },
+      activityType: { id: "at-2", code: "TRAINING_CAMP" },
       trainingCamp: {
         id: "camp-1",
         activityId: "activity-1",
@@ -153,7 +157,7 @@ describe("getActivitySummary", () => {
   it("summarizes a GroundHandlingSession", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
-      activityType: { id: "at-3", code: "GROUND_HANDLING", label: "Gonflage" },
+      activityType: { id: "at-3", code: "GROUND_HANDLING" },
       groundHandlingSession: {
         id: "ghs-1",
         activityId: "activity-1",
@@ -172,6 +176,18 @@ describe("getActivitySummary", () => {
     expect(getActivitySummary(activity)).toEqual({
       title: "Gonflage",
       subtitle: "Site de test · 10/03/2025 · 45 min",
+    });
+  });
+
+  it("falls back to the reference dictionary label for an unrecognized activity type", () => {
+    const activity: ActivityWithDetails = {
+      ...baseActivity,
+      activityType: { id: "at-9", code: "UNKNOWN_TYPE" },
+    };
+
+    expect(getActivitySummary(activity)).toEqual({
+      title: "UNKNOWN_TYPE",
+      subtitle: "",
     });
   });
 });

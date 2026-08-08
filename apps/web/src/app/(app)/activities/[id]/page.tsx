@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { formatFlightLocation, getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { FLIGHT_TYPE_LABELS } from "@/lib/reference-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,12 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
           <Field label="Point de départ" value={formatSitePoint(activity.flight.departurePoint)} />
           <Field label="Point d'arrivée" value={formatSitePoint(activity.flight.arrivalPoint)} />
           <Field label="Durée" value={`${activity.flight.durationMin} min`} />
-          <Field label="Type de vol" value={activity.flight.flightType} />
+          <Field
+            label="Type de vol"
+            value={
+              FLIGHT_TYPE_LABELS[activity.flight.flightType.code] ?? activity.flight.flightType.code
+            }
+          />
           <Field label="Observations" value={activity.flight.observations} />
           <Field label="Points d'amélioration" value={activity.flight.improvementPoints} />
           {activity.flight.trainingCamp && (

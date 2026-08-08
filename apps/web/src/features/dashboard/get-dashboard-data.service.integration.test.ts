@@ -17,10 +17,11 @@ beforeAll(async () => {
     otherUser,
     site,
     school,
-    flightType,
+    flightActivityType,
     groundHandlingType,
     trainingCampType,
     takeoffType,
+    flightType,
   ] = await Promise.all([
     prisma.user.create({
       data: {
@@ -40,6 +41,7 @@ beforeAll(async () => {
     prisma.activityType.findUniqueOrThrow({ where: { code: "GROUND_HANDLING" } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "TRAINING_CAMP" } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
@@ -68,7 +70,7 @@ beforeAll(async () => {
   ];
   for (const { date, durationMin } of flightDurations) {
     const activity = await prisma.activity.create({
-      data: { userId, activityTypeId: flightType.id },
+      data: { userId, activityTypeId: flightActivityType.id },
     });
     await prisma.flight.create({
       data: {
@@ -77,7 +79,7 @@ beforeAll(async () => {
         arrivalPointId: pointId,
         date: new Date(date),
         durationMin,
-        flightType: "LOCAL",
+        flightTypeId: flightType.id,
         observations: "RAS",
         improvementPoints: "RAS",
       },
@@ -122,7 +124,7 @@ beforeAll(async () => {
   activityIds.push(campActivity.id);
 
   const otherUserActivity = await prisma.activity.create({
-    data: { userId: otherUserId, activityTypeId: flightType.id },
+    data: { userId: otherUserId, activityTypeId: flightActivityType.id },
   });
   await prisma.flight.create({
     data: {
@@ -131,7 +133,7 @@ beforeAll(async () => {
       arrivalPointId: pointId,
       date: new Date("2025-06-01"),
       durationMin: 999,
-      flightType: "LOCAL",
+      flightTypeId: flightType.id,
       observations: "Vol d'un autre utilisateur",
       improvementPoints: "RAS",
     },

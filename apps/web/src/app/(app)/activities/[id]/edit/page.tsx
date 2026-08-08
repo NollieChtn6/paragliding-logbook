@@ -30,16 +30,17 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
   }
 
   if (activity.flight) {
-    const [points, trainingCamps] = await Promise.all([
+    const [points, flightTypes, trainingCamps] = await Promise.all([
       prisma.sitePoint.findMany({
         select: {
           id: true,
           label: true,
           altitudeM: true,
           site: { select: { id: true, name: true } },
-          sitePointType: { select: { label: true } },
+          sitePointType: { select: { code: true } },
         },
       }),
+      prisma.flightType.findMany({ select: { id: true, code: true } }),
       listTrainingCamps(user.id),
     ]);
 
@@ -48,6 +49,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
         <PageHeader title="Modifier le vol" />
         <FlightForm
           points={points}
+          flightTypes={flightTypes}
           trainingCamps={trainingCamps}
           action={updateFlightAction.bind(null, activity.id)}
           defaultValues={{
@@ -56,7 +58,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
             arrivalPointId: activity.flight.arrivalPointId,
             trainingCampId: activity.flight.trainingCampId ?? undefined,
             durationMin: activity.flight.durationMin,
-            flightType: activity.flight.flightType,
+            flightTypeId: activity.flight.flightTypeId,
             observations: activity.flight.observations,
             improvementPoints: activity.flight.improvementPoints,
           }}
