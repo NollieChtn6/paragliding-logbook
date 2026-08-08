@@ -1,6 +1,11 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { DEV_USER_2_EMAIL, DEV_USER_EMAIL, TEST_SITE_NAME } from "../src/lib/dev-fixtures";
+import {
+  DEV_USER_2_EMAIL,
+  DEV_USER_EMAIL,
+  TEST_SCHOOL_NAME,
+  TEST_SITE_NAME,
+} from "../src/lib/dev-fixtures";
 import { hashPassword } from "../src/lib/password";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -76,11 +81,16 @@ async function main() {
   await upsertDevUser(prisma, DEV_USER_EMAIL, "Dev");
   await upsertDevUser(prisma, DEV_USER_2_EMAIL, "Dev 2");
 
-  // Site.name n'est pas une contrainte unique en base (upsert impossible) :
-  // vérification manuelle pour rester idempotent.
+  // Site.name et School.name ne sont pas des contraintes uniques en base
+  // (upsert impossible) : vérification manuelle pour rester idempotent.
   const testSite = await prisma.site.findFirst({ where: { name: TEST_SITE_NAME } });
   if (!testSite) {
     await prisma.site.create({ data: { name: TEST_SITE_NAME } });
+  }
+
+  const testSchool = await prisma.school.findFirst({ where: { name: TEST_SCHOOL_NAME } });
+  if (!testSchool) {
+    await prisma.school.create({ data: { name: TEST_SCHOOL_NAME } });
   }
 }
 

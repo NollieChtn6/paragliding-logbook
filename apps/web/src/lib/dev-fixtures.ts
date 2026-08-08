@@ -9,3 +9,4 @@ export const DEV_USER_EMAIL = "dev@paragliding-logbook.local";
 // DEV_USER_EMAIL (DEV_USER_PASSWORD), pas de variable dédiée.
 export const DEV_USER_2_EMAIL = "dev2@paragliding-logbook.local";
 export const TEST_SITE_NAME = "Site de test";
+export const TEST_SCHOOL_NAME = "École de test";

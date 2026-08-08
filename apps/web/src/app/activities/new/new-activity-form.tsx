@@ -4,15 +4,24 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FlightForm } from "@/features/flights/flight-form";
+import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
 
 type NewActivityFormProps = {
   activityTypes: { code: string; label: string }[];
   sites: { id: string; name: string }[];
+  schools: { id: string; name: string }[];
+  trainingCamps: {
+    id: string;
+    campType: string;
+    startDate: Date;
+    endDate: Date;
+    school: { name: string };
+  }[];
 };
 
-// Seul FLIGHT a un formulaire disponible pour l'instant (TrainingCamp et
-// GroundHandlingSession ne sont pas encore implémentés, cf. docs/todo.md).
-const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT"]);
+// FLIGHT et TRAINING_CAMP ont un formulaire disponible ; GROUND_HANDLING pas
+// encore implémenté (cf. docs/todo.md).
+const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT", "TRAINING_CAMP"]);
 
 // "" plutôt que null/undefined pour la valeur "aucune sélection" : Base UI
 // détermine si un RadioGroup est contrôlé ou non au premier rendu (contrôlé
@@ -20,7 +29,12 @@ const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT"]);
 // value doit donc rester une string dès le premier rendu.
 const NO_SELECTION = "";
 
-export function NewActivityForm({ activityTypes, sites }: NewActivityFormProps) {
+export function NewActivityForm({
+  activityTypes,
+  sites,
+  schools,
+  trainingCamps,
+}: NewActivityFormProps) {
   const [selectedCode, setSelectedCode] = useState<string>(NO_SELECTION);
 
   return (
@@ -38,7 +52,8 @@ export function NewActivityForm({ activityTypes, sites }: NewActivityFormProps) 
         <p className="text-muted-foreground">Bientôt disponible.</p>
       )}
 
-      {selectedCode === "FLIGHT" && <FlightForm sites={sites} />}
+      {selectedCode === "FLIGHT" && <FlightForm sites={sites} trainingCamps={trainingCamps} />}
+      {selectedCode === "TRAINING_CAMP" && <TrainingCampForm schools={schools} />}
     </div>
   );
 }

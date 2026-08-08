@@ -1,3 +1,4 @@
+import { ZodError, type ZodIssue } from "zod";
 import { prisma } from "@/lib/prisma";
 import { flightSchema } from "@/lib/validations/flight";
 
@@ -16,6 +17,25 @@ export async function createFlight(userId: string, rawInput: unknown) {
       where: { code: FLIGHT_ACTIVITY_TYPE_CODE },
     });
 
+    // Règle métier docs/domain-model.md (Stage) : un vol rattaché à un stage
+    // doit avoir une date dans l'intervalle [startDate, endDate] du stage.
+    // Pas exprimable en Zod pur (nécessite de lire le TrainingCamp en base) :
+    // ZodError construite manuellement pour réutiliser tel quel le mapping
+    // d'erreur déjà en place dans actions/create-flight.ts.
+    if (input.trainingCampId) {
+      const trainingCamp = await tx.trainingCamp.findUniqueOrThrow({
+        where: { id: input.trainingCampId },
+      });
+      if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["date"],
+          message: "La date du vol doit être comprise dans l'intervalle du stage.",
+        };
+        throw new ZodError([issue]);
+      }
+    }
+
     const activity = await tx.activity.create({
       data: {
         userId,
@@ -27,6 +47,7 @@ export async function createFlight(userId: string, rawInput: unknown) {
       data: {
         activityId: activity.id,
         siteId: input.siteId,
+        trainingCampId: input.trainingCampId,
         date: input.date,
         takeoffAltitudeM: input.takeoffAltitudeM,
         landingAltitudeM: input.landingAltitudeM,
