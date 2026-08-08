@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { nextCookies } from "better-auth/next-js";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
@@ -24,4 +25,8 @@ export const auth = betterAuth({
       generateId: "uuid",
     },
   },
+  // Pose le cookie de session via next/headers lors d'un appel auth.api.*
+  // depuis une Server Action (voir src/actions/sign-in.ts). Doit rester le
+  // dernier plugin de la liste (contrainte Better Auth).
+  plugins: [nextCookies()],
 });

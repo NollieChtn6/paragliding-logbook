@@ -27,7 +27,10 @@ export default async function ActivitiesPage() {
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Activités</h1>
-        <Button render={<Link href="/activities/new">Nouvelle activité</Link>} />
+        <Button
+          nativeButton={false}
+          render={<Link href="/activities/new">Nouvelle activité</Link>}
+        />
       </div>
 
       {activities.length === 0 && (

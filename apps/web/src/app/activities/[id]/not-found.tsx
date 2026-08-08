@@ -10,7 +10,7 @@ export default function ActivityNotFound() {
       <p className="text-muted-foreground">
         Cette activité n&apos;existe pas ou ne vous appartient pas.
       </p>
-      <Button render={<Link href="/activities">Retour aux activités</Link>} />
+      <Button nativeButton={false} render={<Link href="/activities">Retour aux activités</Link>} />
     </div>
   );
 }

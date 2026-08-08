@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
@@ -7,6 +10,7 @@ export default function Home() {
       <p className="text-muted-foreground">
         Carnet de progression parapente numérique — vols, stages, gonflages, statistiques.
       </p>
+      <Button nativeButton={false} render={<Link href="/sign-in">Se connecter</Link>} />
     </div>
   );
 }
