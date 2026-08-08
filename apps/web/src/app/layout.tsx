@@ -15,8 +15,9 @@ const fontSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Carnet de vol parapente",
-  description: "Carnet de progression parapente numérique — vols, stages, gonflages, statistiques.",
+  title: "THERMIK — Carnet de vols & progression",
+  description:
+    "THERMIK, carnet de vols & progression : suivez vos vols, stages et gonflages, et votre progression en parapente.",
 };
 
 export const viewport: Viewport = {

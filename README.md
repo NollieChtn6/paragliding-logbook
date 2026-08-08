@@ -1,5 +1,7 @@
 # paragliding-logbook
 
+**THERMIK** — Carnet de vols & progression
+
 Carnet de bord personnel de parapente (vols, stages, gonflages, statistiques).
 
 Voir [CLAUDE.md](./CLAUDE.md) pour le contexte projet, la stack technique et les conventions.

@@ -1,4 +1,4 @@
-# Paragliding Logbook - Vision produit
+# THERMIK — Vision produit
 
 ## Vision
 

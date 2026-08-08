@@ -22,7 +22,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
             Bienvenue à bord
           </h1>
           <p className="text-sm text-muted-foreground">
-            Votre carnet de vol parapente <br />
+            THERMIK — Carnet de vols &amp; progression <br />
             du décollage à l&apos;atterrissage.
           </p>
         </div>
