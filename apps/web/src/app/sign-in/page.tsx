@@ -17,12 +17,12 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
       </div>
 
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <div className="flex flex-col gap-1 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            Bienvenue à bord
+        <div className="flex flex-col items-center gap-1 text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+            THERMIK
           </h1>
           <p className="text-sm text-muted-foreground">
-            THERMIK — Carnet de vols &amp; progression <br />
+            Carnet de vols et progression <br />
             du décollage à l&apos;atterrissage.
           </p>
         </div>
