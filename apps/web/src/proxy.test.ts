@@ -22,6 +22,17 @@ describe("proxy", () => {
     expect(location.searchParams.get("redirectTo")).toBe("/activities/new");
   });
 
+  it('redirects to /sign-in when there is no session cookie for the dashboard ("/")', () => {
+    vi.mocked(getSessionCookie).mockReturnValue(null);
+    const request = new NextRequest("http://localhost:3000/");
+
+    const response = proxy(request);
+
+    const location = new URL(response.headers.get("location") ?? "");
+    expect(location.pathname).toBe("/sign-in");
+    expect(location.searchParams.get("redirectTo")).toBe("/");
+  });
+
   it("preserves the query string in redirectTo", () => {
     vi.mocked(getSessionCookie).mockReturnValue(null);
     const request = new NextRequest("http://localhost:3000/activities?foo=bar");

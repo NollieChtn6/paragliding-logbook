@@ -151,6 +151,27 @@ Fonctionnalités :
 
 ---
 
+## Dashboard 📊
+
+Page d'accueil (`/`), route protégée (connexion requise), remplace l'ancienne page publique.
+
+Statistiques affichées (`src/features/dashboard/`, dérivées en mémoire du résultat de `listActivities` — aucune requête Prisma supplémentaire) :
+
+- [x] Nombre total de vols
+- [x] Temps de vol cumulé
+- [x] Temps moyen par vol
+- [x] Nombre de séances de gonflage
+- [x] Temps de gonflage cumulé
+- [x] Nombre total d'activités
+
+Fonctionnalités :
+
+- [x] Cartes de statistiques (shadcn `Card`), empilées sur mobile, grille simple sur desktop
+- [x] 5 activités les plus récentes, avec lien vers l'historique complet
+- [x] Bouton principal "Ajouter une activité"
+
+---
+
 ## Rappels importants sur les notions
 
 ### Sites de vol 🌍
@@ -166,11 +187,10 @@ Informations prévues :
 - Altitude
 - Informations complémentaires
 
-### Statistiques 📊
+### Statistiques avancées 📊
 
-- [ ] Temps de vol cumulé
-- [ ] Nombre de vols
-- [ ] Temps de gonflage cumulé
+Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques).
+
 - [ ] Progression dans le temps
 - [ ] Statistiques par site
 - [ ] Statistiques par type d'activité
