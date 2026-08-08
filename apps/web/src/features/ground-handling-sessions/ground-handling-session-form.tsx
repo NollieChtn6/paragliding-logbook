@@ -48,6 +48,10 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("fr-FR");
 }
 
+function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
+  return `${trainingCamp.campType} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
+}
+
 // Format attendu par <Input type="date">, voir flight-form.tsx.
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -68,7 +72,7 @@ export function GroundHandlingSessionForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="date">Date</Label>
         <Input
           id="date"
@@ -79,11 +83,15 @@ export function GroundHandlingSessionForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="siteId">Site</Label>
         <Select name="siteId" defaultValue={defaultValues?.siteId} required>
           <SelectTrigger id="siteId" className="w-full">
-            <SelectValue placeholder="Choisir un site" />
+            <SelectValue placeholder="Choisir un site">
+              {(value: string | null) =>
+                sites.find((site) => site.id === value)?.name ?? "Choisir un site"
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {sites.map((site) => (
@@ -96,18 +104,22 @@ export function GroundHandlingSessionForm({
       </div>
 
       {trainingCamps.length > 0 && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
           <Select name="trainingCampId" defaultValue={defaultValues?.trainingCampId ?? ""}>
             <SelectTrigger id="trainingCampId" className="w-full">
-              <SelectValue placeholder="Aucun" />
+              <SelectValue placeholder="Aucun">
+                {(value: string) => {
+                  const trainingCamp = trainingCamps.find((tc) => tc.id === value);
+                  return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+                }}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Aucun</SelectItem>
               {trainingCamps.map((trainingCamp) => (
                 <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
-                  {trainingCamp.campType} — {trainingCamp.school.name} (
-                  {formatDate(trainingCamp.startDate)} → {formatDate(trainingCamp.endDate)})
+                  {formatTrainingCampOption(trainingCamp)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -115,7 +127,7 @@ export function GroundHandlingSessionForm({
         </div>
       )}
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="durationMin">Durée (min)</Label>
         <Input
           id="durationMin"
@@ -127,7 +139,7 @@ export function GroundHandlingSessionForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="exercises">Exercices travaillés</Label>
         <Textarea
           id="exercises"
@@ -137,7 +149,7 @@ export function GroundHandlingSessionForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="difficulties">Difficultés rencontrées</Label>
         <Textarea
           id="difficulties"
@@ -146,16 +158,16 @@ export function GroundHandlingSessionForm({
         />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-2">
         <Label htmlFor="feeling">Ressenti</Label>
         <Textarea id="feeling" name="feeling" defaultValue={defaultValues?.feeling} />
       </div>
 
-      <Button type="submit" disabled={isPending}>
+      <Button type="submit" className="mt-2" disabled={isPending}>
         {isPending ? "Enregistrement..." : submitLabel}
       </Button>
 
-      {state?.success === false && <p className="text-red-600">{state.error}</p>}
+      {state?.success === false && <p className="text-destructive">{state.error}</p>}
     </form>
   );
 }

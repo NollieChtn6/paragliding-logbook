@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/theme-toggle";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
 import { SignInForm } from "./sign-in-form";
 
@@ -10,9 +11,23 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
   );
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground">Connexion</h1>
-      <SignInForm redirectTo={redirectTo} />
+    <div className="relative flex min-h-svh w-full flex-col items-center justify-center px-4 py-8">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <div className="flex flex-col gap-1 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            Bienvenue à bord
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Votre carnet de vol parapente <br />
+            du décollage à l&apos;atterrissage.
+          </p>
+        </div>
+        <SignInForm redirectTo={redirectTo} />
+      </div>
     </div>
   );
 }

@@ -20,11 +20,21 @@ export async function updateGroundHandlingSession(
 
     // Règle métier docs/domain-model.md (Stage), identique à la création
     // (create-ground-handling-session.service.ts) : une séance rattachée à
-    // un stage doit avoir une date dans l'intervalle du stage.
+    // un stage doit avoir une date dans l'intervalle du stage. activity:
+    // { userId } vérifie aussi que le stage appartient à l'utilisateur
+    // courant.
     if (input.trainingCampId) {
-      const trainingCamp = await tx.trainingCamp.findUniqueOrThrow({
-        where: { id: input.trainingCampId },
+      const trainingCamp = await tx.trainingCamp.findFirst({
+        where: { id: input.trainingCampId, activity: { userId } },
       });
+      if (!trainingCamp) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["trainingCampId"],
+          message: "Ce stage n'existe pas ou ne vous appartient pas.",
+        };
+        throw new ZodError([issue]);
+      }
       if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
         const issue: ZodIssue = {
           code: "custom",

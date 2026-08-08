@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { updateFlightAction } from "@/actions/update-flight";
 import { updateGroundHandlingSessionAction } from "@/actions/update-ground-handling-session";
 import { updateTrainingCampAction } from "@/actions/update-training-camp";
+import { PageHeader } from "@/components/layout/page-header";
 import { getActivityById } from "@/features/activities";
 import { FlightForm } from "@/features/flights/flight-form";
 import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/ground-handling-session-form";
@@ -35,8 +36,8 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     ]);
 
     return (
-      <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Modifier le vol</h1>
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Modifier le vol" />
         <FlightForm
           sites={sites}
           trainingCamps={trainingCamps}
@@ -62,8 +63,8 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     const schools = await prisma.school.findMany({ select: { id: true, name: true } });
 
     return (
-      <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Modifier le stage</h1>
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Modifier le stage" />
         <TrainingCampForm
           schools={schools}
           action={updateTrainingCampAction.bind(null, activity.id)}
@@ -88,10 +89,8 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     ]);
 
     return (
-      <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Modifier la séance
-        </h1>
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Modifier la séance" />
         <GroundHandlingSessionForm
           sites={sites}
           trainingCamps={trainingCamps}

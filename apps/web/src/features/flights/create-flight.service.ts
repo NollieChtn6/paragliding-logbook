@@ -21,11 +21,24 @@ export async function createFlight(userId: string, rawInput: unknown) {
     // doit avoir une date dans l'intervalle [startDate, endDate] du stage.
     // Pas exprimable en Zod pur (nécessite de lire le TrainingCamp en base) :
     // ZodError construite manuellement pour réutiliser tel quel le mapping
-    // d'erreur déjà en place dans actions/create-flight.ts.
+    // d'erreur déjà en place dans actions/create-flight.ts. Le filtre
+    // activity: { userId } vérifie aussi que le stage appartient bien à
+    // l'utilisateur courant — sans ça, n'importe quel trainingCampId existant
+    // serait accepté, quel que soit son propriétaire (listTrainingCamps ne
+    // propose que les stages de l'utilisateur dans l'UI, mais l'action reste
+    // un endpoint public : la vérification doit être refaite ici).
     if (input.trainingCampId) {
-      const trainingCamp = await tx.trainingCamp.findUniqueOrThrow({
-        where: { id: input.trainingCampId },
+      const trainingCamp = await tx.trainingCamp.findFirst({
+        where: { id: input.trainingCampId, activity: { userId } },
       });
+      if (!trainingCamp) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["trainingCampId"],
+          message: "Ce stage n'existe pas ou ne vous appartient pas.",
+        };
+        throw new ZodError([issue]);
+      }
       if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
         const issue: ZodIssue = {
           code: "custom",

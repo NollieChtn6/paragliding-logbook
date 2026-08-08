@@ -5,9 +5,11 @@ import { createGroundHandlingSession } from "./create-ground-handling-session.se
 
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
+let otherUserId: string;
 let siteId: string;
 let schoolId: string;
 let trainingCampId: string;
+let otherUserTrainingCampId: string;
 
 const validGroundHandlingInput = {
   date: "2025-01-15",
@@ -18,13 +20,22 @@ const validGroundHandlingInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const user = await prisma.user.create({
-    data: {
-      email: `integration-test-ghs-${suffix}@paragliding-logbook.local`,
-      name: "Integration Test User",
-    },
-  });
+  const [user, otherUser] = await Promise.all([
+    prisma.user.create({
+      data: {
+        email: `integration-test-ghs-${suffix}@paragliding-logbook.local`,
+        name: "Integration Test User",
+      },
+    }),
+    prisma.user.create({
+      data: {
+        email: `integration-test-ghs-other-${suffix}@paragliding-logbook.local`,
+        name: "Other User",
+      },
+    }),
+  ]);
   userId = user.id;
+  otherUserId = otherUser.id;
 
   const site = await prisma.site.create({
     data: { name: `Integration Test Site ${suffix}` },
@@ -43,15 +54,27 @@ beforeAll(async () => {
     campType: "Perfectionnement",
   });
   trainingCampId = trainingCamp.id;
+
+  const otherUserTrainingCamp = await createTrainingCamp(otherUserId, {
+    startDate: "2025-01-10",
+    endDate: "2025-01-20",
+    schoolId,
+    campType: "Stage d'un autre utilisateur",
+  });
+  otherUserTrainingCampId = otherUserTrainingCamp.id;
 });
 
 afterAll(async () => {
-  await prisma.groundHandlingSession.deleteMany({ where: { activity: { userId } } });
-  await prisma.trainingCamp.deleteMany({ where: { activity: { userId } } });
-  await prisma.activity.deleteMany({ where: { userId } });
+  await prisma.groundHandlingSession.deleteMany({
+    where: { activity: { userId: { in: [userId, otherUserId] } } },
+  });
+  await prisma.trainingCamp.deleteMany({
+    where: { activity: { userId: { in: [userId, otherUserId] } } },
+  });
+  await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.site.delete({ where: { id: siteId } });
   await prisma.school.delete({ where: { id: schoolId } });
-  await prisma.user.delete({ where: { id: userId } });
+  await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
 });
 
@@ -137,6 +160,17 @@ describe("createGroundHandlingSession (integration)", () => {
           siteId,
           trainingCampId,
           date: "2025-01-25",
+        }),
+      ).rejects.toThrow();
+    });
+
+    it("fails when the training camp belongs to another user", async () => {
+      await expect(
+        createGroundHandlingSession(userId, {
+          ...validGroundHandlingInput,
+          siteId,
+          trainingCampId: otherUserTrainingCampId,
+          date: "2025-01-12",
         }),
       ).rejects.toThrow();
     });
