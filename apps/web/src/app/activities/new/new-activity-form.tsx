@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FlightForm } from "@/features/flights/flight-form";
+import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/ground-handling-session-form";
 import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
 
 type NewActivityFormProps = {
@@ -19,9 +20,8 @@ type NewActivityFormProps = {
   }[];
 };
 
-// FLIGHT et TRAINING_CAMP ont un formulaire disponible ; GROUND_HANDLING pas
-// encore implémenté (cf. docs/todo.md).
-const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT", "TRAINING_CAMP"]);
+// Les trois types du MVP (Vol, Stage, Gonflage) ont désormais un formulaire.
+const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT", "TRAINING_CAMP", "GROUND_HANDLING"]);
 
 // "" plutôt que null/undefined pour la valeur "aucune sélection" : Base UI
 // détermine si un RadioGroup est contrôlé ou non au premier rendu (contrôlé
@@ -54,6 +54,7 @@ export function NewActivityForm({
 
       {selectedCode === "FLIGHT" && <FlightForm sites={sites} trainingCamps={trainingCamps} />}
       {selectedCode === "TRAINING_CAMP" && <TrainingCampForm schools={schools} />}
+      {selectedCode === "GROUND_HANDLING" && <GroundHandlingSessionForm sites={sites} />}
     </div>
   );
 }

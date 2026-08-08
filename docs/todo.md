@@ -46,16 +46,17 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 #### Validation et couche métier
 
-- [x] Architecture de validations Zod par domaine (`src/lib/validations/`) — schémas `Flight` et `TrainingCamp` complets et testés (tests unitaires) ; `Activity`/`GroundHandlingSession` en structure seule, sans règle pour l'instant
+- [x] Architecture de validations Zod par domaine (`src/lib/validations/`) — schémas `Flight`, `TrainingCamp` et `GroundHandlingSession` complets et testés (tests unitaires) ; `Activity` en structure seule, sans règle pour l'instant
 - [x] Service métier `createFlight` organisé par feature (`src/features/flights/`), indépendant de l'UI — validation + transaction Prisma Activity/Flight, testé en intégration contre une vraie base
 - [x] Service métier `createTrainingCamp` (`src/features/training-camps/`), même structure que `createFlight` — validation + transaction Prisma Activity/TrainingCamp, testé en intégration
+- [x] Service métier `createGroundHandlingSession` (`src/features/ground-handling-sessions/`), même structure que `createFlight`/`createTrainingCamp` — validation + transaction Prisma Activity/GroundHandlingSession, testé en intégration
 - [x] Hash des mots de passe avec Argon2 (`src/lib/password.ts`)
 - [x] `getCurrentUser()` (`src/lib/current-user.ts`) : résolution de l'utilisateur courant à partir de la vraie session Better Auth
 
 #### Gestion des activités
 
 - [x] Créer le concept d'activité (`Activity` + `ActivityType`)
-- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire disponible pour Vol et Stage (Gonflage affiche "Bientôt disponible"), route protégée (connexion requise)
+- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire disponible pour les trois types du MVP, route protégée (connexion requise)
 - [x] Permettre de choisir un type d'activité
 - [x] Consultation des activités : page `/activities` (historique trié par date d'événement, du plus récent au plus ancien) et `/activities/[id]` (détail complet), lecture via `src/features/activities/` (`listActivities`, `getActivityById`), gestion propre du cas "activité introuvable", routes protégées (connexion requise)
 
@@ -130,17 +131,26 @@ Fonctionnalités :
 
 ---
 
+## Séances de gonflage 🪁
+
+Informations obligatoires (validées côté Zod) :
+
+- [x] Date
+- [x] Site
+- [x] Durée (strictement positive)
+- [x] Exercices travaillés
+- [x] Difficultés rencontrées (optionnel)
+- [x] Ressenti (optionnel)
+
+Fonctionnalités :
+
+- [x] Ajouter une séance — `/activities/new`, service `createGroundHandlingSession` (`src/features/ground-handling-sessions/`), route protégée (connexion requise)
+- [x] Consulter l'historique des séances — `/activities` (liste) et `/activities/[id]` (détail)
+- [ ] Modifier une séance
+
+---
+
 ## Rappels importants sur les notions
-
-### Séances de gonflage
-
-Informations prévues :
-
-- [ ] Date
-- [ ] Durée
-- [ ] Exercices travaillés
-- [ ] Difficultés rencontrées
-- [ ] Ressenti
 
 ### Sites de vol 🌍
 
