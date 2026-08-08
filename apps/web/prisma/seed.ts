@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
-import { DEV_USER_EMAIL, TEST_SITE_NAME } from "../src/lib/dev-fixtures";
+import { DEV_USER_EMAIL, DEV_USER_PASSWORD, TEST_SITE_NAME } from "../src/lib/dev-fixtures";
+import { hashPassword } from "../src/lib/password";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -23,13 +24,14 @@ async function main() {
   // Utilisateur et site de développement : pas d'Auth.js ni de gestion des
   // sites pour l'instant, ces données de référence débloquent les premiers
   // flux métier (ex. création d'un vol) sans construire ces features.
+  const devPasswordHash = await hashPassword(DEV_USER_PASSWORD);
   await prisma.user.upsert({
     where: { email: DEV_USER_EMAIL },
-    update: {},
+    update: { passwordHash: devPasswordHash },
     create: {
       email: DEV_USER_EMAIL,
       name: "Dev",
-      passwordHash: "dev-fixture-not-a-real-hash",
+      passwordHash: devPasswordHash,
     },
   });
 
