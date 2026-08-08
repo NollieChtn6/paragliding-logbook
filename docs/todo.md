@@ -1,4 +1,4 @@
-# Paragliding Logbook - Backlog
+# THERMIK — Backlog
 
 ## Vision
 

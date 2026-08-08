@@ -26,7 +26,7 @@ export function DesktopSidebar() {
         >
           🪂
         </span>
-        Carnet de vol
+        THERMIK
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1">

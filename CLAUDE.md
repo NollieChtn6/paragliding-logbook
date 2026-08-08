@@ -2,7 +2,13 @@
 
 ## Projet
 
-Nom : paragliding-logbook
+Nom du dépôt (technique) : paragliding-logbook
+
+Nom de l'application (produit) : THERMIK
+
+Sous-titre officiel : Carnet de vols & progression
+
+Signature courte (usage ponctuel dans l'UI, quand l'espace le permet, ne remplace pas systématiquement le sous-titre) : Voler · Apprendre · Progresser
 
 Application web mobile-first permettant de gérer un carnet de bord personnel de parapente.
 

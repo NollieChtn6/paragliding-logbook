@@ -1,4 +1,4 @@
-# UI Direction — Paragliding Logbook
+# UI Direction — THERMIK
 
 ## Objectif
 

@@ -17,12 +17,18 @@ export default async function SignInPage({ searchParams }: PageProps<"/sign-in">
       </div>
 
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <div className="flex flex-col gap-1 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            Bienvenue à bord
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span
+            className="flex size-10 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-accent text-base"
+            aria-hidden
+          >
+            🪂
+          </span>
+          <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+            THERMIK
           </h1>
           <p className="text-sm text-muted-foreground">
-            Votre carnet de vol parapente <br />
+            Carnet de vols et progression <br />
             du décollage à l&apos;atterrissage.
           </p>
         </div>
