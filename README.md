@@ -51,9 +51,11 @@ Monorepo pnpm workspaces (`apps/*`, `packages/*`) :
 - `apps/web` : application Next.js (App Router, TypeScript strict, Tailwind CSS, shadcn/ui)
   - `prisma/` : schéma Prisma, migrations, seed
   - `src/lib/validations/` : schémas Zod par domaine métier (Flight complet et testé ; Activity/TrainingCamp/GroundHandlingSession en structure seule pour l'instant)
-  - `src/features/` : couche métier par feature (ex. `flights/create-flight.service.ts`), indépendante de l'UI
+  - `src/lib/current-user.ts` : résolution de l'utilisateur courant (utilisateur de développement en attendant Auth.js)
+  - `src/features/` : couche métier par feature, indépendante de l'UI — `flights/` (création d'un vol) et `activities/` (lecture : liste et détail, tous types d'activité confondus)
   - `src/actions/` : Server Actions Next.js
-  - `src/app/flights/new` : page de test manuelle du flux de création d'un vol
+  - `src/app/activities` : parcours applicatif — `new` (choix du type d'activité puis formulaire), liste et `[id]` (détail)
+  - `src/app/flights/new` : route de test historique (même formulaire partagé que `/activities/new`)
 
 Base de données : PostgreSQL (local via Docker), Prisma ORM. Validation : Zod. Pas encore d'authentification (Auth.js prévu, non démarré) — un utilisateur de développement est créé par le seed.
 
