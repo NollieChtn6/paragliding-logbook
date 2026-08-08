@@ -5,12 +5,13 @@ import { getActivityById } from "./get-activity.service";
 let userId: string;
 let otherUserId: string;
 let siteId: string;
+let pointId: string;
 let activityId: string;
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, flightType] = await Promise.all([
+  const [user, otherUser, site, activityType, takeoffType, flightType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `get-activity-${suffix}@paragliding-logbook.local`,
@@ -25,23 +26,36 @@ beforeAll(async () => {
     }),
     prisma.site.create({ data: { name: `Get Activity Test Site ${suffix}` } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
+    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
 
+  const point = await prisma.sitePoint.create({
+    data: {
+      label: "Point de test",
+      siteId,
+      sitePointTypeId: takeoffType.id,
+      latitude: 45.9,
+      longitude: 6.9,
+      altitudeM: 1200,
+    },
+  });
+  pointId = point.id;
+
   const activity = await prisma.activity.create({
-    data: { userId, activityTypeId: flightType.id },
+    data: { userId, activityTypeId: activityType.id },
   });
   await prisma.flight.create({
     data: {
       activityId: activity.id,
-      siteId,
+      departurePointId: pointId,
+      arrivalPointId: pointId,
       date: new Date("2025-06-15"),
-      takeoffAltitudeM: 1200,
-      landingAltitudeM: 450,
       durationMin: 35,
-      flightType: "LOCAL",
+      flightTypeId: flightType.id,
       observations: "Vol de test",
       improvementPoints: "RAS",
     },
@@ -52,6 +66,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.flight.deleteMany({ where: { activityId } });
   await prisma.activity.deleteMany({ where: { id: activityId } });
+  await prisma.sitePoint.deleteMany({ where: { siteId } });
   await prisma.site.delete({ where: { id: siteId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -63,7 +78,7 @@ describe("getActivityById (integration)", () => {
 
     expect(activity?.id).toBe(activityId);
     expect(activity?.flight?.observations).toBe("Vol de test");
-    expect(activity?.flight?.site.id).toBe(siteId);
+    expect(activity?.flight?.departurePoint.site.id).toBe(siteId);
   });
 
   it("returns null when the activity belongs to another user", async () => {

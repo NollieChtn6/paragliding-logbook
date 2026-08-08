@@ -1,3 +1,4 @@
+import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 import type { ActivityWithDetails } from "./queries";
 
 export type ActivitySummary = {
@@ -9,6 +10,19 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("fr-FR");
 }
 
+// departurePoint et arrivalPoint peuvent appartenir à des sites différents
+// (ex. cross) : n'affiche qu'un seul nom quand c'est le même site, "A → B"
+// sinon. Exportée : réutilisée telle quelle par /activities/[id] pour la
+// liste condensée "Vols associés" d'un stage.
+export function formatFlightLocation(flight: {
+  departurePoint: { site: { name: string } };
+  arrivalPoint: { site: { name: string } };
+}): string {
+  const departureSite = flight.departurePoint.site.name;
+  const arrivalSite = flight.arrivalPoint.site.name;
+  return departureSite === arrivalSite ? departureSite : `${departureSite} → ${arrivalSite}`;
+}
+
 // Résumé condensé affiché dans la liste /activities (le détail complet est
 // réservé à /activities/[id]). Une fonction pure, indépendante de Prisma et
 // de React, pour rester facilement testable.
@@ -17,7 +31,7 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { flight } = activity;
     return {
       title: "Vol",
-      subtitle: `${flight.site.name} · ${formatDate(flight.date)} · ${flight.durationMin} min`,
+      subtitle: `${formatFlightLocation(flight)} · ${formatDate(flight.date)} · ${flight.durationMin} min`,
     };
   }
 
@@ -37,5 +51,8 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     };
   }
 
-  return { title: activity.activityType.label, subtitle: "" };
+  return {
+    title: ACTIVITY_TYPE_LABELS[activity.activityType.code] ?? activity.activityType.code,
+    subtitle: "",
+  };
 }

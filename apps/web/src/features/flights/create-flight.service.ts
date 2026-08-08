@@ -17,6 +17,42 @@ export async function createFlight(userId: string, rawInput: unknown) {
       where: { code: FLIGHT_ACTIVITY_TYPE_CODE },
     });
 
+    // SitePoint est une donnée de référence partagée (comme Site) : simple
+    // vérification d'existence, pas de contrôle de propriété (à la différence
+    // de trainingCampId ci-dessous, qui appartient à un utilisateur).
+    const [departurePoint, arrivalPoint] = await Promise.all([
+      tx.sitePoint.findUnique({ where: { id: input.departurePointId } }),
+      tx.sitePoint.findUnique({ where: { id: input.arrivalPointId } }),
+    ]);
+    if (!departurePoint) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["departurePointId"],
+        message: "Ce point de départ n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+    if (!arrivalPoint) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["arrivalPointId"],
+        message: "Ce point d'arrivée n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+
+    // FlightType est une donnée de référence partagée, même traitement que
+    // SitePoint ci-dessus (docs/decisions/003-reference-table-codes.md).
+    const flightType = await tx.flightType.findUnique({ where: { id: input.flightTypeId } });
+    if (!flightType) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["flightTypeId"],
+        message: "Ce type de vol n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+
     // Règle métier docs/domain-model.md (Stage) : un vol rattaché à un stage
     // doit avoir une date dans l'intervalle [startDate, endDate] du stage.
     // Pas exprimable en Zod pur (nécessite de lire le TrainingCamp en base) :
@@ -59,13 +95,12 @@ export async function createFlight(userId: string, rawInput: unknown) {
     return tx.flight.create({
       data: {
         activityId: activity.id,
-        siteId: input.siteId,
+        departurePointId: input.departurePointId,
+        arrivalPointId: input.arrivalPointId,
         trainingCampId: input.trainingCampId,
         date: input.date,
-        takeoffAltitudeM: input.takeoffAltitudeM,
-        landingAltitudeM: input.landingAltitudeM,
         durationMin: input.durationMin,
-        flightType: input.flightType,
+        flightTypeId: input.flightTypeId,
         observations: input.observations,
         improvementPoints: input.improvementPoints,
       },

@@ -9,8 +9,26 @@ const site = {
   country: null,
   latitude: null,
   longitude: null,
+  primaryTakeoffPointId: null,
+  primaryLandingPointId: null,
   createdAt: new Date("2025-01-01"),
   updatedAt: new Date("2025-01-01"),
+};
+
+const takeoffType = { id: "spt-takeoff", code: "TAKEOFF" };
+const localFlightType = { id: "ft-local", code: "LOCAL" };
+
+const point = {
+  id: "point-1",
+  label: "Point de test",
+  siteId: site.id,
+  sitePointTypeId: takeoffType.id,
+  latitude: 45.9,
+  longitude: 6.9,
+  altitudeM: 1200,
+  orientationDeg: null,
+  site,
+  sitePointType: takeoffType,
 };
 
 const baseActivity = {
@@ -27,20 +45,21 @@ function flightActivity(id: string, durationMin: number): ActivityWithDetails {
   return {
     ...baseActivity,
     id,
-    activityType: { id: "at-1", code: "FLIGHT", label: "Vol" },
+    activityType: { id: "at-1", code: "FLIGHT" },
     flight: {
       id: `flight-${id}`,
       activityId: id,
-      siteId: site.id,
+      departurePointId: point.id,
+      arrivalPointId: point.id,
+      flightTypeId: localFlightType.id,
       trainingCampId: null,
       date: new Date("2025-06-15"),
-      takeoffAltitudeM: 1200,
-      landingAltitudeM: 450,
       durationMin,
-      flightType: "LOCAL",
       observations: "RAS",
       improvementPoints: "RAS",
-      site,
+      departurePoint: point,
+      arrivalPoint: point,
+      flightType: localFlightType,
       trainingCamp: null,
     },
   };
@@ -50,7 +69,7 @@ function groundHandlingActivity(id: string, durationMin: number): ActivityWithDe
   return {
     ...baseActivity,
     id,
-    activityType: { id: "at-3", code: "GROUND_HANDLING", label: "Gonflage" },
+    activityType: { id: "at-3", code: "GROUND_HANDLING" },
     groundHandlingSession: {
       id: `ghs-${id}`,
       activityId: id,
@@ -71,7 +90,7 @@ function trainingCampActivity(id: string): ActivityWithDetails {
   return {
     ...baseActivity,
     id,
-    activityType: { id: "at-2", code: "TRAINING_CAMP", label: "Stage" },
+    activityType: { id: "at-2", code: "TRAINING_CAMP" },
     trainingCamp: {
       id: `camp-${id}`,
       activityId: id,

@@ -93,9 +93,8 @@ Types prévus :
 Informations obligatoires (validées côté Zod) :
 
 - [x] Date
-- [x] Site
-- [x] Altitude de décollage
-- [x] Altitude d'atterrissage
+- [x] Point de départ (site + altitude dérivés du `SitePoint` choisi)
+- [x] Point d'arrivée (site + altitude dérivés du `SitePoint` choisi, potentiellement un site différent)
 - [x] Durée
 - [x] Type de vol
 - [x] Observations
@@ -105,6 +104,7 @@ Fonctionnalités :
 
 - [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
 - [x] Modifier un vol — `/activities/[id]/edit`, service `updateFlight` (`src/features/flights/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
+- [x] Modèle Site/SitePoint/SitePointType — un vol référence un point de départ et un point d'arrivée (`SitePoint`), plutôt qu'un site unique avec des altitudes dupliquées ; plus de règle comparant les altitudes de décollage/atterrissage (départ et arrivée peuvent appartenir à des sites différents, ex. cross)
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer un vol à un stage à la création — champ optionnel "Stage associé" dans `FlightForm` (limité aux stages de l'utilisateur courant, `listTrainingCamps`), règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`
 
@@ -176,7 +176,8 @@ Fonctionnalités :
 
 ### Sites de vol 🌍
 
-- [ ] Créer la gestion des sites de vol
+- [x] Modèle `Site`/`SitePoint`/`SitePointType` — un site peut avoir plusieurs points (décollage, atterrissage), chacun avec coordonnées GPS précises et altitude ; `Site.primaryTakeoffPointId`/`primaryLandingPointId` désignent le point principal
+- [ ] Créer la gestion des sites de vol (interface de création/modification d'un `Site` et de ses `SitePoint` — actuellement seedés uniquement)
 - [ ] Ajouter un site manuellement
 - [ ] Prévoir une évolution vers des données externes (API)
 

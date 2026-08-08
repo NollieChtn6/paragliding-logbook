@@ -5,21 +5,35 @@ import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 
-// La liste des sites doit toujours refléter l'état actuel de la base, pas un
+// La liste des points doit toujours refléter l'état actuel de la base, pas un
 // instantané figé au build.
 export const dynamic = "force-dynamic";
 
 export default async function NewFlightPage() {
   const user = await requireCurrentUser();
-  const [sites, trainingCamps] = await Promise.all([
-    prisma.site.findMany({ select: { id: true, name: true } }),
+  const [points, flightTypes, trainingCamps] = await Promise.all([
+    prisma.sitePoint.findMany({
+      select: {
+        id: true,
+        label: true,
+        altitudeM: true,
+        site: { select: { id: true, name: true } },
+        sitePointType: { select: { code: true } },
+      },
+    }),
+    prisma.flightType.findMany({ select: { id: true, code: true } }),
     listTrainingCamps(user.id),
   ]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Nouveau vol" />
-      <FlightForm sites={sites} trainingCamps={trainingCamps} action={createFlightAction} />
+      <FlightForm
+        points={points}
+        flightTypes={flightTypes}
+        trainingCamps={trainingCamps}
+        action={createFlightAction}
+      />
     </div>
   );
 }

@@ -88,7 +88,8 @@ Champs :
 
 - id
 - code (unique)
-- label
+
+Pas de `label` : catégorie technique traduisible, le libellé affiché vit dans `apps/web/src/lib/reference-labels.ts` (voir `docs/decisions/003-reference-table-codes.md`).
 
 Valeurs initiales (peuplées par le seed) :
 
@@ -105,18 +106,40 @@ Spécialisation d'une Activity.
 Relations :
 
 - appartient à une Activity
-- appartient à un Site
+- departurePoint et arrivalPoint : chacun un SitePoint, potentiellement de sites différents (voir SitePoint ci-dessous)
 - peut appartenir à un TrainingCamp
+- appartient à un FlightType
 
 Champs :
 
 - date
-- takeoffAltitudeM
-- landingAltitudeM
 - durationMin
-- flightType
 - observations
 - improvementPoints
+
+Pas de `siteId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `departurePoint.altitudeM`/`arrivalPoint.altitudeM`.
+
+---
+
+### FlightType
+
+Référentiel des types de vol (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`).
+
+Champs :
+
+- id
+- code (unique)
+
+Pas de `label`, même principe que `ActivityType`/`SitePointType`.
+
+Valeurs initiales (peuplées par le seed) :
+
+- LOCAL
+- CROSS_COUNTRY
+- SOARING
+- THERMAL
+- TRAINING
+- OTHER
 
 ---
 
@@ -164,10 +187,52 @@ Champs :
 - name
 - region (optionnel)
 - country (optionnel)
-- latitude (optionnel)
+- latitude (optionnel) — localisation approximative du site
 - longitude (optionnel)
+- primaryTakeoffPointId (optionnel, FK SitePoint) — décollage principal
+- primaryLandingPointId (optionnel, FK SitePoint) — atterrissage principal
 - createdAt
 - updatedAt
+
+`primaryTakeoffPointId`/`primaryLandingPointId` doivent référencer un `SitePoint` du même `Site` et du bon `SitePointType` (TAKEOFF/LANDING respectivement) : non exprimable nativement en Postgres/Prisma (pas de CHECK inter-lignes), vérifié côté applicatif.
+
+---
+
+### SitePoint
+
+Point physique appartenant à un Site (décollage, atterrissage...). Un Site peut avoir plusieurs `SitePoint` d'un même `SitePointType` ; `Site.primaryTakeoffPointId`/`primaryLandingPointId` désignent le point principal, pas l'ensemble des points.
+
+Relations :
+
+- appartient à un Site
+- appartient à un SitePointType
+
+Champs :
+
+- label
+- latitude, longitude (utilisation future dans une carte)
+- altitudeM
+- orientationDeg (optionnel)
+
+Le type d'un `SitePoint` est sa fonction habituelle dans le référentiel du site, pas son rôle dans un `Flight` donné : un point TAKEOFF peut être utilisé comme `arrivalPoint` d'un vol.
+
+---
+
+### SitePointType
+
+Référentiel des types de point (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`).
+
+Champs :
+
+- id
+- code (unique)
+
+Pas de `label`, même principe que `ActivityType`.
+
+Valeurs initiales (peuplées par le seed) :
+
+- TAKEOFF
+- LANDING
 
 ---
 
@@ -201,7 +266,19 @@ Activity 1,0..1 TrainingCamp
 
 Activity 1,0..1 GroundHandlingSession
 
-Site 1,N Flight
+Site 1,N SitePoint
+
+Site 0..1,1 SitePoint (primaryTakeoffPoint)
+
+Site 0..1,1 SitePoint (primaryLandingPoint)
+
+SitePointType 1,N SitePoint
+
+SitePoint 1,N Flight (departurePoint)
+
+SitePoint 1,N Flight (arrivalPoint)
+
+FlightType 1,N Flight
 
 Site 1,N GroundHandlingSession
 

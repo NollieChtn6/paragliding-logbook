@@ -155,18 +155,19 @@ Les activités doivent permettre :
 Informations obligatoires :
 
 - date
-- site
-- altitude décollage
-- altitude atterrissage
+- point de départ (site + altitude dérivés du point choisi)
+- point d'arrivée (site + altitude dérivés du point choisi — peut appartenir à un site différent du départ, ex. vol de cross)
 - durée
 - type de vol
 - observations
 - points d'amélioration
 
+Un site peut avoir plusieurs points (décollage, atterrissage), avec coordonnées GPS et altitude. Aucune contrainte ne compare les altitudes de départ et d'arrivée.
+
 Type de vol :
 
 - LOCAL
-- CROSS
+- CROSS_COUNTRY
 - SOARING
 - THERMAL
 - TRAINING
