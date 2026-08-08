@@ -10,7 +10,7 @@ export default function Home() {
       <p className="text-muted-foreground">
         Carnet de progression parapente numérique — vols, stages, gonflages, statistiques.
       </p>
-      <Button render={<Link href="/sign-in">Se connecter</Link>} />
+      <Button nativeButton={false} render={<Link href="/sign-in">Se connecter</Link>} />
     </div>
   );
 }
