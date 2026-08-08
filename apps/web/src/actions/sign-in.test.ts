@@ -30,7 +30,7 @@ describe("signInAction", () => {
     expect(auth.api.signInEmail).not.toHaveBeenCalled();
   });
 
-  it("calls signInEmail and redirects on success", async () => {
+  it("calls signInEmail and redirects to /activities by default", async () => {
     vi.mocked(auth.api.signInEmail).mockResolvedValue({} as never);
     const formData = formDataFor({ email: "dev@example.local", password: "correct-password" });
 
@@ -39,6 +39,32 @@ describe("signInAction", () => {
     expect(auth.api.signInEmail).toHaveBeenCalledWith({
       body: { email: "dev@example.local", password: "correct-password" },
     });
+    expect(redirect).toHaveBeenCalledWith("/activities");
+  });
+
+  it("redirects to redirectTo when it is a safe internal path", async () => {
+    vi.mocked(auth.api.signInEmail).mockResolvedValue({} as never);
+    const formData = formDataFor({
+      email: "dev@example.local",
+      password: "correct-password",
+      redirectTo: "/activities/new",
+    });
+
+    await signInAction(null, formData);
+
+    expect(redirect).toHaveBeenCalledWith("/activities/new");
+  });
+
+  it("falls back to /activities when redirectTo is an external URL (open redirect)", async () => {
+    vi.mocked(auth.api.signInEmail).mockResolvedValue({} as never);
+    const formData = formDataFor({
+      email: "dev@example.local",
+      password: "correct-password",
+      redirectTo: "https://evil.example.com",
+    });
+
+    await signInAction(null, formData);
+
     expect(redirect).toHaveBeenCalledWith("/activities");
   });
 

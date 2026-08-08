@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getActivityById } from "@/features/activities";
-import { getCurrentUser } from "@/lib/current-user";
+import { requireCurrentUser } from "@/lib/current-user";
 
 export const dynamic = "force-dynamic";
 
@@ -10,19 +10,7 @@ function formatDate(date: Date): string {
 
 export default async function ActivityDetailPage(props: PageProps<"/activities/[id]">) {
   const { id } = await props.params;
-  const user = await getCurrentUser();
-
-  if (!user) {
-    return (
-      <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-4 px-4 py-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Activité</h1>
-        <p className="text-muted-foreground">
-          Utilisateur de développement introuvable, lancer `pnpm prisma:seed`.
-        </p>
-      </div>
-    );
-  }
-
+  const user = await requireCurrentUser();
   const activity = await getActivityById(id, user.id);
 
   if (!activity) {

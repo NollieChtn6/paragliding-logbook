@@ -1,26 +1,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getActivitySummary, listActivities } from "@/features/activities";
-import { getCurrentUser } from "@/lib/current-user";
+import { requireCurrentUser } from "@/lib/current-user";
 
 // La liste doit toujours refléter l'état actuel de la base, pas un
 // instantané figé au build.
 export const dynamic = "force-dynamic";
 
 export default async function ActivitiesPage() {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    return (
-      <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-4 px-4 py-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Activités</h1>
-        <p className="text-muted-foreground">
-          Utilisateur de développement introuvable, lancer `pnpm prisma:seed`.
-        </p>
-      </div>
-    );
-  }
-
+  const user = await requireCurrentUser();
   const activities = await listActivities(user.id);
 
   return (

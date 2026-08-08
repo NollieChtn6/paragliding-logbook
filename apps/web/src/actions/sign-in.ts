@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { toSafeRedirectPath } from "@/lib/safe-redirect";
 
 export type SignInActionState = { success: true } | { success: false; error: string };
 
@@ -11,6 +12,10 @@ export async function signInAction(
 ): Promise<SignInActionState> {
   const email = formData.get("email");
   const password = formData.get("password");
+  // redirectTo vient d'un champ caché rempli côté serveur (sign-in/page.tsx),
+  // mais reste une donnée client à cette étape : revalidée ici contre les
+  // open redirects avant tout usage.
+  const redirectTo = toSafeRedirectPath(formData.get("redirectTo")?.toString(), "/activities");
 
   if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
     return { success: false, error: "Email et mot de passe requis." };
@@ -27,5 +32,5 @@ export async function signInAction(
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect("/activities");
+  redirect(redirectTo);
 }

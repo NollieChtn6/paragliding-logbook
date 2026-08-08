@@ -6,13 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// signInAction redirige vers /activities en cas de succès : il n'y a pas
+type SignInFormProps = {
+  redirectTo: string;
+};
+
+// signInAction redirige vers redirectTo en cas de succès : il n'y a pas
 // d'état "succès" à afficher ici (voir FlightForm pour le même principe).
-export function SignInForm() {
+export function SignInForm({ redirectTo }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(signInAction, null);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      <input type="hidden" name="redirectTo" value={redirectTo} />
+
       <div className="flex flex-col gap-1">
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" required />
