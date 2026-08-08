@@ -155,7 +155,7 @@ export function GroundHandlingSessionForm({
         {isPending ? "Enregistrement..." : submitLabel}
       </Button>
 
-      {state?.success === false && <p className="text-red-600">{state.error}</p>}
+      {state?.success === false && <p className="text-destructive">{state.error}</p>}
     </form>
   );
 }

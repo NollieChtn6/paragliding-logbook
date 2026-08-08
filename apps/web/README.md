@@ -23,3 +23,14 @@ Nécessite `apps/web/.env` (copié depuis `.env.example`) et PostgreSQL local d�
 - `/flights/new` : route de test historique, formulaire de vol seul (même composant partagé que `/activities/new`). **Protégée.**
 
 Routes protégées : accès sans session valide → redirection vers `/sign-in?redirectTo=<page demandée>` (vérification optimiste dans `src/proxy.ts`, vérification faisant autorité via `requireCurrentUser()` dans la page ou la Server Action elle-même).
+
+Les pages protégées vivent physiquement sous `src/app/(app)/` (route group : n'affecte pas les URLs ci-dessus) pour partager le même `AppShell` (`src/components/layout/`) sans dupliquer son rendu dans chaque page.
+
+## UI
+
+Direction visuelle détaillée dans [`docs/ui-directions.md`](../../docs/ui-directions.md).
+
+- Navigation responsive : `DesktopSidebar` (≥ md) / `MobileBottomNav` (< md), toutes deux dérivées de `src/components/layout/nav-items.ts`.
+- Thème clair/sombre via `next-themes` (`attribute="class"`, défaut système) — bascule manuelle dans `ThemeToggle`.
+- Police Plus Jakarta Sans (SIL OFL) auto-hébergée via `next/font/local` (`src/app/fonts/`) — pas de dépendance à Google Fonts.
+- Composants de présentation réutilisables : `StatCard`, `ActivityCard`, `EmptyState` (`src/components/`).

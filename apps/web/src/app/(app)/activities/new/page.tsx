@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/layout/page-header";
 import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
@@ -17,8 +18,8 @@ export default async function NewActivityPage() {
   ]);
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground">Nouvelle activité</h1>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Nouvelle activité" />
       <NewActivityForm
         activityTypes={activityTypes}
         sites={sites}
