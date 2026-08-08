@@ -12,15 +12,75 @@ datasource db {
   provider = "postgresql"
 }
 
+/// passwordHash conservé temporairement en parallèle de Account.password (Better
+/// Auth) le temps de valider la migration complète de l'authentification -
+/// retrait prévu dans une PR ultérieure (voir CLAUDE.md > Authentification).
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  email         String   @unique
+  passwordHash  String
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   activities Activity[]
+  sessions   Session[]
+  accounts   Account[]
+}
+
+/// Modèles Better Auth (voir apps/web/src/lib/auth.ts). Noms de champs et
+/// relations imposés par l'adaptateur Prisma de Better Auth ; conventions
+/// d'identifiant (@id @default(uuid()) @db.Uuid) alignées sur le reste du
+/// schéma grâce à advanced.database.generateId: "uuid" dans la config.
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Compte de connexion (provider "credential" pour email + mot de passe).
+/// password porte le hash Argon2 - c'est ici, pas sur User.passwordHash, que
+/// Better Auth lit/écrit le mot de passe (voir apps/web/src/lib/auth.ts).
+model Account {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @db.Uuid
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }
 
 /// Référentiel des types d'activité (table, pas un enum : extensible sans migration).

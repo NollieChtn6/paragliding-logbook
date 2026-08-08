@@ -77,9 +77,15 @@ API intégrée Next.js
 
 ### Authentification
 
-- Auth.js
+- Better Auth
 - Email + mot de passe
 - Hash sécurisé des mots de passe avec Argon2
+- Pas d'inscription publique dans le MVP (`/sign-in` uniquement) : comptes créés de manière contrôlée
+
+Better Auth plutôt qu'Auth.js : Auth.js est passé en mode maintenance (son
+équipe est désormais celle de Better Auth, qui recommande Better Auth pour les
+nouveaux projets), et Better Auth est compatible avec Next.js App Router et
+Prisma 7 via un adaptateur dédié.
 
 ### Validation
 
@@ -114,6 +120,13 @@ Même si l'usage initial est personnel :
 
 - chaque donnée métier doit être liée à un utilisateur,
 - aucune donnée ne doit être globale sans justification.
+
+### Conventions de sécurité
+
+Le `userId` ne doit jamais être une donnée envoyée ou fiable côté client
+(champ de formulaire caché, prop, paramètre d'URL, etc.). Il doit toujours
+être résolu côté serveur à partir de la session (Better Auth), jamais fourni
+par le client.
 
 ---
 
