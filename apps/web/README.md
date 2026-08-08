@@ -18,6 +18,7 @@ Nécessite `apps/web/.env` (copié depuis `.env.example`) et PostgreSQL local d�
 - `/sign-in` : connexion email + mot de passe (pas d'inscription publique — comptes créés par le seed). Accepte un paramètre `redirectTo` (validé côté serveur contre les open redirects) pour revenir à la page initialement demandée après connexion.
 - `/activities` : historique des activités de l'utilisateur, triées de la plus récente à la plus ancienne. **Protégée.**
 - `/activities/[id]` : détail d'une activité (page "introuvable" dédiée si elle n'existe pas ou n'appartient pas à l'utilisateur). **Protégée.**
+- `/activities/[id]/edit` : modification d'une activité — type déterminé automatiquement (Vol/Stage/Gonflage), formulaire pré-rempli (même composant partagé qu'à la création), vérification systématique que l'activité appartient à l'utilisateur courant. **Protégée.**
 - `/activities/new` : choix du type d'activité (Vol/Stage/Gonflage) puis formulaire — les trois types du MVP sont implémentés. **Protégée.**
 - `/flights/new` : route de test historique, formulaire de vol seul (même composant partagé que `/activities/new`). **Protégée.**
 

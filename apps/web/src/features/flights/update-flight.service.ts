@@ -1,0 +1,54 @@
+import { ZodError, type ZodIssue } from "zod";
+import { ActivityNotFoundError } from "@/features/activities";
+import { prisma } from "@/lib/prisma";
+import { flightSchema } from "@/lib/validations/flight";
+
+// Même structure que createFlight (create-flight.service.ts) : valide, puis
+// persiste dans une transaction. La vérification de propriété (activité
+// appartient à userId) se fait dans la même transaction que l'update, pour
+// éviter une fenêtre entre le contrôle et l'écriture.
+export async function updateFlight(userId: string, activityId: string, rawInput: unknown) {
+  const input = flightSchema.parse(rawInput);
+
+  return prisma.$transaction(async (tx) => {
+    const activity = await tx.activity.findFirst({ where: { id: activityId, userId } });
+    if (!activity) {
+      throw new ActivityNotFoundError();
+    }
+
+    // Règle métier docs/domain-model.md (Stage), identique à la création
+    // (create-flight.service.ts) : un vol rattaché à un stage doit avoir une
+    // date dans l'intervalle [startDate, endDate] du stage.
+    if (input.trainingCampId) {
+      const trainingCamp = await tx.trainingCamp.findUniqueOrThrow({
+        where: { id: input.trainingCampId },
+      });
+      if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["date"],
+          message: "La date du vol doit être comprise dans l'intervalle du stage.",
+        };
+        throw new ZodError([issue]);
+      }
+    }
+
+    return tx.flight.update({
+      where: { activityId },
+      data: {
+        siteId: input.siteId,
+        // ?? null (pas juste input.trainingCampId) : contrairement à create,
+        // un update Prisma ignore les champs undefined au lieu de les
+        // effacer — nécessaire pour permettre de retirer le stage associé.
+        trainingCampId: input.trainingCampId ?? null,
+        date: input.date,
+        takeoffAltitudeM: input.takeoffAltitudeM,
+        landingAltitudeM: input.landingAltitudeM,
+        durationMin: input.durationMin,
+        flightType: input.flightType,
+        observations: input.observations,
+        improvementPoints: input.improvementPoints,
+      },
+    });
+  });
+}
