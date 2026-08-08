@@ -23,8 +23,9 @@ Séance de gonflage ou de travail au sol.
 - id
 - name
 - email
-- passwordHash / provider
+- passwordHash (hashé avec Argon2, jamais en clair — y compris pour l'utilisateur de développement créé par le seed)
 - createdAt
+- updatedAt
 
 ---
 
@@ -32,10 +33,12 @@ Séance de gonflage ou de travail au sol.
 
 - id
 - name
-- region
-- country
+- region (optionnel)
+- country (optionnel)
 - latitude (optionnel)
 - longitude (optionnel)
+- createdAt
+- updatedAt
 
 Les sites seront saisis manuellement dans un premier temps. Donnée de référence partagée (pas de `userId`) : c'est un lieu du monde réel, pas une donnée privée à un utilisateur.
 
@@ -47,6 +50,8 @@ Les sites seront saisis manuellement dans un premier temps. Donnée de référen
 - name
 - website (optionnel)
 - location (optionnel)
+- createdAt
+- updatedAt
 
 Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 
@@ -95,6 +100,8 @@ Relation :
 - siteId
 - durationMin
 - exercises
+- difficulties (optionnel)
+- feeling (optionnel)
 
 Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de duplication sur `GroundHandlingSession`.
 
@@ -139,4 +146,3 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 - IGCTrack
 - SiteTakeoff / SiteLanding
 - FlightStatisticsSnapshot
-- `GroundHandlingSession.difficulties` / `feeling` (ressenti détaillé)
