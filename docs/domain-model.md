@@ -93,14 +93,16 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 
 Relation :
 
-- un stage peut contenir plusieurs vols ;
-- un vol appartient au maximum à un stage.
+- un stage peut contenir plusieurs vols et plusieurs séances de gonflage ;
+- un vol appartient au maximum à un stage ;
+- une séance de gonflage appartient au maximum à un stage.
 
 ---
 
 ### GroundHandlingSession
 
 - id
+- trainingCampId (nullable)
 - date
 - siteId
 - durationMin
@@ -124,7 +126,7 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 ### Stage
 
 - `startDate <= endDate` ;
-- les vols associés doivent avoir une date comprise dans l’intervalle du stage.
+- les vols et séances de gonflage associés doivent avoir une date comprise dans l’intervalle du stage.
 
 ### Gonflage
 

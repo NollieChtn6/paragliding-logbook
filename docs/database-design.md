@@ -139,10 +139,15 @@ Champs :
 
 Spécialisation d'une Activity.
 
+Relations :
+
+- appartient à une Activity
+- appartient à un Site
+- peut appartenir à un TrainingCamp
+
 Champs :
 
 - date
-- siteId
 - durationMin
 - exercises
 - difficulties (optionnel)
@@ -201,5 +206,7 @@ Site 1,N Flight
 Site 1,N GroundHandlingSession
 
 TrainingCamp 1,N Flight
+
+TrainingCamp 1,N GroundHandlingSession
 
 School 1,N TrainingCamp

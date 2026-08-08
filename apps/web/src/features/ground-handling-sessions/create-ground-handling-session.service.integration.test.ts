@@ -1,10 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { createTrainingCamp } from "@/features/training-camps";
 import { prisma } from "@/lib/prisma";
 import { createGroundHandlingSession } from "./create-ground-handling-session.service";
 
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
 let siteId: string;
+let schoolId: string;
+let trainingCampId: string;
 
 const validGroundHandlingInput = {
   date: "2025-01-15",
@@ -27,12 +30,27 @@ beforeAll(async () => {
     data: { name: `Integration Test Site ${suffix}` },
   });
   siteId = site.id;
+
+  const school = await prisma.school.create({
+    data: { name: `Integration Test School GHS ${suffix}` },
+  });
+  schoolId = school.id;
+
+  const trainingCamp = await createTrainingCamp(userId, {
+    startDate: "2025-01-10",
+    endDate: "2025-01-20",
+    schoolId,
+    campType: "Perfectionnement",
+  });
+  trainingCampId = trainingCamp.id;
 });
 
 afterAll(async () => {
   await prisma.groundHandlingSession.deleteMany({ where: { activity: { userId } } });
+  await prisma.trainingCamp.deleteMany({ where: { activity: { userId } } });
   await prisma.activity.deleteMany({ where: { userId } });
   await prisma.site.delete({ where: { id: siteId } });
+  await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.delete({ where: { id: userId } });
   await prisma.$disconnect();
 });
@@ -86,5 +104,41 @@ describe("createGroundHandlingSession (integration)", () => {
         durationMin: "-10",
       }),
     ).rejects.toThrow();
+  });
+
+  // Règle métier docs/domain-model.md (Stage) : une séance rattachée à un
+  // stage doit avoir une date dans l'intervalle du stage.
+  describe("with a trainingCampId", () => {
+    it("succeeds when the session date is within the training camp's interval", async () => {
+      const groundHandlingSession = await createGroundHandlingSession(userId, {
+        ...validGroundHandlingInput,
+        siteId,
+        trainingCampId,
+        date: "2025-01-12",
+      });
+      expect(groundHandlingSession.trainingCampId).toBe(trainingCampId);
+    });
+
+    it("fails when the session date is before the training camp's start date", async () => {
+      await expect(
+        createGroundHandlingSession(userId, {
+          ...validGroundHandlingInput,
+          siteId,
+          trainingCampId,
+          date: "2025-01-05",
+        }),
+      ).rejects.toThrow();
+    });
+
+    it("fails when the session date is after the training camp's end date", async () => {
+      await expect(
+        createGroundHandlingSession(userId, {
+          ...validGroundHandlingInput,
+          siteId,
+          trainingCampId,
+          date: "2025-01-25",
+        }),
+      ).rejects.toThrow();
+    });
   });
 });

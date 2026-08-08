@@ -74,6 +74,30 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
               </ul>
             </div>
           )}
+
+          {activity.trainingCamp.groundHandlingSessions.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                Séances associées
+              </h2>
+              <ul className="flex flex-col gap-2">
+                {activity.trainingCamp.groundHandlingSessions.map((groundHandlingSession) => (
+                  <li
+                    key={groundHandlingSession.id}
+                    className="flex flex-col gap-0.5 rounded-lg border border-input px-3 py-2"
+                  >
+                    <span className="font-medium text-foreground">
+                      {groundHandlingSession.site.name}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {formatDate(groundHandlingSession.date)} · {groundHandlingSession.durationMin}{" "}
+                      min
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       )}
 
@@ -90,6 +114,12 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
             )}
             {activity.groundHandlingSession.feeling && (
               <Field label="Ressenti" value={activity.groundHandlingSession.feeling} />
+            )}
+            {activity.groundHandlingSession.trainingCamp && (
+              <Field
+                label="Stage associé"
+                value={activity.groundHandlingSession.trainingCamp.campType}
+              />
             )}
           </dl>
         </>

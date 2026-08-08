@@ -76,6 +76,7 @@ describe("getActivitySummary", () => {
         certification: null,
         school,
         flights: [],
+        groundHandlingSessions: [],
       },
     };
 
@@ -93,12 +94,14 @@ describe("getActivitySummary", () => {
         id: "ghs-1",
         activityId: "activity-1",
         siteId: site.id,
+        trainingCampId: null,
         date: new Date("2025-03-10"),
         durationMin: 45,
         exercises: "Contrôle au sol",
         difficulties: null,
         feeling: null,
         site,
+        trainingCamp: null,
       },
     };
 
