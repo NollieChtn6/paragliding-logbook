@@ -20,10 +20,20 @@ export async function createGroundHandlingSession(userId: string, rawInput: unkn
     // stage. Même traitement que create-flight.service.ts : ZodError
     // construite manuellement pour réutiliser tel quel le mapping d'erreur
     // déjà en place dans actions/create-ground-handling-session.ts.
+    // activity: { userId } vérifie aussi que le stage appartient à
+    // l'utilisateur courant (voir create-flight.service.ts).
     if (input.trainingCampId) {
-      const trainingCamp = await tx.trainingCamp.findUniqueOrThrow({
-        where: { id: input.trainingCampId },
+      const trainingCamp = await tx.trainingCamp.findFirst({
+        where: { id: input.trainingCampId, activity: { userId } },
       });
+      if (!trainingCamp) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["trainingCampId"],
+          message: "Ce stage n'existe pas ou ne vous appartient pas.",
+        };
+        throw new ZodError([issue]);
+      }
       if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
         const issue: ZodIssue = {
           code: "custom",

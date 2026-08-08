@@ -11,6 +11,7 @@ let otherUserId: string;
 let siteId: string;
 let schoolId: string;
 let trainingCampId: string;
+let otherUserTrainingCampId: string;
 let groundHandlingSessionId: string;
 let activityId: string;
 
@@ -52,6 +53,14 @@ beforeAll(async () => {
   });
   trainingCampId = trainingCamp.id;
 
+  const otherUserTrainingCamp = await createTrainingCamp(otherUserId, {
+    startDate: "2025-01-10",
+    endDate: "2025-01-20",
+    schoolId,
+    campType: "Stage d'un autre utilisateur",
+  });
+  otherUserTrainingCampId = otherUserTrainingCamp.id;
+
   const groundHandlingSession = await createGroundHandlingSession(userId, {
     ...validGroundHandlingInput,
     siteId,
@@ -64,7 +73,9 @@ afterAll(async () => {
   await prisma.groundHandlingSession.deleteMany({
     where: { activity: { userId: { in: [userId, otherUserId] } } },
   });
-  await prisma.trainingCamp.deleteMany({ where: { activity: { userId } } });
+  await prisma.trainingCamp.deleteMany({
+    where: { activity: { userId: { in: [userId, otherUserId] } } },
+  });
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.site.delete({ where: { id: siteId } });
   await prisma.school.delete({ where: { id: schoolId } });
@@ -140,6 +151,17 @@ describe("updateGroundHandlingSession (integration)", () => {
           siteId,
           trainingCampId,
           date: "2025-01-25",
+        }),
+      ).rejects.toThrow();
+    });
+
+    it("fails when the training camp belongs to another user", async () => {
+      await expect(
+        updateGroundHandlingSession(userId, activityId, {
+          ...validGroundHandlingInput,
+          siteId,
+          trainingCampId: otherUserTrainingCampId,
+          date: "2025-01-12",
         }),
       ).rejects.toThrow();
     });
