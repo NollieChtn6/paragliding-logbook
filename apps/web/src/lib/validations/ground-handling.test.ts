@@ -31,6 +31,14 @@ describe("groundHandlingSchema", () => {
     }
   });
 
+  it("treats an empty trainingCampId as absent", () => {
+    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, trainingCampId: "" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.trainingCampId).toBeUndefined();
+    }
+  });
+
   it("rejects a session without a date or site", () => {
     const { date, siteId, ...rest } = validGroundHandling;
     const result = groundHandlingSchema.safeParse(rest);

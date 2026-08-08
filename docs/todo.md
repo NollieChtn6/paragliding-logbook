@@ -146,6 +146,7 @@ Fonctionnalités :
 
 - [x] Ajouter une séance — `/activities/new`, service `createGroundHandlingSession` (`src/features/ground-handling-sessions/`), route protégée (connexion requise)
 - [x] Consulter l'historique des séances — `/activities` (liste) et `/activities/[id]` (détail)
+- [x] Associer une séance à un stage à la création — champ optionnel "Stage associé" dans `GroundHandlingSessionForm` (limité aux stages de l'utilisateur courant), règle métier "date de la séance dans l'intervalle du stage" validée et testée dans `create-ground-handling-session.service.ts` ; séances associées affichées sur le détail du stage
 - [ ] Modifier une séance
 
 ---

@@ -7,9 +7,13 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
   activityType: true,
   flight: { include: { site: true, trainingCamp: true } },
   trainingCamp: {
-    include: { school: true, flights: { include: { site: true }, orderBy: { date: "asc" } } },
+    include: {
+      school: true,
+      flights: { include: { site: true }, orderBy: { date: "asc" } },
+      groundHandlingSessions: { include: { site: true }, orderBy: { date: "asc" } },
+    },
   },
-  groundHandlingSession: { include: { site: true } },
+  groundHandlingSession: { include: { site: true, trainingCamp: true } },
 } satisfies Prisma.ActivityInclude;
 
 export type ActivityWithDetails = Prisma.ActivityGetPayload<{

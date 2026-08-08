@@ -54,7 +54,9 @@ export function NewActivityForm({
 
       {selectedCode === "FLIGHT" && <FlightForm sites={sites} trainingCamps={trainingCamps} />}
       {selectedCode === "TRAINING_CAMP" && <TrainingCampForm schools={schools} />}
-      {selectedCode === "GROUND_HANDLING" && <GroundHandlingSessionForm sites={sites} />}
+      {selectedCode === "GROUND_HANDLING" && (
+        <GroundHandlingSessionForm sites={sites} trainingCamps={trainingCamps} />
+      )}
     </div>
   );
 }

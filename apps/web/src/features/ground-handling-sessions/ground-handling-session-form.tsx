@@ -14,14 +14,30 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
+type TrainingCampOption = {
+  id: string;
+  campType: string;
+  startDate: Date;
+  endDate: Date;
+  school: { name: string };
+};
+
 type GroundHandlingSessionFormProps = {
   sites: { id: string; name: string }[];
+  trainingCamps?: TrainingCampOption[];
 };
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString("fr-FR");
+}
 
 // Même principe que FlightForm/TrainingCampForm :
 // createGroundHandlingSessionAction redirige vers /activities en cas de
 // succès, pas d'état "succès" à afficher ici.
-export function GroundHandlingSessionForm({ sites }: GroundHandlingSessionFormProps) {
+export function GroundHandlingSessionForm({
+  sites,
+  trainingCamps = [],
+}: GroundHandlingSessionFormProps) {
   const [state, formAction, isPending] = useActionState(createGroundHandlingSessionAction, null);
 
   return (
@@ -46,6 +62,26 @@ export function GroundHandlingSessionForm({ sites }: GroundHandlingSessionFormPr
           </SelectContent>
         </Select>
       </div>
+
+      {trainingCamps.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+          <Select name="trainingCampId" defaultValue="">
+            <SelectTrigger id="trainingCampId" className="w-full">
+              <SelectValue placeholder="Aucun" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Aucun</SelectItem>
+              {trainingCamps.map((trainingCamp) => (
+                <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
+                  {trainingCamp.campType} — {trainingCamp.school.name} (
+                  {formatDate(trainingCamp.startDate)} → {formatDate(trainingCamp.endDate)})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="flex flex-col gap-1">
         <Label htmlFor="durationMin">Durée (min)</Label>
