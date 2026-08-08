@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
 
@@ -19,6 +21,13 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
+      <Button
+        nativeButton={false}
+        variant="outline"
+        className="self-start"
+        render={<Link href={`/activities/${activity.id}/edit`}>Modifier</Link>}
+      />
+
       {activity.flight && (
         <>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Vol</h1>

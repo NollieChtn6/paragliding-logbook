@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { createFlightAction } from "@/actions/create-flight";
+import { createGroundHandlingSessionAction } from "@/actions/create-ground-handling-session";
+import { createTrainingCampAction } from "@/actions/create-training-camp";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FlightForm } from "@/features/flights/flight-form";
@@ -52,10 +55,18 @@ export function NewActivityForm({
         <p className="text-muted-foreground">Bientôt disponible.</p>
       )}
 
-      {selectedCode === "FLIGHT" && <FlightForm sites={sites} trainingCamps={trainingCamps} />}
-      {selectedCode === "TRAINING_CAMP" && <TrainingCampForm schools={schools} />}
+      {selectedCode === "FLIGHT" && (
+        <FlightForm sites={sites} trainingCamps={trainingCamps} action={createFlightAction} />
+      )}
+      {selectedCode === "TRAINING_CAMP" && (
+        <TrainingCampForm schools={schools} action={createTrainingCampAction} />
+      )}
       {selectedCode === "GROUND_HANDLING" && (
-        <GroundHandlingSessionForm sites={sites} trainingCamps={trainingCamps} />
+        <GroundHandlingSessionForm
+          sites={sites}
+          trainingCamps={trainingCamps}
+          action={createGroundHandlingSessionAction}
+        />
       )}
     </div>
   );

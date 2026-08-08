@@ -104,7 +104,7 @@ Informations obligatoires (validées côté Zod) :
 Fonctionnalités :
 
 - [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
-- [ ] Modifier un vol
+- [x] Modifier un vol — `/activities/[id]/edit`, service `updateFlight` (`src/features/flights/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer un vol à un stage à la création — champ optionnel "Stage associé" dans `FlightForm` (limité aux stages de l'utilisateur courant, `listTrainingCamps`), règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`
 
@@ -126,7 +126,7 @@ Fonctionnalités :
 - [x] Ajouter un stage — `/activities/new`, service `createTrainingCamp` (`src/features/training-camps/`), route protégée (connexion requise)
 - [x] Consulter l'historique des stages — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Afficher les vols associés à un stage sur `/activities/[id]`, quand il y en a
-- [ ] Modifier un stage
+- [x] Modifier un stage — `/activities/[id]/edit`, service `updateTrainingCamp` (`src/features/training-camps/`), vérification de propriété systématique
 - [ ] Rattacher un vol existant à un stage depuis l'interface
 
 ---
@@ -147,7 +147,7 @@ Fonctionnalités :
 - [x] Ajouter une séance — `/activities/new`, service `createGroundHandlingSession` (`src/features/ground-handling-sessions/`), route protégée (connexion requise)
 - [x] Consulter l'historique des séances — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer une séance à un stage à la création — champ optionnel "Stage associé" dans `GroundHandlingSessionForm` (limité aux stages de l'utilisateur courant), règle métier "date de la séance dans l'intervalle du stage" validée et testée dans `create-ground-handling-session.service.ts` ; séances associées affichées sur le détail du stage
-- [ ] Modifier une séance
+- [x] Modifier une séance — `/activities/[id]/edit`, service `updateGroundHandlingSession` (`src/features/ground-handling-sessions/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
 
 ---
 

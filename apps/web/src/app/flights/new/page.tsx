@@ -1,3 +1,4 @@
+import { createFlightAction } from "@/actions/create-flight";
 import { FlightForm } from "@/features/flights/flight-form";
 import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
@@ -17,7 +18,7 @@ export default async function NewFlightPage() {
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
       <h1 className="text-2xl font-semibold tracking-tight text-foreground">Nouveau vol</h1>
-      <FlightForm sites={sites} trainingCamps={trainingCamps} />
+      <FlightForm sites={sites} trainingCamps={trainingCamps} action={createFlightAction} />
     </div>
   );
 }
