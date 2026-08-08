@@ -48,25 +48,33 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 - [x] Architecture de validations Zod par domaine (`src/lib/validations/`) — schéma `Flight` complet et testé (tests unitaires) ; `Activity`/`TrainingCamp`/`GroundHandlingSession` en structure seule, sans règle pour l'instant
 - [x] Service métier `createFlight` organisé par feature (`src/features/flights/`), indépendant de l'UI — validation + transaction Prisma Activity/Flight, testé en intégration contre une vraie base
-- [x] Hash des mots de passe avec Argon2, y compris pour l'utilisateur de développement créé par le seed (jamais de mot de passe en clair en base)
-- [x] `getCurrentUser()` (`src/lib/current-user.ts`) : point unique de résolution de l'utilisateur courant, à remplacer par une vraie session le jour où Auth.js sera en place
+- [x] Hash des mots de passe avec Argon2 (`src/lib/password.ts`)
+- [x] `getCurrentUser()` (`src/lib/current-user.ts`) : résolution de l'utilisateur courant à partir de la vraie session Better Auth
 
 #### Gestion des activités
 
 - [x] Créer le concept d'activité (`Activity` + `ActivityType`)
-- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire réellement disponible pour Vol uniquement (Stage/Gonflage affichent "Bientôt disponible"), sans authentification (utilisateur de développement créé par le seed)
+- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire réellement disponible pour Vol uniquement (Stage/Gonflage affichent "Bientôt disponible"), route protégée (connexion requise)
 - [x] Permettre de choisir un type d'activité
-- [x] Consultation des activités : page `/activities` (historique trié par date d'événement, du plus récent au plus ancien) et `/activities/[id]` (détail complet), lecture via `src/features/activities/` (`listActivities`, `getActivityById`), gestion propre du cas "activité introuvable"
+- [x] Consultation des activités : page `/activities` (historique trié par date d'événement, du plus récent au plus ancien) et `/activities/[id]` (détail complet), lecture via `src/features/activities/` (`listActivities`, `getActivityById`), gestion propre du cas "activité introuvable", routes protégées (connexion requise)
+
+#### Authentification
+
+- [x] Choisir et configurer la solution d'authentification — Better Auth (email + mot de passe, hash Argon2, adaptateur Prisma)
+- [x] Créer le modèle utilisateur — `User` + modèles Better Auth (`Session`, `Account`, `Verification`)
+- [x] Préparer la gestion multi-utilisateurs — chaque donnée métier reste liée à un `userId` résolu côté serveur depuis la session
+- [x] Page de connexion `/sign-in` (email + mot de passe, pas d'inscription publique — comptes créés par le seed), avec retour vers la page initialement demandée (`redirectTo`, validé contre les open redirects)
+- [x] Protection des routes (`/activities`, `/activities/new`, `/activities/[id]`, `/flights/new`) : vérification optimiste dans `src/proxy.ts`, vérification faisant autorité via `requireCurrentUser()`
+- [x] `User.passwordHash` retiré : le hash Argon2 vit uniquement sur `Account.password` (Better Auth)
 
 ---
 
 ### À venir 📌
 
-### Authentification
+### Authentification (backlog restreint)
 
-- [ ] Choisir et configurer la solution d'authentification
-- [ ] Créer le modèle utilisateur
-- [ ] Préparer la gestion multi-utilisateurs
+- [ ] Inscription publique (`/sign-up`) — volontairement hors MVP pour l'instant, comptes créés de manière contrôlée
+- [ ] Réinitialisation de mot de passe
 
 ### Gestion des activités
 
@@ -93,7 +101,7 @@ Informations obligatoires (validées côté Zod) :
 
 Fonctionnalités :
 
-- [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), sans authentification
+- [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
 - [ ] Modifier un vol
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
 - [ ] Associer un vol à un stage (`trainingCampId` prévu au schéma, non exposé dans le formulaire)

@@ -20,6 +20,8 @@ pnpm prisma:migrate
 pnpm prisma:seed
 ```
 
+`apps/web/.env` doit être complété avant le seed : `DEV_USER_PASSWORD` (mot de passe du compte de développement, jamais en dur dans le code) et `BETTER_AUTH_SECRET` (secret de signature des sessions, ex. `openssl rand -base64 32`). Le compte de développement (`dev@paragliding-logbook.local`) permet ensuite de se connecter via `/sign-in`.
+
 ## Scripts
 
 | Commande | Description |
@@ -49,14 +51,17 @@ pnpm prisma:seed
 Monorepo pnpm workspaces (`apps/*`, `packages/*`) :
 
 - `apps/web` : application Next.js (App Router, TypeScript strict, Tailwind CSS, shadcn/ui)
-  - `prisma/` : schéma Prisma, migrations, seed
+  - `prisma/` : schéma Prisma (dont les modèles Better Auth : `Session`/`Account`/`Verification`), migrations, seed
+  - `src/lib/auth.ts` : instance serveur Better Auth (adaptateur Prisma, hash Argon2, inscription publique désactivée)
+  - `src/lib/current-user.ts` : résolution de l'utilisateur courant à partir de la vraie session (`getCurrentUser`) et variante qui redirige vers `/sign-in` si absente (`requireCurrentUser`)
+  - `src/proxy.ts` : protection des routes `/activities`, `/activities/:path*` et `/flights/new` (vérification optimiste de session, redirige vers `/sign-in`)
   - `src/lib/validations/` : schémas Zod par domaine métier (Flight complet et testé ; Activity/TrainingCamp/GroundHandlingSession en structure seule pour l'instant)
-  - `src/lib/current-user.ts` : résolution de l'utilisateur courant (utilisateur de développement en attendant Auth.js)
   - `src/features/` : couche métier par feature, indépendante de l'UI — `flights/` (création d'un vol) et `activities/` (lecture : liste et détail, tous types d'activité confondus)
-  - `src/actions/` : Server Actions Next.js
+  - `src/actions/` : Server Actions Next.js (dont `sign-in.ts`)
+  - `src/app/sign-in` : page de connexion email + mot de passe (pas d'inscription publique)
   - `src/app/activities` : parcours applicatif — `new` (choix du type d'activité puis formulaire), liste et `[id]` (détail)
   - `src/app/flights/new` : route de test historique (même formulaire partagé que `/activities/new`)
 
-Base de données : PostgreSQL (local via Docker), Prisma ORM. Validation : Zod. Pas encore d'authentification (Auth.js prévu, non démarré) — un utilisateur de développement est créé par le seed.
+Base de données : PostgreSQL (local via Docker), Prisma ORM. Validation : Zod. Authentification : Better Auth (email + mot de passe, hash Argon2, pas d'inscription publique) — voir [CLAUDE.md](./CLAUDE.md#authentification).
 
 Voir [docs/todo.md](./docs/todo.md) pour le détail de l'avancement.
