@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { createFlight } from "./create-flight.service";
 
@@ -24,7 +23,6 @@ beforeAll(async () => {
     data: {
       email: `integration-test-${suffix}@paragliding-logbook.local`,
       name: "Integration Test User",
-      passwordHash: await hashPassword(`not-a-real-password-${suffix}`),
     },
   });
   userId = user.id;

@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { getActivityById } from "./get-activity.service";
 
@@ -16,14 +15,12 @@ beforeAll(async () => {
       data: {
         email: `get-activity-${suffix}@paragliding-logbook.local`,
         name: "Get Activity Test User",
-        passwordHash: await hashPassword(`not-a-real-password-${suffix}`),
       },
     }),
     prisma.user.create({
       data: {
         email: `get-activity-other-${suffix}@paragliding-logbook.local`,
         name: "Other User",
-        passwordHash: await hashPassword(`not-a-real-password-other-${suffix}`),
       },
     }),
     prisma.site.create({ data: { name: `Get Activity Test Site ${suffix}` } }),
