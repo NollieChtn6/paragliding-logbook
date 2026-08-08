@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
 import { getActivitySummary, listActivities } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
@@ -15,10 +16,13 @@ export default async function ActivitiesPage() {
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Activités</h1>
-        <Button
-          nativeButton={false}
-          render={<Link href="/activities/new">Nouvelle activité</Link>}
-        />
+        <div className="flex items-center gap-2">
+          <Button
+            nativeButton={false}
+            render={<Link href="/activities/new">Nouvelle activité</Link>}
+          />
+          <SignOutButton />
+        </div>
       </div>
 
       {activities.length === 0 && (
