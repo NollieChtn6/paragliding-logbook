@@ -43,7 +43,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Configurer Prisma
 - [x] Créer le premier schéma de données
 - [x] Créer les migrations initiales
-- [x] Ajouter les données de référence (`ActivityType`)
+- [x] Ajouter les données de référence techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) — seedées, pas de CRUD applicatif (voir Administration)
 
 #### Validation et couche métier
 
@@ -68,6 +68,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Créer le modèle utilisateur — `User` + modèles Better Auth (`Session`, `Account`, `Verification`)
 - [x] Préparer la gestion multi-utilisateurs — chaque donnée métier reste liée à un `userId` résolu côté serveur depuis la session
 - [x] Page de connexion `/sign-in` (email + mot de passe), avec retour vers la page initialement demandée (`redirectTo`, validé contre les open redirects)
+- [x] Déconnexion — `signOutAction` (`src/actions/sign-out.ts`), bouton disponible dans `AppShell`/`AdminShell`/`app/settings/layout.tsx`
 - [x] Protection des routes (`/activities`, `/activities/new`, `/activities/[id]`, `/flights/new`) : vérification optimiste dans `src/proxy.ts`, vérification faisant autorité via `requireCurrentUser()`
 - [x] `User.passwordHash` retiré : le hash Argon2 vit uniquement sur `Account.password` (Better Auth)
 - [x] Changement de mot de passe `/settings/security` — service `changePassword` (`src/features/account/`), utilise `auth.api.changePassword` de Better Auth (vérification/hash Argon2 déjà branchés), révoque les autres sessions à chaque changement, testé en intégration contre une vraie base
@@ -90,24 +91,31 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 ### Authentification (backlog restreint)
 
 - [ ] Réinitialisation de mot de passe
+- [ ] Vérification d'adresse email
+- [ ] Gestion du profil utilisateur (modifier son nom, etc.)
+- [ ] Rate limiting sur l'authentification
+- [ ] Protection anti-abus de l'inscription
+- [ ] OAuth (éventuel)
+- [ ] MFA (éventuel)
 
 ### Administration (backlog restreint)
 
 Volontairement hors périmètre de la première version de `/admin` (docs/admin.md) :
 
 - [ ] Gestion des utilisateurs par un admin (liste, changement de rôle depuis l'interface)
+- [ ] Désactivation d'un compte
+- [ ] Suppression d'un compte
 - [ ] Permissions plus fines que `USER`/`ADMIN` (ex. `canManageSites()`, `canManageSchools()`) — à introduire seulement si un vrai besoin apparaît
 - [ ] Archivage plutôt que suppression pour les référentiels encore référencés
 - [ ] Journal d'audit des modifications administratives
 - [ ] CRUD admin sur les référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) — restent gérés par les seeds/migrations pour l'instant
 
-### Gestion des activités
+### Interface & qualité (reste à faire)
 
-Types prévus :
-
-- Vol
-- Stage
-- Gonflage
+- [ ] États de chargement (indicateurs/skeletons sur les pages qui en ont besoin)
+- [ ] Vérification systématique du rendu sur Firefox/Safari/Chromium
+- [ ] Tests d'intégration bout-en-bout des Server Actions (au-delà des services déjà testés en intégration)
+- [ ] Continuer à augmenter la couverture de tests sur les cas limites
 
 ---
 
@@ -207,7 +215,8 @@ Fonctionnalités :
 - [x] `Flight.takeoffPointId`/`landingPointId` avec contrainte de type applicative + recherche de points par nom dans le formulaire de vol (ADR 005)
 - [x] Gestion des sites de vol — interface de création/modification d'un `Site` et de ses `SitePoint`, réservée aux administrateurs (`/admin/sites`, `/admin/site-points`, voir section Administration)
 - [x] Ajouter un site manuellement — `/admin/sites/new` (admin uniquement)
-- [ ] Prévoir une évolution vers des données externes (API)
+- [ ] Ajouter progressivement les sites/points/écoles connus (saisie manuelle via `/admin`)
+- [ ] Prévoir une évolution vers des données externes (API), notamment le référentiel FFVL (sites, écoles) — étudier les données disponibles et une stratégie d'import avant toute implémentation
 
 Informations prévues :
 
@@ -223,6 +232,23 @@ Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques
 - [ ] Progression dans le temps
 - [ ] Statistiques par site
 - [ ] Statistiques par type d'activité
+- [ ] Records personnels
+- [ ] Analyse des vols
+- [ ] Comparaison de vols sur un même site
+
+---
+
+## Déploiement 🚀
+
+- [ ] Finaliser la configuration de production
+- [ ] Neon pour PostgreSQL production
+- [ ] Configurer les variables d'environnement de production
+- [ ] Déployer sur Vercel
+- [ ] Configurer les migrations Prisma en production
+- [ ] Exécuter le seed public de référentiels en production
+- [ ] Vérifier le parcours inscription → connexion → activités en production
+- [ ] Mettre en place une stratégie de sauvegarde Neon
+- [ ] Documenter la procédure de déploiement
 
 ---
 
@@ -230,14 +256,19 @@ Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques
 
 Ces fonctionnalités sont volontairement hors MVP.
 
-- [ ] Import de traces GPS / fichiers IGC
-- [ ] Carte des sites visités
+- [ ] Import de traces GPS / fichiers IGC — étudier le format des traces Garmin et l'import GPX en premier, avant tout format plus exotique
+- [ ] Import automatique depuis une application Garmin dédiée (étudier faisabilité/accès aux données en amont)
+- [ ] Carte des sites visités (incluant décollages/atterrissages, tracé des vols)
 - [ ] Météo associée aux vols
 - [ ] Gestion du matériel
 - [ ] Photos associées aux activités
 - [ ] Carnet de progression / objectifs personnels
 - [ ] Suggestions d'amélioration basées sur l'historique
-- [ ] Mode PWA / application mobile installable
+- [ ] Calendrier des activités
+- [ ] Notifications / rappels
+- [ ] Partage public optionnel d'un vol
+- [ ] Export des données personnelles (JSON, PDF)
+- [ ] Mode PWA / application mobile installable, avec fonctionnement offline partiel
 
 ---
 
