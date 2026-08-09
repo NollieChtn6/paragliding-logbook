@@ -12,7 +12,8 @@ import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 // Colonne fixe visible à partir de md, masquée en dessous (MobileBottomNav
 // prend le relais). Porte la marque, la navigation, et le thème/déconnexion
 // en pied — MobileBottomNav n'a que la navigation, ces deux actions vivent
-// dans la bande haute mobile d'AppShell.
+// dans la bande haute mobile d'AppShell. Jamais rendue pour un rôle ADMIN
+// (voir app-shell.tsx), donc pas de lien Administration ici.
 export function DesktopSidebar() {
   const pathname = usePathname();
 

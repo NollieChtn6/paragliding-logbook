@@ -37,12 +37,17 @@ Séance de gonflage ou de travail au sol.
 - email
 - emailVerified
 - image (optionnel)
+- role (`UserRole` : `USER`/`ADMIN`, défaut `USER`)
 - createdAt
 - updatedAt
 
 Authentification email + mot de passe via Better Auth : le hash Argon2 vit
 sur `Account` (provider `credential`), pas sur `User` — voir
 docs/database-design.md pour le détail des modèles `Session`/`Account`/`Verification`.
+
+`role` détermine l'accès à `/admin` (`requireAdmin()`,
+`src/lib/current-user.ts`) : jamais choisi par l'utilisateur à l'inscription,
+`ADMIN` attribué uniquement en base — voir docs/admin.md.
 
 ---
 

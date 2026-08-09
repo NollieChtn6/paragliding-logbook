@@ -22,10 +22,15 @@ Champs :
 - email
 - emailVerified
 - image (optionnel)
+- role (`UserRole` : `USER`/`ADMIN`, défaut `USER`)
 - createdAt
 - updatedAt
 
 Pas de mot de passe sur `User` : le hash Argon2 vit sur `Account` (voir ci-dessous).
+
+`role` : jamais choisi par l'utilisateur (non exposé à Better Auth comme
+additionalField), `ADMIN` attribué uniquement en base — voir
+`requireAdmin()` (`src/lib/current-user.ts`) et `docs/admin.md`.
 
 ---
 

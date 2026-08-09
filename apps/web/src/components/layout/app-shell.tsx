@@ -7,11 +7,19 @@ import { Button } from "@/components/ui/button";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
+type AppShellProps = {
+  children: React.ReactNode;
+};
+
 // Chrome commun des pages authentifiées (racine du route group (app), voir
-// app/(app)/layout.tsx). DesktopSidebar porte marque + thème + déconnexion
-// à partir de md ; en dessous, une bande haute minimale assure la même
-// fonction puisque DesktopSidebar est masquée en mobile.
-export function AppShell({ children }: { children: React.ReactNode }) {
+// app/(app)/layout.tsx). Jamais rendu pour un rôle ADMIN : le layout
+// redirige vers /admin avant d'atteindre ce composant (docs/admin.md >
+// Navigation — un admin n'a pas d'usage de l'interface des autres
+// utilisateurs), donc pas de lien Administration ici. DesktopSidebar porte
+// marque + thème + déconnexion à partir de md ; en dessous, une bande haute
+// minimale assure la même fonction puisque DesktopSidebar est masquée en
+// mobile.
+export function AppShell({ children }: AppShellProps) {
   return (
     <div className="flex min-h-svh">
       <DesktopSidebar />

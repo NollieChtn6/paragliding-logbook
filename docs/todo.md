@@ -73,6 +73,16 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Changement de mot de passe `/settings/security` — service `changePassword` (`src/features/account/`), utilise `auth.api.changePassword` de Better Auth (vérification/hash Argon2 déjà branchés), révoque les autres sessions à chaque changement, testé en intégration contre une vraie base
 - [x] Inscription publique `/sign-up` (email + mot de passe) — service `signUp` (`src/features/auth/`), utilise `auth.api.signUpEmail` de Better Auth, connexion automatique après inscription, `redirectTo` transmis entre `/sign-in` et `/sign-up`, comptes de développement retirés du seed (`prisma/seed.ts`)
 
+#### Administration
+
+- [x] Rôle utilisateur — `User.role` (`UserRole` : `USER`/`ADMIN`, défaut `USER`), attribué uniquement en base (pas d'interface pour l'instant), jamais choisi par l'utilisateur (non exposé à Better Auth, testé)
+- [x] Autorisation serveur — `requireAdmin()` (`src/lib/current-user.ts`), utilisateur non admin ramené à `/`, non authentifié redirigé vers `/sign-in` ; revérifiée dans chaque Server Action admin, pas seulement dans le layout de `/admin`
+- [x] Espace `/admin` (`src/app/admin/`) — tableau de bord (compteurs sites/points/écoles), navigation dédiée (desktop : colonne latérale ; mobile : onglets défilants), lien "Administration" affiché uniquement aux admins dans la navigation principale
+- [x] Gestion des sites `/admin/sites` — liste, recherche, création, modification, suppression (`src/features/sites/`), suppression bloquée si des points ou séances de gonflage y sont encore rattachés
+- [x] Gestion des points de site `/admin/site-points` — liste filtrable (recherche, site, type), création, modification, suppression (`src/features/site-points/`), type sélectionné depuis le référentiel `SitePointType` (pas de texte libre), suppression bloquée si un vol y est encore rattaché
+- [x] Gestion des écoles `/admin/schools` — liste, recherche, création, modification, suppression (`src/features/schools/`), suppression bloquée si des stages y sont encore rattachés
+- [x] Référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) non gérables depuis l'interface admin — restent seedés/migrés, volontairement hors périmètre de cette première version
+
 ---
 
 ### À venir 📌
@@ -80,6 +90,16 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 ### Authentification (backlog restreint)
 
 - [ ] Réinitialisation de mot de passe
+
+### Administration (backlog restreint)
+
+Volontairement hors périmètre de la première version de `/admin` (docs/admin.md) :
+
+- [ ] Gestion des utilisateurs par un admin (liste, changement de rôle depuis l'interface)
+- [ ] Permissions plus fines que `USER`/`ADMIN` (ex. `canManageSites()`, `canManageSchools()`) — à introduire seulement si un vrai besoin apparaît
+- [ ] Archivage plutôt que suppression pour les référentiels encore référencés
+- [ ] Journal d'audit des modifications administratives
+- [ ] CRUD admin sur les référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) — restent gérés par les seeds/migrations pour l'instant
 
 ### Gestion des activités
 
@@ -185,8 +205,8 @@ Fonctionnalités :
 - [x] Modèle `Site`/`SitePoint`/`SitePointType` — un site peut avoir plusieurs points (décollage, atterrissage), chacun avec coordonnées GPS précises et altitude ; pas de "point principal" (ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`)
 - [x] `Site.countryCode`/`School` enrichi (adresse structurée, code pays ISO) — prépare `School`/`Site`/`SitePoint` à une future gestion applicative sans construire l'interface (ADR 004, `docs/decisions/004-editable-referentials.md`)
 - [x] `Flight.takeoffPointId`/`landingPointId` avec contrainte de type applicative + recherche de points par nom dans le formulaire de vol (ADR 005)
-- [ ] Créer la gestion des sites de vol (interface de création/modification d'un `Site` et de ses `SitePoint` — actuellement seedés uniquement)
-- [ ] Ajouter un site manuellement
+- [x] Gestion des sites de vol — interface de création/modification d'un `Site` et de ses `SitePoint`, réservée aux administrateurs (`/admin/sites`, `/admin/site-points`, voir section Administration)
+- [x] Ajouter un site manuellement — `/admin/sites/new` (admin uniquement)
 - [ ] Prévoir une évolution vers des données externes (API)
 
 Informations prévues :

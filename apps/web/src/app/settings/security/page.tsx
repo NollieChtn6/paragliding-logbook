@@ -4,7 +4,7 @@ import { ChangePasswordForm } from "@/features/account/change-password-form";
 import { requireCurrentUser } from "@/lib/current-user";
 
 export default async function SecuritySettingsPage() {
-  await requireCurrentUser();
+  const user = await requireCurrentUser();
 
   return (
     <div className="flex flex-col gap-6">
@@ -12,7 +12,7 @@ export default async function SecuritySettingsPage() {
 
       <Card className="max-w-sm">
         <CardContent>
-          <ChangePasswordForm />
+          <ChangePasswordForm email={user.email} />
         </CardContent>
       </Card>
     </div>

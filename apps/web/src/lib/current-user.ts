@@ -23,3 +23,19 @@ export async function requireCurrentUser() {
   }
   return user;
 }
+
+// Abstraction dédiée pour l'espace /admin (docs/admin.md > Helpers
+// d'autorisation) : point d'entrée unique pour vérifier le rôle, plutôt que
+// de disperser des `if (user.role === "ADMIN")` dans chaque page/Server
+// Action. proxy.ts ne vérifie que la présence du cookie (voir son
+// commentaire) — il ne peut pas lire le rôle sans requête DB, donc la
+// vérification qui fait autorité reste ici. Un utilisateur non admin est
+// silencieusement ramené à l'accueil : /admin n'a pas besoin d'une page
+// "accès refusé" dédiée pour ce périmètre initial.
+export async function requireAdmin() {
+  const user = await requireCurrentUser();
+  if (user.role !== "ADMIN") {
+    redirect("/");
+  }
+  return user;
+}

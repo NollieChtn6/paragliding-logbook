@@ -1,8 +1,17 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+
+// Compte admin de démonstration/local : le rôle ADMIN n'est jamais accessible
+// depuis l'inscription publique (/sign-up, voir sign-up-role.integration.test.ts),
+// donc pas d'autre moyen d'accéder à /admin en local sans ce seed. Mot de
+// passe à changer après la première connexion (page Compte > changer le mot
+// de passe) — voir docs/admin.md.
+const ADMIN_EMAIL = "admin@thermik.com";
+const ADMIN_PASSWORD = "password1234";
 
 // Tables de référence (ActivityType/SitePointType/FlightType) : pas de label
 // ici, le libellé affiché vit côté application
@@ -306,6 +315,40 @@ async function ensureSchool(client: PrismaClient, school: SchoolSeed) {
   return client.school.create({ data: school });
 }
 
+// Reproduit manuellement ce que auth.api.signUpEmail (Better Auth) créerait
+// (User + Account provider "credential", accountId = userId — vérifié en
+// base sur des comptes existants), plutôt que d'appeler l'API Better Auth
+// depuis ce script : évite toute dépendance au contexte requête Next.js
+// (next/headers, plugin nextCookies) qu'un script tsx autonome n'a pas.
+// Idempotent : le mot de passe est re-hashé et remis à jour à chaque run,
+// comme l'était l'ancien compte de développement avant la migration vers
+// Better Auth.
+async function ensureAdminUser(client: PrismaClient) {
+  const passwordHash = await hashPassword(ADMIN_PASSWORD);
+
+  const user = await client.user.upsert({
+    where: { email: ADMIN_EMAIL },
+    update: { role: "ADMIN" },
+    create: { email: ADMIN_EMAIL, name: "Admin", role: "ADMIN" },
+  });
+
+  const existingAccount = await client.account.findFirst({
+    where: { userId: user.id, providerId: "credential" },
+  });
+
+  if (existingAccount) {
+    await client.account.update({
+      where: { id: existingAccount.id },
+      data: { password: passwordHash },
+    });
+    return;
+  }
+
+  await client.account.create({
+    data: { userId: user.id, accountId: user.id, providerId: "credential", password: passwordHash },
+  });
+}
+
 async function main() {
   for (const activityType of activityTypes) {
     await prisma.activityType.upsert({
@@ -341,8 +384,9 @@ async function main() {
 
   // Site.name et School.name ne sont pas des contraintes uniques en base
   // (upsert impossible) : vérification manuelle pour rester idempotent (voir
-  // ensureSite/ensureSchool). Les comptes utilisateurs sont créés via
-  // /sign-up, plus par ce seed (voir docs/todo.md).
+  // ensureSite/ensureSchool). Les comptes utilisateurs "normaux" restent
+  // créés via /sign-up ; seul le compte admin (ci-dessous) est seedé, faute
+  // d'autre moyen d'obtenir un compte ADMIN en local (voir docs/admin.md).
   for (const site of SITES) {
     await ensureSite(prisma, site);
   }
@@ -350,6 +394,8 @@ async function main() {
   for (const school of SCHOOLS) {
     await ensureSchool(prisma, school);
   }
+
+  await ensureAdminUser(prisma);
 }
 
 main()
