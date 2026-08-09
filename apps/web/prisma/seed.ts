@@ -195,7 +195,7 @@ const SITES: SiteSeed[] = [
         orientationDeg: ORIENTATION_SO,
       },
       {
-        label: "PERROIX - PERROIX",
+        label: "PLANFAIT - PERROIX",
         typeCode: "LANDING",
         latitude: 45.8532,
         longitude: 6.223,
@@ -294,7 +294,11 @@ async function upsertDevUser(client: PrismaClient, email: string, name: string) 
 // Un site doit avoir des points de décollage et d'atterrissage pour que le
 // flux de création de vol soit utilisable (Flight référence directement des
 // SitePoint typés, plus un Site). Idempotent : ne crée que les points
-// absents (recherche par site + libellé, pas de contrainte unique en base).
+// absents (recherche par site + libellé + type, pas de contrainte unique en
+// base). Le type doit faire partie de la clé de recherche : plusieurs sites
+// (ex. Montlambert) ont un décollage et un atterrissage qui partagent le même
+// libellé — une recherche par site + libellé seul retomberait sur le
+// décollage déjà créé et sauterait à tort la création de l'atterrissage.
 async function ensureSitePoints(client: PrismaClient, siteId: string, points: SitePointSeed[]) {
   const sitePointTypesByCode = new Map(
     (
@@ -306,14 +310,16 @@ async function ensureSitePoints(client: PrismaClient, siteId: string, points: Si
   );
 
   for (const point of points) {
-    const existing = await client.sitePoint.findFirst({ where: { siteId, label: point.label } });
-    if (existing) {
-      continue;
-    }
-
     const sitePointType = sitePointTypesByCode.get(point.typeCode);
     if (!sitePointType) {
       throw new Error(`SitePointType inconnu : ${point.typeCode}`);
+    }
+
+    const existing = await client.sitePoint.findFirst({
+      where: { siteId, label: point.label, sitePointTypeId: sitePointType.id },
+    });
+    if (existing) {
+      continue;
     }
 
     await client.sitePoint.create({
