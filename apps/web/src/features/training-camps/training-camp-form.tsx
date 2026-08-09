@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,10 @@ type TrainingCampFormProps = {
   ) => Promise<TrainingCampFormActionState>;
   defaultValues?: TrainingCampFormDefaultValues;
   submitLabel?: string;
+  // Mode assistant en 3 étapes : voir flight-form.tsx pour le détail.
+  wizardStep?: 2 | 3;
+  onWizardBack?: () => void;
+  onWizardNext?: () => void;
 };
 
 function formatTrainingCampTypeOption(trainingCampType: TrainingCampTypeOption): string {
@@ -58,8 +62,12 @@ export function TrainingCampForm({
   action,
   defaultValues,
   submitLabel = "Créer le stage",
+  wizardStep,
+  onWizardBack,
+  onWizardNext,
 }: TrainingCampFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state?.success === false) {
@@ -67,94 +75,131 @@ export function TrainingCampForm({
     }
   }, [state]);
 
+  function handleWizardNext() {
+    if (formRef.current?.reportValidity()) {
+      onWizardNext?.();
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="startDate">Date de début</Label>
-        <Input
-          id="startDate"
-          name="startDate"
-          type="date"
-          defaultValue={
-            defaultValues?.startDate ? toDateInputValue(defaultValues.startDate) : undefined
-          }
-          required
-        />
+    <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
+      )}
+      <div hidden={wizardStep === 3} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="startDate">Date de début</Label>
+          <Input
+            id="startDate"
+            name="startDate"
+            type="date"
+            defaultValue={
+              defaultValues?.startDate ? toDateInputValue(defaultValues.startDate) : undefined
+            }
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="endDate">Date de fin</Label>
+          <Input
+            id="endDate"
+            name="endDate"
+            type="date"
+            defaultValue={
+              defaultValues?.endDate ? toDateInputValue(defaultValues.endDate) : undefined
+            }
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="schoolId">École</Label>
+          <Select name="schoolId" defaultValue={defaultValues?.schoolId} required>
+            <SelectTrigger id="schoolId" className="w-full">
+              <SelectValue placeholder="Choisir une école">
+                {(value: string | null) =>
+                  schools.find((school) => school.id === value)?.name ?? "Choisir une école"
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {schools.map((school) => (
+                <SelectItem key={school.id} value={school.id}>
+                  {school.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="trainingCampTypeId">Type de stage</Label>
+          <Select
+            name="trainingCampTypeId"
+            defaultValue={defaultValues?.trainingCampTypeId}
+            required
+          >
+            <SelectTrigger id="trainingCampTypeId" className="w-full">
+              <SelectValue placeholder="Choisir un type de stage">
+                {(value: string | null) => {
+                  const trainingCampType = trainingCampTypes.find((tct) => tct.id === value);
+                  return trainingCampType
+                    ? formatTrainingCampTypeOption(trainingCampType)
+                    : "Choisir un type de stage";
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {trainingCampTypes.map((trainingCampType) => (
+                <SelectItem key={trainingCampType.id} value={trainingCampType.id}>
+                  {formatTrainingCampTypeOption(trainingCampType)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="endDate">Date de fin</Label>
-        <Input
-          id="endDate"
-          name="endDate"
-          type="date"
-          defaultValue={
-            defaultValues?.endDate ? toDateInputValue(defaultValues.endDate) : undefined
-          }
-          required
-        />
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
+      )}
+      <div hidden={wizardStep === 2} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="summary">Bilan</Label>
+          <Textarea id="summary" name="summary" defaultValue={defaultValues?.summary} />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="certification">Certification</Label>
+          <Input
+            id="certification"
+            name="certification"
+            defaultValue={defaultValues?.certification}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="schoolId">École</Label>
-        <Select name="schoolId" defaultValue={defaultValues?.schoolId} required>
-          <SelectTrigger id="schoolId" className="w-full">
-            <SelectValue placeholder="Choisir une école">
-              {(value: string | null) =>
-                schools.find((school) => school.id === value)?.name ?? "Choisir une école"
-              }
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {schools.map((school) => (
-              <SelectItem key={school.id} value={school.id}>
-                {school.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="trainingCampTypeId">Type de stage</Label>
-        <Select name="trainingCampTypeId" defaultValue={defaultValues?.trainingCampTypeId} required>
-          <SelectTrigger id="trainingCampTypeId" className="w-full">
-            <SelectValue placeholder="Choisir un type de stage">
-              {(value: string | null) => {
-                const trainingCampType = trainingCampTypes.find((tct) => tct.id === value);
-                return trainingCampType
-                  ? formatTrainingCampTypeOption(trainingCampType)
-                  : "Choisir un type de stage";
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {trainingCampTypes.map((trainingCampType) => (
-              <SelectItem key={trainingCampType.id} value={trainingCampType.id}>
-                {formatTrainingCampTypeOption(trainingCampType)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="summary">Bilan</Label>
-        <Textarea id="summary" name="summary" defaultValue={defaultValues?.summary} />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="certification">Certification</Label>
-        <Input
-          id="certification"
-          name="certification"
-          defaultValue={defaultValues?.certification}
-        />
-      </div>
-
-      <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
-      </Button>
+      {wizardStep ? (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" onClick={onWizardBack}>
+            Précédent
+          </Button>
+          {wizardStep === 2 ? (
+            <Button type="button" onClick={handleWizardNext}>
+              Suivant
+            </Button>
+          ) : (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Enregistrement..." : submitLabel}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <Button type="submit" className="mt-2" disabled={isPending}>
+          {isPending ? "Enregistrement..." : submitLabel}
+        </Button>
+      )}
 
       {state?.success === false && <p className="text-destructive">{state.error}</p>}
     </form>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +44,10 @@ type GroundHandlingSessionFormProps = {
   ) => Promise<GroundHandlingSessionFormActionState>;
   defaultValues?: GroundHandlingSessionFormDefaultValues;
   submitLabel?: string;
+  // Mode assistant en 3 étapes : voir flight-form.tsx pour le détail.
+  wizardStep?: 2 | 3;
+  onWizardBack?: () => void;
+  onWizardNext?: () => void;
 };
 
 function formatDate(date: Date): string {
@@ -72,8 +76,12 @@ export function GroundHandlingSessionForm({
   action,
   defaultValues,
   submitLabel = "Créer la séance",
+  wizardStep,
+  onWizardBack,
+  onWizardNext,
 }: GroundHandlingSessionFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state?.success === false) {
@@ -81,102 +89,135 @@ export function GroundHandlingSessionForm({
     }
   }, [state]);
 
+  function handleWizardNext() {
+    if (formRef.current?.reportValidity()) {
+      onWizardNext?.();
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="date">Date</Label>
-        <Input
-          id="date"
-          name="date"
-          type="date"
-          defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="siteId">Site</Label>
-        <Select name="siteId" defaultValue={defaultValues?.siteId} required>
-          <SelectTrigger id="siteId" className="w-full">
-            <SelectValue placeholder="Choisir un site">
-              {(value: string | null) =>
-                sites.find((site) => site.id === value)?.name ?? "Choisir un site"
-              }
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {sites.map((site) => (
-              <SelectItem key={site.id} value={site.id}>
-                {site.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {trainingCamps.length > 0 && (
+    <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
+      )}
+      <div hidden={wizardStep === 3} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
-          <Select name="trainingCampId" defaultValue={defaultValues?.trainingCampId ?? ""}>
-            <SelectTrigger id="trainingCampId" className="w-full">
-              <SelectValue placeholder="Aucun">
-                {(value: string) => {
-                  const trainingCamp = trainingCamps.find((tc) => tc.id === value);
-                  return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
-                }}
+          <Label htmlFor="date">Date</Label>
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="siteId">Site</Label>
+          <Select name="siteId" defaultValue={defaultValues?.siteId} required>
+            <SelectTrigger id="siteId" className="w-full">
+              <SelectValue placeholder="Choisir un site">
+                {(value: string | null) =>
+                  sites.find((site) => site.id === value)?.name ?? "Choisir un site"
+                }
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Aucun</SelectItem>
-              {trainingCamps.map((trainingCamp) => (
-                <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
-                  {formatTrainingCampOption(trainingCamp)}
+              {sites.map((site) => (
+                <SelectItem key={site.id} value={site.id}>
+                  {site.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+
+        {trainingCamps.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+            <Select name="trainingCampId" defaultValue={defaultValues?.trainingCampId ?? ""}>
+              <SelectTrigger id="trainingCampId" className="w-full">
+                <SelectValue placeholder="Aucun">
+                  {(value: string) => {
+                    const trainingCamp = trainingCamps.find((tc) => tc.id === value);
+                    return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Aucun</SelectItem>
+                {trainingCamps.map((trainingCamp) => (
+                  <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
+                    {formatTrainingCampOption(trainingCamp)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="durationMin">Durée (min)</Label>
+          <Input
+            id="durationMin"
+            name="durationMin"
+            type="number"
+            min={1}
+            defaultValue={defaultValues?.durationMin}
+            required
+          />
+        </div>
+      </div>
+
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
       )}
+      <div hidden={wizardStep === 2} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="exercises">Exercices travaillés</Label>
+          <Textarea
+            id="exercises"
+            name="exercises"
+            defaultValue={defaultValues?.exercises}
+            required
+          />
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="durationMin">Durée (min)</Label>
-        <Input
-          id="durationMin"
-          name="durationMin"
-          type="number"
-          min={1}
-          defaultValue={defaultValues?.durationMin}
-          required
-        />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="difficulties">Difficultés rencontrées</Label>
+          <Textarea
+            id="difficulties"
+            name="difficulties"
+            defaultValue={defaultValues?.difficulties}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="feeling">Ressenti</Label>
+          <Textarea id="feeling" name="feeling" defaultValue={defaultValues?.feeling} />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="exercises">Exercices travaillés</Label>
-        <Textarea
-          id="exercises"
-          name="exercises"
-          defaultValue={defaultValues?.exercises}
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="difficulties">Difficultés rencontrées</Label>
-        <Textarea
-          id="difficulties"
-          name="difficulties"
-          defaultValue={defaultValues?.difficulties}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="feeling">Ressenti</Label>
-        <Textarea id="feeling" name="feeling" defaultValue={defaultValues?.feeling} />
-      </div>
-
-      <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
-      </Button>
+      {wizardStep ? (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" onClick={onWizardBack}>
+            Précédent
+          </Button>
+          {wizardStep === 2 ? (
+            <Button type="button" onClick={handleWizardNext}>
+              Suivant
+            </Button>
+          ) : (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Enregistrement..." : submitLabel}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <Button type="submit" className="mt-2" disabled={isPending}>
+          {isPending ? "Enregistrement..." : submitLabel}
+        </Button>
+      )}
 
       {state?.success === false && <p className="text-destructive">{state.error}</p>}
     </form>

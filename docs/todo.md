@@ -58,7 +58,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 #### Gestion des activités
 
 - [x] Créer le concept d'activité (`Activity` + `ActivityType`)
-- [x] Permettre l'ajout d'une activité — page `/activities/new`, choix du type (Vol/Stage/Gonflage) via `RadioGroup`, formulaire disponible pour les trois types du MVP, route protégée (connexion requise)
+- [x] Permettre l'ajout d'une activité — page `/activities/new`, assistant en 3 étapes (1. choix du type Vol/Stage/Gonflage via `RadioGroup`, 2. détails structurés, 3. observations/texte libre selon le type), bouton "Annuler" avec confirmation de perte de données à tout moment, formulaire disponible pour les trois types du MVP, route protégée (connexion requise)
 - [x] Permettre de choisir un type d'activité
 - [x] Consultation des activités : page `/activities` (historique trié par date d'événement, du plus récent au plus ancien) et `/activities/[id]` (détail complet), lecture via `src/features/activities/` (`listActivities`, `getActivityById`), gestion propre du cas "activité introuvable", routes protégées (connexion requise)
 
@@ -105,7 +105,7 @@ Informations obligatoires (validées côté Zod) :
 
 Fonctionnalités :
 
-- [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
+- [x] Ajouter un vol — `/activities/new` (flux officiel, assistant en 3 étapes) et `/flights/new` (route de test historique, même formulaire partagé mais affiché en une seule étape), routes protégées (connexion requise)
 - [x] Modifier un vol — `/activities/[id]/edit`, service `updateFlight` (`src/features/flights/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
 - [x] Supprimer un vol — bouton "Supprimer" + confirmation sur `/activities/[id]`, service générique `deleteActivity` (`src/features/activities/`, commun aux trois types d'activité)
 - [x] Modèle Site/SitePoint/SitePointType — un vol référence un point de départ et un point d'arrivée (`SitePoint`), plutôt qu'un site unique avec des altitudes dupliquées ; plus de règle comparant les altitudes de décollage/atterrissage (départ et arrivée peuvent appartenir à des sites différents, ex. cross)

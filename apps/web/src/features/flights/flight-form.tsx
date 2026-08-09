@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +48,13 @@ type FlightFormProps = {
   defaultTakeoffPoint?: SitePointOption;
   defaultLandingPoint?: SitePointOption;
   submitLabel?: string;
+  // Mode assistant en 3 étapes (utilisé par /activities/new,
+  // new-activity-form.tsx) : absent = comportement historique inchangé, un
+  // seul écran (/flights/new, /activities/[id]/edit). Voir le commentaire
+  // au-dessus du <form> ci-dessous pour le détail du fonctionnement.
+  wizardStep?: 2 | 3;
+  onWizardBack?: () => void;
+  onWizardNext?: () => void;
 };
 
 function formatDate(date: Date): string {
@@ -90,8 +97,12 @@ export function FlightForm({
   defaultTakeoffPoint,
   defaultLandingPoint,
   submitLabel = "Créer le vol",
+  wizardStep,
+  onWizardBack,
+  onWizardNext,
 }: FlightFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state?.success === false) {
@@ -99,115 +110,151 @@ export function FlightForm({
     }
   }, [state]);
 
+  // reportValidity() ne valide que les champs "rendus" : ceux du groupe
+  // encore hidden (étape 3, pas encore affichée) en sont automatiquement
+  // exclus, pas besoin de les distinguer manuellement ici.
+  function handleWizardNext() {
+    if (formRef.current?.reportValidity()) {
+      onWizardNext?.();
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="date">Date</Label>
-        <Input
-          id="date"
-          name="date"
-          type="date"
-          defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
-          required
-        />
-      </div>
-
-      <SitePointCombobox
-        type="TAKEOFF"
-        name="takeoffPointId"
-        label="Décollage"
-        placeholder="Rechercher un décollage..."
-        defaultPoint={defaultTakeoffPoint}
-      />
-
-      <SitePointCombobox
-        type="LANDING"
-        name="landingPointId"
-        label="Atterrissage"
-        placeholder="Rechercher un atterrissage..."
-        defaultPoint={defaultLandingPoint}
-      />
-
-      {trainingCamps.length > 0 && (
+    <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
+      )}
+      <div hidden={wizardStep === 3} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
-          <Select name="trainingCampId" defaultValue={defaultValues?.trainingCampId ?? ""}>
-            <SelectTrigger id="trainingCampId" className="w-full">
-              <SelectValue placeholder="Aucun">
-                {(value: string) => {
-                  const trainingCamp = trainingCamps.find((tc) => tc.id === value);
-                  return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+          <Label htmlFor="date">Date</Label>
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
+            required
+          />
+        </div>
+
+        <SitePointCombobox
+          type="TAKEOFF"
+          name="takeoffPointId"
+          label="Décollage"
+          placeholder="Rechercher un décollage..."
+          defaultPoint={defaultTakeoffPoint}
+        />
+
+        <SitePointCombobox
+          type="LANDING"
+          name="landingPointId"
+          label="Atterrissage"
+          placeholder="Rechercher un atterrissage..."
+          defaultPoint={defaultLandingPoint}
+        />
+
+        {trainingCamps.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+            <Select name="trainingCampId" defaultValue={defaultValues?.trainingCampId ?? ""}>
+              <SelectTrigger id="trainingCampId" className="w-full">
+                <SelectValue placeholder="Aucun">
+                  {(value: string) => {
+                    const trainingCamp = trainingCamps.find((tc) => tc.id === value);
+                    return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Aucun</SelectItem>
+                {trainingCamps.map((trainingCamp) => (
+                  <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
+                    {formatTrainingCampOption(trainingCamp)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="durationMin">Durée (min)</Label>
+          <Input
+            id="durationMin"
+            name="durationMin"
+            type="number"
+            min={1}
+            defaultValue={defaultValues?.durationMin}
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="flightTypeId">Type de vol</Label>
+          <Select name="flightTypeId" defaultValue={defaultValues?.flightTypeId} required>
+            <SelectTrigger id="flightTypeId" className="w-full">
+              <SelectValue placeholder="Choisir un type de vol">
+                {(value: string | null) => {
+                  const flightType = flightTypes.find((ft) => ft.id === value);
+                  return flightType ? formatFlightTypeOption(flightType) : "Choisir un type de vol";
                 }}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Aucun</SelectItem>
-              {trainingCamps.map((trainingCamp) => (
-                <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
-                  {formatTrainingCampOption(trainingCamp)}
+              {flightTypes.map((flightType) => (
+                <SelectItem key={flightType.id} value={flightType.id}>
+                  {formatFlightTypeOption(flightType)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
       )}
+      <div hidden={wizardStep === 2} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="observations">Observations</Label>
+          <Textarea
+            id="observations"
+            name="observations"
+            defaultValue={defaultValues?.observations}
+            required
+          />
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="durationMin">Durée (min)</Label>
-        <Input
-          id="durationMin"
-          name="durationMin"
-          type="number"
-          min={1}
-          defaultValue={defaultValues?.durationMin}
-          required
-        />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="improvementPoints">Points d&apos;amélioration</Label>
+          <Textarea
+            id="improvementPoints"
+            name="improvementPoints"
+            defaultValue={defaultValues?.improvementPoints}
+            required
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="flightTypeId">Type de vol</Label>
-        <Select name="flightTypeId" defaultValue={defaultValues?.flightTypeId} required>
-          <SelectTrigger id="flightTypeId" className="w-full">
-            <SelectValue placeholder="Choisir un type de vol">
-              {(value: string | null) => {
-                const flightType = flightTypes.find((ft) => ft.id === value);
-                return flightType ? formatFlightTypeOption(flightType) : "Choisir un type de vol";
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {flightTypes.map((flightType) => (
-              <SelectItem key={flightType.id} value={flightType.id}>
-                {formatFlightTypeOption(flightType)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="observations">Observations</Label>
-        <Textarea
-          id="observations"
-          name="observations"
-          defaultValue={defaultValues?.observations}
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="improvementPoints">Points d&apos;amélioration</Label>
-        <Textarea
-          id="improvementPoints"
-          name="improvementPoints"
-          defaultValue={defaultValues?.improvementPoints}
-          required
-        />
-      </div>
-
-      <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
-      </Button>
+      {wizardStep ? (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" onClick={onWizardBack}>
+            Précédent
+          </Button>
+          {wizardStep === 2 ? (
+            <Button type="button" onClick={handleWizardNext}>
+              Suivant
+            </Button>
+          ) : (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Enregistrement..." : submitLabel}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <Button type="submit" className="mt-2" disabled={isPending}>
+          {isPending ? "Enregistrement..." : submitLabel}
+        </Button>
+      )}
 
       {state?.success === false && <p className="text-destructive">{state.error}</p>}
     </form>

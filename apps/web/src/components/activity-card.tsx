@@ -19,7 +19,10 @@ export function getActivityCardType(activity: {
   return "GROUND_HANDLING";
 }
 
-const ACTIVITY_TYPE_STYLE: Record<ActivityCardType, { icon: LucideIcon; className: string }> = {
+export const ACTIVITY_TYPE_STYLE: Record<
+  ActivityCardType,
+  { icon: LucideIcon; className: string }
+> = {
   FLIGHT: { icon: Plane, className: "bg-primary/10 text-primary" },
   TRAINING_CAMP: { icon: GraduationCap, className: "bg-accent/15 text-accent" },
   GROUND_HANDLING: { icon: Wind, className: "bg-muted text-muted-foreground" },

@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/layout/page-header";
+import { LeaveFormButton } from "@/components/leave-form-button";
 import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
@@ -22,7 +23,7 @@ export default async function NewActivityPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Nouvelle activité" />
+      <PageHeader title="Nouvelle activité" actions={<LeaveFormButton />} />
       <NewActivityForm
         activityTypes={activityTypes}
         sites={sites}
