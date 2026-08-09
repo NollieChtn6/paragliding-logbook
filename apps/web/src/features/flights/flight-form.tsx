@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import type * as React from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { SelectClearButton } from "@/components/select-clear-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { getFieldErrors } from "@/lib/form-validation";
 import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
+import { cn } from "@/lib/utils";
 import { SitePointCombobox, type SitePointOption } from "./site-point-combobox";
 
 type TrainingCampOption = {
@@ -48,6 +52,13 @@ type FlightFormProps = {
   defaultTakeoffPoint?: SitePointOption;
   defaultLandingPoint?: SitePointOption;
   submitLabel?: string;
+  // Mode assistant en 3 étapes (utilisé par /activities/new,
+  // new-activity-form.tsx) : absent = comportement historique inchangé, un
+  // seul écran (/flights/new, /activities/[id]/edit). Voir le commentaire
+  // au-dessus du <form> ci-dessous pour le détail du fonctionnement.
+  wizardStep?: 2 | 3;
+  onWizardBack?: () => void;
+  onWizardNext?: () => void;
 };
 
 function formatDate(date: Date): string {
@@ -68,6 +79,15 @@ function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
 function formatFlightTypeOption(flightType: FlightTypeOption): string {
   return FLIGHT_TYPE_LABELS[flightType.code] ?? flightType.code;
 }
+
+const WIZARD_STEP_2_REQUIRED_FIELDS = [
+  "date",
+  "takeoffPointId",
+  "landingPointId",
+  "durationMin",
+  "flightTypeId",
+];
+const WIZARD_STEP_3_REQUIRED_FIELDS = ["observations", "improvementPoints"];
 
 // Format attendu par <Input type="date">. Cohérent avec la lecture : le
 // schéma Zod (flightSchema) parse "YYYY-MM-DD" en UTC minuit via
@@ -90,8 +110,22 @@ export function FlightForm({
   defaultTakeoffPoint,
   defaultLandingPoint,
   submitLabel = "Créer le vol",
+  wizardStep,
+  onWizardBack,
+  onWizardNext,
 }: FlightFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const formRef = useRef<HTMLFormElement>(null);
+  // Select contrôlé (plutôt que defaultValue non contrôlé) : nécessaire pour
+  // permettre au bouton croix (SelectClearButton) de réinitialiser la valeur
+  // de l'extérieur du composant Select.
+  const [trainingCampId, setTrainingCampId] = useState(defaultValues?.trainingCampId ?? "");
+  const [flightTypeId, setFlightTypeId] = useState(defaultValues?.flightTypeId ?? "");
+  // Erreurs de validation affichées en ligne sous chaque champ (mode
+  // assistant uniquement) — les toasts restent réservés à la soumission
+  // (state?.success === false ci-dessous) et au succès (redirection +
+  // toast, voir actions/create-flight.ts).
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (state?.success === false) {
@@ -99,115 +133,241 @@ export function FlightForm({
     }
   }, [state]);
 
+  function handleWizardNext() {
+    const form = formRef.current;
+    if (!form) return;
+
+    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    // Règle métier docs/domain-model.md (Stage) : un vol rattaché à un stage
+    // doit avoir une date dans l'intervalle du stage — revérifiée côté
+    // serveur (create-flight.service.ts/update-flight.service.ts), pas
+    // exprimable par une contrainte HTML statique (dépend du stage choisi).
+    // Vérifiée ici pour bloquer le passage à l'étape 3 au bon endroit (date
+    // et stage associé sont des champs de l'étape 2).
+    if (trainingCampId) {
+      const selectedCamp = trainingCamps.find((tc) => tc.id === trainingCampId);
+      const dateInput = form.elements.namedItem("date");
+      const dateValue = dateInput instanceof HTMLInputElement ? dateInput.value : undefined;
+      if (selectedCamp && dateValue) {
+        const flightDate = new Date(dateValue);
+        if (flightDate < selectedCamp.startDate || flightDate > selectedCamp.endDate) {
+          setFieldErrors({
+            date: "Doit être comprise dans l'intervalle du stage sélectionné (ou retirez le stage associé).",
+          });
+          return;
+        }
+      }
+    }
+
+    setFieldErrors({});
+    onWizardNext?.();
+  }
+
+  // Applique le même traitement en ligne à la soumission finale (étape 3) :
+  // sans ça, les champs Observations/Points d'amélioration retomberaient
+  // sur la bulle de validation native du navigateur, incohérent avec
+  // l'étape 2 ci-dessus. N'intercepte rien en dehors du mode assistant
+  // (wizardStep absent : /flights/new, /activities/[id]/edit inchangés).
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    if (!wizardStep) return;
+    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS);
+    if (Object.keys(errors).length > 0) {
+      event.preventDefault();
+      setFieldErrors(errors);
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="date">Date</Label>
-        <Input
-          id="date"
-          name="date"
-          type="date"
-          defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
-          required
-        />
-      </div>
-
-      <SitePointCombobox
-        type="TAKEOFF"
-        name="takeoffPointId"
-        label="Décollage"
-        placeholder="Rechercher un décollage..."
-        defaultPoint={defaultTakeoffPoint}
-      />
-
-      <SitePointCombobox
-        type="LANDING"
-        name="landingPointId"
-        label="Atterrissage"
-        placeholder="Rechercher un atterrissage..."
-        defaultPoint={defaultLandingPoint}
-      />
-
-      {trainingCamps.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
-          <Select name="trainingCampId" defaultValue={defaultValues?.trainingCampId ?? ""}>
-            <SelectTrigger id="trainingCampId" className="w-full">
-              <SelectValue placeholder="Aucun">
-                {(value: string) => {
-                  const trainingCamp = trainingCamps.find((tc) => tc.id === value);
-                  return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Aucun</SelectItem>
-              {trainingCamps.map((trainingCamp) => (
-                <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
-                  {formatTrainingCampOption(trainingCamp)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
       )}
+      <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="date">Date</Label>
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
+            required
+            aria-invalid={!!fieldErrors.date}
+          />
+          {fieldErrors.date && <p className="text-sm text-destructive">{fieldErrors.date}</p>}
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="durationMin">Durée (min)</Label>
-        <Input
-          id="durationMin"
-          name="durationMin"
-          type="number"
-          min={1}
-          defaultValue={defaultValues?.durationMin}
-          required
+        <SitePointCombobox
+          type="TAKEOFF"
+          name="takeoffPointId"
+          label="Décollage"
+          placeholder="Rechercher un décollage..."
+          defaultPoint={defaultTakeoffPoint}
+          error={fieldErrors.takeoffPointId}
         />
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="flightTypeId">Type de vol</Label>
-        <Select name="flightTypeId" defaultValue={defaultValues?.flightTypeId} required>
-          <SelectTrigger id="flightTypeId" className="w-full">
-            <SelectValue placeholder="Choisir un type de vol">
-              {(value: string | null) => {
-                const flightType = flightTypes.find((ft) => ft.id === value);
-                return flightType ? formatFlightTypeOption(flightType) : "Choisir un type de vol";
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {flightTypes.map((flightType) => (
-              <SelectItem key={flightType.id} value={flightType.id}>
-                {formatFlightTypeOption(flightType)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="observations">Observations</Label>
-        <Textarea
-          id="observations"
-          name="observations"
-          defaultValue={defaultValues?.observations}
-          required
+        <SitePointCombobox
+          type="LANDING"
+          name="landingPointId"
+          label="Atterrissage"
+          placeholder="Rechercher un atterrissage..."
+          defaultPoint={defaultLandingPoint}
+          error={fieldErrors.landingPointId}
         />
+
+        {trainingCamps.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+            <div className="flex items-center gap-1.5">
+              <Select
+                name="trainingCampId"
+                value={trainingCampId}
+                onValueChange={(value) => setTrainingCampId(value ?? "")}
+              >
+                <SelectTrigger id="trainingCampId" className="w-full flex-1">
+                  <SelectValue placeholder="Aucun">
+                    {(value: string) => {
+                      const trainingCamp = trainingCamps.find((tc) => tc.id === value);
+                      return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Aucun</SelectItem>
+                  {trainingCamps.map((trainingCamp) => (
+                    <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
+                      {formatTrainingCampOption(trainingCamp)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {trainingCampId && (
+                <SelectClearButton
+                  onClear={() => setTrainingCampId("")}
+                  label="Effacer le stage associé"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="durationMin">Durée (min)</Label>
+          <Input
+            id="durationMin"
+            name="durationMin"
+            type="number"
+            min={1}
+            defaultValue={defaultValues?.durationMin}
+            required
+            aria-invalid={!!fieldErrors.durationMin}
+          />
+          {fieldErrors.durationMin && (
+            <p className="text-sm text-destructive">{fieldErrors.durationMin}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="flightTypeId">Type de vol</Label>
+          <div className="flex items-center gap-1.5">
+            <Select
+              name="flightTypeId"
+              value={flightTypeId}
+              onValueChange={(value) => setFlightTypeId(value ?? "")}
+              required
+            >
+              <SelectTrigger
+                id="flightTypeId"
+                className="w-full flex-1"
+                aria-invalid={!!fieldErrors.flightTypeId}
+              >
+                <SelectValue placeholder="Choisir un type de vol">
+                  {(value: string | null) => {
+                    const flightType = flightTypes.find((ft) => ft.id === value);
+                    return flightType
+                      ? formatFlightTypeOption(flightType)
+                      : "Choisir un type de vol";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {flightTypes.map((flightType) => (
+                  <SelectItem key={flightType.id} value={flightType.id}>
+                    {formatFlightTypeOption(flightType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {flightTypeId && (
+              <SelectClearButton
+                onClear={() => setFlightTypeId("")}
+                label="Effacer le type de vol"
+              />
+            )}
+          </div>
+          {fieldErrors.flightTypeId && (
+            <p className="text-sm text-destructive">{fieldErrors.flightTypeId}</p>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="improvementPoints">Points d&apos;amélioration</Label>
-        <Textarea
-          id="improvementPoints"
-          name="improvementPoints"
-          defaultValue={defaultValues?.improvementPoints}
-          required
-        />
+      {!wizardStep && (
+        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
+      )}
+      <div className={cn(wizardStep === 2 ? "hidden" : "flex flex-col gap-4")}>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="observations">Observations</Label>
+          <Textarea
+            id="observations"
+            name="observations"
+            defaultValue={defaultValues?.observations}
+            required={wizardStep !== 2}
+            aria-invalid={!!fieldErrors.observations}
+          />
+          {fieldErrors.observations && (
+            <p className="text-sm text-destructive">{fieldErrors.observations}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="improvementPoints">Points d&apos;amélioration</Label>
+          <Textarea
+            id="improvementPoints"
+            name="improvementPoints"
+            defaultValue={defaultValues?.improvementPoints}
+            required={wizardStep !== 2}
+            aria-invalid={!!fieldErrors.improvementPoints}
+          />
+          {fieldErrors.improvementPoints && (
+            <p className="text-sm text-destructive">{fieldErrors.improvementPoints}</p>
+          )}
+        </div>
       </div>
 
-      <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
-      </Button>
+      {wizardStep ? (
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <Button type="button" variant="outline" onClick={onWizardBack}>
+            Précédent
+          </Button>
+          {wizardStep === 2 ? (
+            <Button type="button" onClick={handleWizardNext}>
+              Suivant
+            </Button>
+          ) : (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Enregistrement..." : submitLabel}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <Button type="submit" className="mt-2" disabled={isPending}>
+          {isPending ? "Enregistrement..." : submitLabel}
+        </Button>
+      )}
 
       {state?.success === false && <p className="text-destructive">{state.error}</p>}
     </form>

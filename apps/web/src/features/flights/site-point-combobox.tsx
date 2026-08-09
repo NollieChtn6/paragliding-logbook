@@ -70,6 +70,11 @@ type SitePointComboboxProps = {
   label: string;
   placeholder: string;
   defaultPoint?: SitePointOption;
+  // Erreur en ligne (mode assistant, voir flight-form.tsx) : le champ
+  // effectivement lié à `name` (utilisé par getFieldErrors,
+  // lib/form-validation.ts) est un <input> masqué géré par Combobox, pas
+  // celui rendu ici — le parent doit donc transmettre le message lui-même.
+  error?: string;
 };
 
 // Recherche serveur débouncée plutôt qu'une liste de points chargée
@@ -82,6 +87,7 @@ export function SitePointCombobox({
   label,
   placeholder,
   defaultPoint,
+  error,
 }: SitePointComboboxProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SitePointOption[]>(defaultPoint ? [defaultPoint] : []);
@@ -116,7 +122,13 @@ export function SitePointCombobox({
         filter={null}
         name={name}
       >
-        <ComboboxInput id={name} placeholder={placeholder} required />
+        <ComboboxInput
+          id={name}
+          placeholder={placeholder}
+          required
+          showClear
+          aria-invalid={!!error}
+        />
         <ComboboxContent>
           <ComboboxEmpty>Aucun point trouvé.</ComboboxEmpty>
           <ComboboxList>
@@ -147,6 +159,8 @@ export function SitePointCombobox({
           </p>
         </div>
       )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }
