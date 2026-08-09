@@ -17,7 +17,7 @@ Nécessite `apps/web/.env` (copié depuis `.env.example`) et PostgreSQL local d�
 - `/` : dashboard — cartes de statistiques (vols, gonflage, total d'activités) et 5 activités les plus récentes, lecture via `src/features/dashboard/`. **Protégée.**
 - `/sign-in` : connexion email + mot de passe (pas d'inscription publique — comptes créés par le seed). Accepte un paramètre `redirectTo` (validé côté serveur contre les open redirects) pour revenir à la page initialement demandée après connexion.
 - `/activities` : historique des activités de l'utilisateur, triées de la plus récente à la plus ancienne. **Protégée.**
-- `/activities/[id]` : détail d'une activité (page "introuvable" dédiée si elle n'existe pas ou n'appartient pas à l'utilisateur). **Protégée.**
+- `/activities/[id]` : détail d'une activité (page "introuvable" dédiée si elle n'existe pas ou n'appartient pas à l'utilisateur), avec suppression (bouton "Supprimer" + confirmation) via `src/actions/delete-activity.ts` — supprime l'`Activity`, sa spécialisation (Flight/TrainingCamp/GroundHandlingSession) est supprimée en cascade par la base ; un vol/une séance rattaché à un stage supprimé est conservé mais dissocié du stage. **Protégée.**
 - `/activities/[id]/edit` : modification d'une activité — type déterminé automatiquement (Vol/Stage/Gonflage), formulaire pré-rempli (même composant partagé qu'à la création), vérification systématique que l'activité appartient à l'utilisateur courant. **Protégée.**
 - `/activities/new` : choix du type d'activité (Vol/Stage/Gonflage) puis formulaire — les trois types du MVP sont implémentés. **Protégée.**
 - `/flights/new` : route de test historique, formulaire de vol seul (même composant partagé que `/activities/new`). **Protégée.**

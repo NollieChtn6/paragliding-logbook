@@ -104,6 +104,7 @@ Fonctionnalités :
 
 - [x] Ajouter un vol — `/activities/new` (flux officiel) et `/flights/new` (route de test historique, même formulaire partagé), routes protégées (connexion requise)
 - [x] Modifier un vol — `/activities/[id]/edit`, service `updateFlight` (`src/features/flights/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
+- [x] Supprimer un vol — bouton "Supprimer" + confirmation sur `/activities/[id]`, service générique `deleteActivity` (`src/features/activities/`, commun aux trois types d'activité)
 - [x] Modèle Site/SitePoint/SitePointType — un vol référence un point de départ et un point d'arrivée (`SitePoint`), plutôt qu'un site unique avec des altitudes dupliquées ; plus de règle comparant les altitudes de décollage/atterrissage (départ et arrivée peuvent appartenir à des sites différents, ex. cross)
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer un vol à un stage à la création — champ optionnel "Stage associé" dans `FlightForm` (limité aux stages de l'utilisateur courant, `listTrainingCamps`), règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`
@@ -127,6 +128,7 @@ Fonctionnalités :
 - [x] Consulter l'historique des stages — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Afficher les vols associés à un stage sur `/activities/[id]`, quand il y en a
 - [x] Modifier un stage — `/activities/[id]/edit`, service `updateTrainingCamp` (`src/features/training-camps/`), vérification de propriété systématique
+- [x] Supprimer un stage — même bouton/service générique `deleteActivity` que les autres types ; les vols/séances éventuellement rattachés au stage sont conservés mais dissociés (`trainingCampId` mis à `null`, contrainte `ON DELETE SET NULL`), pas supprimés — avertissement affiché dans la confirmation si le stage a des enfants
 - [ ] Rattacher un vol existant à un stage depuis l'interface
 
 ---
@@ -148,6 +150,7 @@ Fonctionnalités :
 - [x] Consulter l'historique des séances — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer une séance à un stage à la création — champ optionnel "Stage associé" dans `GroundHandlingSessionForm` (limité aux stages de l'utilisateur courant), règle métier "date de la séance dans l'intervalle du stage" validée et testée dans `create-ground-handling-session.service.ts` ; séances associées affichées sur le détail du stage
 - [x] Modifier une séance — `/activities/[id]/edit`, service `updateGroundHandlingSession` (`src/features/ground-handling-sessions/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
+- [x] Supprimer une séance — même bouton/service générique `deleteActivity` que les autres types
 
 ---
 

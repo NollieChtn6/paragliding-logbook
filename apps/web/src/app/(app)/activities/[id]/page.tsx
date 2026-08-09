@@ -1,10 +1,39 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DeleteActivityButton } from "@/components/delete-activity-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { formatFlightLocation, getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
 import { FLIGHT_TYPE_LABELS } from "@/lib/reference-labels";
+
+// Message affiché dans la boîte de confirmation quand le stage supprimé a
+// des vols/séances rattachés : trainingCampId est en onDelete: SetNull
+// (voir delete-activity.service.ts), ils sont dissociés, pas supprimés.
+function trainingCampDeletionWarning(activity: {
+  trainingCamp: { flights: unknown[]; groundHandlingSessions: unknown[] } | null;
+}): string | undefined {
+  if (!activity.trainingCamp) {
+    return undefined;
+  }
+
+  const parts: string[] = [];
+  const flightCount = activity.trainingCamp.flights.length;
+  const sessionCount = activity.trainingCamp.groundHandlingSessions.length;
+
+  if (flightCount > 0) {
+    parts.push(`${flightCount} vol${flightCount > 1 ? "s" : ""}`);
+  }
+  if (sessionCount > 0) {
+    parts.push(`${sessionCount} séance${sessionCount > 1 ? "s" : ""} de gonflage`);
+  }
+  if (parts.length === 0) {
+    return undefined;
+  }
+
+  const verb = flightCount + sessionCount > 1 ? "resteront" : "restera";
+  return `${parts.join(" et ")} ${verb} dans votre carnet mais ne seront plus rattachés à ce stage.`;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -30,17 +59,29 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
   }
 
   const title = activity.flight ? "Vol" : activity.trainingCamp ? "Stage" : "Gonflage";
+  const entityLabel = activity.flight
+    ? "ce vol"
+    : activity.trainingCamp
+      ? "ce stage"
+      : "cette séance";
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={title}
         actions={
-          <Button
-            nativeButton={false}
-            variant="outline"
-            render={<Link href={`/activities/${activity.id}/edit`}>Modifier</Link>}
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href={`/activities/${activity.id}/edit`}>Modifier</Link>}
+            />
+            <DeleteActivityButton
+              activityId={activity.id}
+              entityLabel={entityLabel}
+              warning={trainingCampDeletionWarning(activity)}
+            />
+          </div>
         }
       />
 
