@@ -43,7 +43,7 @@ docs/database-design.md pour le détail des modèles `Session`/`Account`/`Verifi
 - id
 - name
 - region (optionnel)
-- country (optionnel)
+- countryCode (optionnel) — code pays ISO 3166-1 alpha-2 (`FR`, `CH`, `IT`, `ES`...), pas du texte libre
 - latitude (optionnel) — localisation approximative du site
 - longitude (optionnel)
 - primaryTakeoffPointId (optionnel) — décollage principal du site, parmi ses éventuels `SitePoint` de type TAKEOFF
@@ -51,7 +51,7 @@ docs/database-design.md pour le détail des modèles `Session`/`Account`/`Verifi
 - createdAt
 - updatedAt
 
-Les sites seront saisis manuellement dans un premier temps. Donnée de référence partagée (pas de `userId`) : c'est un lieu du monde réel, pas une donnée privée à un utilisateur.
+Les sites seront saisis manuellement dans un premier temps. Donnée de référence partagée (pas de `userId`) : c'est un lieu du monde réel, pas une donnée privée à un utilisateur. Référentiel éditorial destiné à une future gestion applicative (ADR 004, `docs/decisions/004-editable-referentials.md`), à distinguer des tables de référence techniques comme `ActivityType`/`FlightType`/`SitePointType` (ADR 003) : `Site.name` reste une donnée métier éditoriale, jamais un code.
 
 ---
 
@@ -65,7 +65,7 @@ Les sites seront saisis manuellement dans un premier temps. Donnée de référen
 - altitudeM
 - orientationDeg (optionnel) — pertinent pour un décollage, pas nécessairement pour un atterrissage
 
-Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
+Donnée de référence partagée (pas de `userId`), au même titre que `Site`. Référentiel éditorial (ADR 004), même principe que `Site`/`School`.
 
 ---
 
@@ -82,10 +82,17 @@ Table de référence (pas un enum), même principe qu'`ActivityType` : extensibl
 
 - id
 - name
+- address (optionnel)
+- postalCode (optionnel)
+- city (optionnel)
+- countryCode (optionnel) — code pays ISO 3166-1 alpha-2, même convention que `Site.countryCode`
+- latitude (optionnel)
+- longitude (optionnel)
 - website (optionnel)
-- location (optionnel)
 - createdAt
 - updatedAt
+
+Référentiel éditorial (ADR 004), même principe que `Site`.
 
 Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 
