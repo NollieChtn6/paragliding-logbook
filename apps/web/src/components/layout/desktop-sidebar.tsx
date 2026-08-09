@@ -1,9 +1,11 @@
 "use client";
 
+import { Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
@@ -54,6 +56,17 @@ export function DesktopSidebar() {
 
       <div className="flex items-center justify-between border-t border-sidebar-border pt-4">
         <ThemeToggle />
+        <Button
+          nativeButton={false}
+          variant="outline"
+          size="icon"
+          aria-label="Paramètres de sécurité"
+          render={
+            <Link href="/settings/security">
+              <Settings />
+            </Link>
+          }
+        />
         <SignOutButton />
       </div>
     </aside>
