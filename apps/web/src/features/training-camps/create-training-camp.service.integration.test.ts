@@ -50,6 +50,7 @@ describe("createTrainingCamp (integration)", () => {
         ...validTrainingCampInput,
         schoolId,
         trainingCampTypeId,
+        observations: "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
       });
       trainingCampId = trainingCamp.id;
       activityId = trainingCamp.activityId;
@@ -70,6 +71,9 @@ describe("createTrainingCamp (integration)", () => {
       });
       expect(trainingCamp.schoolId).toBe(schoolId);
       expect(trainingCamp.trainingCampTypeId).toBe(trainingCampTypeId);
+      expect(trainingCamp.observations).toBe(
+        "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
+      );
     });
 
     it("links the TrainingCamp to its Activity", async () => {

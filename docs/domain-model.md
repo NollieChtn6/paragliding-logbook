@@ -129,6 +129,7 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.us
 - trainingCampTypeId — type de stage, table de référence (`TrainingCampType` : INIT, PROGRESSION, THERMAL, SIV), pas de `label` — voir `TrainingCampType`
 - startDate
 - endDate
+- observations (nullable)
 - summary
 - certification (nullable)
 
