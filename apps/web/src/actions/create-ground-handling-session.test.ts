@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { createGroundHandlingSessionAction } from "./create-ground-handling-session";
 
 // Ne re-teste pas les règles métier GroundHandlingSession (déjà couvertes par
@@ -37,7 +38,7 @@ describe("createGroundHandlingSessionAction", () => {
       CURRENT_USER.id,
       expect.objectContaining({ siteId: "some-site" }),
     );
-    expect(redirect).toHaveBeenCalledWith("/activities");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Séance créée."));
   });
 
   it("maps a ZodError from createGroundHandlingSession to a validation error message", async () => {

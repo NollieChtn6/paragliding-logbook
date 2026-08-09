@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { createTrainingCampAction } from "./create-training-camp";
 
 // Ne re-teste pas les règles métier TrainingCamp (déjà couvertes par
@@ -34,7 +35,7 @@ describe("createTrainingCampAction", () => {
       CURRENT_USER.id,
       expect.objectContaining({ schoolId: "some-school" }),
     );
-    expect(redirect).toHaveBeenCalledWith("/activities");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Stage créé."));
   });
 
   it("maps a ZodError from createTrainingCamp to a validation error message", async () => {

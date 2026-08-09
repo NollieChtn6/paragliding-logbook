@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { FLIGHT_TYPE_LABELS, SITE_POINT_TYPE_LABELS } from "@/lib/reference-labels";
 
 type TrainingCampOption = {
@@ -135,6 +136,12 @@ export function FlightForm({
 }: FlightFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
   const pointGroups = groupPointsBySite(points);
+
+  useEffect(() => {
+    if (state?.success === false) {
+      toast.add({ title: state.error, type: "error" });
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

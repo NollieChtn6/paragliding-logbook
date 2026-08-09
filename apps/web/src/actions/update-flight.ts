@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type UpdateFlightActionState = { success: true } | { success: false; error: string };
 
@@ -39,5 +40,5 @@ export async function updateFlightAction(
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter. Vers le détail
   // modifié plutôt que /activities, pour confirmer visuellement le résultat.
-  redirect(`/activities/${activityId}`);
+  redirect(withToast(`/activities/${activityId}`, "Vol modifié."));
 }

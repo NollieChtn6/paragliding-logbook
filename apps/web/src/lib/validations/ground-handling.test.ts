@@ -45,13 +45,19 @@ describe("groundHandlingSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects a negative duration", () => {
+  it("rejects a negative duration with a French, user-friendly message", () => {
     const result = groundHandlingSchema.safeParse({ ...validGroundHandling, durationMin: "-10" });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("La durée doit être strictement positive.");
+    }
   });
 
-  it("rejects an empty exercises field", () => {
+  it("rejects an empty exercises field with a French, user-friendly message", () => {
     const result = groundHandlingSchema.safeParse({ ...validGroundHandling, exercises: "  " });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("Les exercices travaillés sont obligatoires.");
+    }
   });
 });

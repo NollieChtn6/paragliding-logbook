@@ -1,11 +1,12 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { signInAction } from "@/actions/sign-in";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 
 type SignInFormProps = {
   redirectTo: string;
@@ -16,6 +17,12 @@ type SignInFormProps = {
 export function SignInForm({ redirectTo }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(signInAction, null);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (state?.success === false) {
+      toast.add({ title: state.error, type: "error" });
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

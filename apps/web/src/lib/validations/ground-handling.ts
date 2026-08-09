@@ -8,7 +8,7 @@ const optionalTrimmedString = z.preprocess(
 );
 const optionalUuid = z.preprocess(
   (value) => (value === "" ? undefined : value),
-  z.string().uuid().optional(),
+  z.string().uuid("Le stage sélectionné est invalide.").optional(),
 );
 
 // Règles métier docs/domain-model.md (Gonflage) :
@@ -19,11 +19,14 @@ const optionalUuid = z.preprocess(
 // validée dans create-ground-handling-session.service.ts, pas ici (nécessite
 // de lire le TrainingCamp en base, hors de portée d'un schéma Zod pur).
 export const groundHandlingSchema = z.object({
-  date: z.coerce.date(),
-  siteId: z.string().uuid(),
+  date: z.coerce.date("La date de la séance est invalide."),
+  siteId: z.string().uuid("Le site sélectionné est invalide."),
   trainingCampId: optionalUuid,
-  durationMin: z.coerce.number().int().positive(),
-  exercises: z.string().trim().min(1),
+  durationMin: z.coerce
+    .number("La durée doit être un nombre de minutes.")
+    .int("La durée doit être un nombre entier de minutes.")
+    .positive("La durée doit être strictement positive."),
+  exercises: z.string().trim().min(1, "Les exercices travaillés sont obligatoires."),
   difficulties: optionalTrimmedString,
   feeling: optionalTrimmedString,
 });

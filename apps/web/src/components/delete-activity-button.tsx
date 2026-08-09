@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { deleteActivityAction } from "@/actions/delete-activity";
 import {
   AlertDialog,
@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 
 type DeleteActivityButtonProps = {
   activityId: string;
@@ -33,6 +34,12 @@ export function DeleteActivityButton({
     deleteActivityAction.bind(null, activityId),
     null,
   );
+
+  useEffect(() => {
+    if (state?.success === false) {
+      toast.add({ title: state.error, type: "error" });
+    }
+  }, [state]);
 
   return (
     <AlertDialog>

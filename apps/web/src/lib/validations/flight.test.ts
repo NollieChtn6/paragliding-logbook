@@ -31,14 +31,28 @@ describe("flightSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects a negative duration", () => {
+  it("rejects a negative duration with a French, user-friendly message", () => {
     const result = flightSchema.safeParse({ ...validFlight, durationMin: "-10" });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("La durée doit être strictement positive.");
+    }
   });
 
-  it("rejects a malformed flight type id", () => {
+  it("rejects a malformed flight type id with a French, user-friendly message", () => {
     const result = flightSchema.safeParse({ ...validFlight, flightTypeId: "not-a-uuid" });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("Le type de vol est invalide.");
+    }
+  });
+
+  it("rejects empty observations with a French, user-friendly message", () => {
+    const result = flightSchema.safeParse({ ...validFlight, observations: "" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("Les observations sont obligatoires.");
+    }
   });
 
   it("rejects a date in the future", () => {
