@@ -35,7 +35,11 @@ export async function updateGroundHandlingSession(
         };
         throw new ZodError([issue]);
       }
-      if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
+      // Comparaison au jour près, voir create-flight.service.ts.
+      const sessionDay = input.date.toISOString().slice(0, 10);
+      const startDay = trainingCamp.startDate.toISOString().slice(0, 10);
+      const endDay = trainingCamp.endDate.toISOString().slice(0, 10);
+      if (sessionDay < startDay || sessionDay > endDay) {
         const issue: ZodIssue = {
           code: "custom",
           path: ["date"],

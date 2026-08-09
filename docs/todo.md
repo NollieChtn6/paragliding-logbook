@@ -139,6 +139,7 @@ Fonctionnalités :
 - [x] Modèle Site/SitePoint/SitePointType — un vol référence un point de départ et un point d'arrivée (`SitePoint`), plutôt qu'un site unique avec des altitudes dupliquées ; plus de règle comparant les altitudes de décollage/atterrissage (départ et arrivée peuvent appartenir à des sites différents, ex. cross)
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer un vol à un stage à la création — champ optionnel "Stage associé" dans `FlightForm` (limité aux stages de l'utilisateur courant, `listTrainingCamps`), règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`
+- [x] Heure du vol (en plus de la date) — permet d'ordonner plusieurs vols le même jour (`getActivityEventDate`), champ obligatoire combiné à la date en un seul `DateTime`, sans conversion de fuseau horaire
 
 ---
 
@@ -182,6 +183,7 @@ Fonctionnalités :
 - [x] Associer une séance à un stage à la création — champ optionnel "Stage associé" dans `GroundHandlingSessionForm` (limité aux stages de l'utilisateur courant), règle métier "date de la séance dans l'intervalle du stage" validée et testée dans `create-ground-handling-session.service.ts` ; séances associées affichées sur le détail du stage
 - [x] Modifier une séance — `/activities/[id]/edit`, service `updateGroundHandlingSession` (`src/features/ground-handling-sessions/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
 - [x] Supprimer une séance — même bouton/service générique `deleteActivity` que les autres types
+- [x] Heure de la séance (en plus de la date) — même principe que pour les vols
 
 ---
 

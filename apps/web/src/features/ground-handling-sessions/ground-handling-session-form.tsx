@@ -30,6 +30,8 @@ type TrainingCampOption = {
 type GroundHandlingSessionFormActionState = { success: true } | { success: false; error: string };
 
 type GroundHandlingSessionFormDefaultValues = {
+  // Porte aussi l'heure (voir toTimeInputValue ci-dessous) : pas de champ
+  // "time" séparé ici, un seul Date sert à préremplir les deux <Input>.
   date?: Date;
   siteId?: string;
   trainingCampId?: string;
@@ -54,7 +56,7 @@ type GroundHandlingSessionFormProps = {
   onWizardNext?: () => void;
 };
 
-const WIZARD_STEP_2_REQUIRED_FIELDS = ["date", "siteId", "durationMin"];
+const WIZARD_STEP_2_REQUIRED_FIELDS = ["date", "time", "siteId", "durationMin"];
 const WIZARD_STEP_3_REQUIRED_FIELDS = ["exercises"];
 
 function formatDate(date: Date): string {
@@ -68,9 +70,14 @@ function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
   return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
 }
 
-// Format attendu par <Input type="date">, voir flight-form.tsx.
+// Format attendu par <Input type="date">/<Input type="time">, voir
+// flight-form.tsx.
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+function toTimeInputValue(date: Date): string {
+  return date.toISOString().slice(11, 16);
 }
 
 // Même principe que FlightForm/TrainingCampForm : utilisé en création
@@ -155,17 +162,32 @@ export function GroundHandlingSessionForm({
         <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
       )}
       <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="date">Date</Label>
-          <Input
-            id="date"
-            name="date"
-            type="date"
-            defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
-            required
-            aria-invalid={!!fieldErrors.date}
-          />
-          {fieldErrors.date && <p className="text-sm text-destructive">{fieldErrors.date}</p>}
+        <div className="flex gap-3">
+          <div className="flex flex-1 flex-col gap-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
+              required
+              aria-invalid={!!fieldErrors.date}
+            />
+            {fieldErrors.date && <p className="text-sm text-destructive">{fieldErrors.date}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="time">Heure</Label>
+            <Input
+              id="time"
+              name="time"
+              type="time"
+              defaultValue={defaultValues?.date ? toTimeInputValue(defaultValues.date) : undefined}
+              required
+              aria-invalid={!!fieldErrors.time}
+            />
+            {fieldErrors.time && <p className="text-sm text-destructive">{fieldErrors.time}</p>}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">

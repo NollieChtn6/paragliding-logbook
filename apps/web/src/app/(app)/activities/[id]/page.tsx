@@ -47,6 +47,11 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("fr-FR");
 }
 
+// Extraction directe des composantes UTC, voir activity-summary.ts.
+function formatTime(date: Date): string {
+  return date.toISOString().slice(11, 16);
+}
+
 function formatTrainingCampType(trainingCampType: { code: string }): string {
   return TRAINING_CAMP_TYPE_LABELS[trainingCampType.code] ?? trainingCampType.code;
 }
@@ -111,11 +116,11 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
     ? formatFlightLocation(activity.flight)
     : (activity.trainingCamp?.school.name ?? activity.groundHandlingSession?.site.name ?? title);
   const heroSubtitle = activity.flight
-    ? formatDate(activity.flight.date)
+    ? `${formatDate(activity.flight.date)} à ${formatTime(activity.flight.date)}`
     : activity.trainingCamp
       ? `${formatDate(activity.trainingCamp.startDate)} → ${formatDate(activity.trainingCamp.endDate)}`
       : activity.groundHandlingSession
-        ? formatDate(activity.groundHandlingSession.date)
+        ? `${formatDate(activity.groundHandlingSession.date)} à ${formatTime(activity.groundHandlingSession.date)}`
         : "";
 
   return (
@@ -272,7 +277,8 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                       {formatFlightLocation(flight)}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(flight.date)} · {formatDurationMinutes(flight.durationMin)}
+                      {formatDate(flight.date)} à {formatTime(flight.date)} ·{" "}
+                      {formatDurationMinutes(flight.durationMin)}
                     </span>
                   </li>
                 ))}
@@ -295,7 +301,8 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                       {groundHandlingSession.site.name}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(groundHandlingSession.date)} ·{" "}
+                      {formatDate(groundHandlingSession.date)} à{" "}
+                      {formatTime(groundHandlingSession.date)} ·{" "}
                       {formatDurationMinutes(groundHandlingSession.durationMin)}
                     </span>
                   </li>

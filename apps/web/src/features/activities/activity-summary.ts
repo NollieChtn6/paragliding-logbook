@@ -11,6 +11,14 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("fr-FR");
 }
 
+// Extraction directe des composantes UTC (pas toLocaleTimeString, dépendant
+// du fuseau du serveur) : l'heure est stockée en UTC littéral, sans
+// conversion de fuseau (voir lib/validations/flight.ts), donc relue de la
+// même façon.
+function formatTime(date: Date): string {
+  return date.toISOString().slice(11, 16);
+}
+
 // takeoffPoint et landingPoint peuvent appartenir à des sites différents
 // (ex. cross) : n'affiche qu'un seul nom quand c'est le même site, "A → B"
 // sinon. Exportée : réutilisée telle quelle par /activities/[id] pour la
@@ -32,7 +40,7 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { flight } = activity;
     return {
       title: "Vol",
-      subtitle: `${formatFlightLocation(flight)} · ${formatDate(flight.date)} · ${formatDurationMinutes(flight.durationMin)}`,
+      subtitle: `${formatFlightLocation(flight)} · ${formatDate(flight.date)} à ${formatTime(flight.date)} · ${formatDurationMinutes(flight.durationMin)}`,
     };
   }
 
@@ -48,7 +56,7 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { groundHandlingSession } = activity;
     return {
       title: "Gonflage",
-      subtitle: `${groundHandlingSession.site.name} · ${formatDate(groundHandlingSession.date)} · ${formatDurationMinutes(groundHandlingSession.durationMin)}`,
+      subtitle: `${groundHandlingSession.site.name} · ${formatDate(groundHandlingSession.date)} à ${formatTime(groundHandlingSession.date)} · ${formatDurationMinutes(groundHandlingSession.durationMin)}`,
     };
   }
 

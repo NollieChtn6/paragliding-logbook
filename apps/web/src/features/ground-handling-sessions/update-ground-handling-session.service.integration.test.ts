@@ -18,6 +18,7 @@ let activityId: string;
 
 const validGroundHandlingInput = {
   date: "2025-01-15",
+  time: "10:00",
   durationMin: "30",
   exercises: "Contrôle au sol, gestion des surventes.",
 };
