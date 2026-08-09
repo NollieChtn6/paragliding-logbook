@@ -10,6 +10,7 @@ let userId: string;
 let otherUserId: string;
 let siteId: string;
 let schoolId: string;
+let trainingCampTypeId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
 let groundHandlingSessionId: string;
@@ -24,7 +25,7 @@ const validGroundHandlingInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school] = await Promise.all([
+  const [user, otherUser, site, school, trainingCampType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `update-ghs-${suffix}@paragliding-logbook.local`,
@@ -39,17 +40,19 @@ beforeAll(async () => {
     }),
     prisma.site.create({ data: { name: `Update Ground Handling Test Site ${suffix}` } }),
     prisma.school.create({ data: { name: `Update Ground Handling Test School ${suffix}` } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
   schoolId = school.id;
+  trainingCampTypeId = trainingCampType.id;
 
   const trainingCamp = await createTrainingCamp(userId, {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Perfectionnement",
+    trainingCampTypeId,
   });
   trainingCampId = trainingCamp.id;
 
@@ -57,7 +60,7 @@ beforeAll(async () => {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Stage d'un autre utilisateur",
+    trainingCampTypeId,
   });
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 

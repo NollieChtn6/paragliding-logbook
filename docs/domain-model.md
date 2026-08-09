@@ -18,6 +18,10 @@ Point physique précis appartenant à un site — décollage ou atterrissage, se
 
 Période encadrée par une école ou un organisme de formation (stage, etc.).
 
+### 'TrainingCampType'
+
+Type d'un stage (initiation, progression, thermique, SIV...), table de référence — voir ADR 003 (`docs/decisions/003-reference-table-codes.md`). Remplace l'ancien champ `TrainingCamp.campType` (texte libre).
+
 ### 'GroundHandlingSession'
 
 Séance de gonflage ou de travail au sol.
@@ -122,7 +126,7 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.us
 
 - id
 - schoolId
-- campType
+- trainingCampTypeId — type de stage, table de référence (`TrainingCampType` : INIT, PROGRESSION, THERMAL, SIV), pas de `label` — voir `TrainingCampType`
 - startDate
 - endDate
 - summary
@@ -135,6 +139,17 @@ Relation :
 - un stage peut contenir plusieurs vols et plusieurs séances de gonflage ;
 - un vol appartient au maximum à un stage ;
 - une séance de gonflage appartient au maximum à un stage.
+
+---
+
+### TrainingCampType
+
+- id
+- code (unique) — `INIT`, `PROGRESSION`, `THERMAL`, `SIV`
+- createdAt
+- updatedAt
+
+Table de référence (pas un enum), même principe qu'`ActivityType`/`SitePointType`/`FlightType` : extensible sans migration si un nouveau type de stage est nécessaire. Pas de `label` : le libellé affiché vit dans `apps/web/src/lib/reference-labels.ts` (voir `docs/decisions/003-reference-table-codes.md`). Porte `createdAt`/`updatedAt` à la différence des autres tables de référence ci-dessus (demande explicite pour cette table, pas un oubli).
 
 ---
 

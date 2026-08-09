@@ -1,3 +1,4 @@
+import { ZodError, type ZodIssue } from "zod";
 import { prisma } from "@/lib/prisma";
 import { trainingCampSchema } from "@/lib/validations/training-camp";
 
@@ -14,6 +15,20 @@ export async function createTrainingCamp(userId: string, rawInput: unknown) {
       where: { code: TRAINING_CAMP_ACTIVITY_TYPE_CODE },
     });
 
+    // TrainingCampType est une donnée de référence partagée, même traitement
+    // que FlightType (docs/decisions/003-reference-table-codes.md).
+    const trainingCampType = await tx.trainingCampType.findUnique({
+      where: { id: input.trainingCampTypeId },
+    });
+    if (!trainingCampType) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["trainingCampTypeId"],
+        message: "Ce type de stage n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+
     const activity = await tx.activity.create({
       data: {
         userId,
@@ -25,7 +40,7 @@ export async function createTrainingCamp(userId: string, rawInput: unknown) {
       data: {
         activityId: activity.id,
         schoolId: input.schoolId,
-        campType: input.campType,
+        trainingCampTypeId: input.trainingCampTypeId,
         startDate: input.startDate,
         endDate: input.endDate,
         summary: input.summary,

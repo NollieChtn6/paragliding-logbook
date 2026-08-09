@@ -13,10 +13,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 
 type TrainingCampOption = {
   id: string;
-  campType: string;
+  trainingCampType: { code: string };
   startDate: Date;
   endDate: Date;
   school: { name: string };
@@ -50,7 +51,10 @@ function formatDate(date: Date): string {
 }
 
 function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
-  return `${trainingCamp.campType} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
+  const typeLabel =
+    TRAINING_CAMP_TYPE_LABELS[trainingCamp.trainingCampType.code] ??
+    trainingCamp.trainingCampType.code;
+  return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
 }
 
 // Format attendu par <Input type="date">, voir flight-form.tsx.

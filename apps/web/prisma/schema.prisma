@@ -247,22 +247,43 @@ model Flight {
 /// Spécialisation Stage (TrainingCamp). startDate <= endDate et les vols et
 /// séances de gonflage associés doivent avoir une date dans cet intervalle :
 /// règles applicatives (docs/domain-model.md), non exprimables nativement en Prisma.
+/// trainingCampTypeId remplace l'ancien champ campType (texte libre) : table
+/// de référence TrainingCampType (docs/decisions/003-reference-table-codes.md).
 model TrainingCamp {
-  id            String   @id @default(uuid()) @db.Uuid
-  activityId    String   @unique @db.Uuid
-  schoolId      String   @db.Uuid
-  campType      String
-  startDate     DateTime
-  endDate       DateTime
-  summary       String?
-  certification String?
+  id                 String   @id @default(uuid()) @db.Uuid
+  activityId         String   @unique @db.Uuid
+  schoolId           String   @db.Uuid
+  trainingCampTypeId String   @db.Uuid
+  startDate          DateTime
+  endDate            DateTime
+  summary            String?
+  certification      String?
 
   activity               Activity                @relation(fields: [activityId], references: [id], onDelete: Cascade)
   school                 School                  @relation(fields: [schoolId], references: [id])
+  trainingCampType       TrainingCampType        @relation(fields: [trainingCampTypeId], references: [id])
   flights                Flight[]
   groundHandlingSessions GroundHandlingSession[]
 
   @@index([schoolId])
+  @@index([trainingCampTypeId])
+}
+
+/// Référentiel des types de stage (table, pas un enum : extensible sans
+/// migration, même principe qu'ActivityType/SitePointType/FlightType,
+/// docs/decisions/003-reference-table-codes.md). Remplace l'ancien champ
+/// TrainingCamp.campType (texte libre). Porte createdAt/updatedAt à la
+/// différence des autres tables de référence ci-dessus (demande explicite,
+/// pas un oubli). Pas de label : affichage via TRAINING_CAMP_TYPE_LABELS
+/// (src/lib/reference-labels.ts). Valeurs initiales (peuplées par le seed) :
+/// INIT, PROGRESSION, THERMAL, SIV.
+model TrainingCampType {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainingCamps TrainingCamp[]
 }
 
 /// Spécialisation Gonflage. exercises obligatoire (règle métier docs/domain-model.md).

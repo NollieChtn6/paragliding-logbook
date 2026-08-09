@@ -7,6 +7,7 @@ let otherUserId: string;
 let siteId: string;
 let pointId: string;
 let schoolId: string;
+let trainingCampTypeId: string;
 const activityIds: string[] = [];
 
 beforeAll(async () => {
@@ -22,6 +23,7 @@ beforeAll(async () => {
     trainingCampType,
     takeoffType,
     flightType,
+    progressionTrainingCampType,
   ] = await Promise.all([
     prisma.user.create({
       data: {
@@ -42,11 +44,13 @@ beforeAll(async () => {
     prisma.activityType.findUniqueOrThrow({ where: { code: "TRAINING_CAMP" } }),
     prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
     prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
   schoolId = school.id;
+  trainingCampTypeId = progressionTrainingCampType.id;
 
   const point = await prisma.sitePoint.create({
     data: {
@@ -116,7 +120,7 @@ beforeAll(async () => {
     data: {
       activityId: campActivity.id,
       schoolId: school.id,
-      campType: "Initiation",
+      trainingCampTypeId,
       startDate: new Date("2024-01-01"),
       endDate: new Date("2024-01-05"),
     },
@@ -173,7 +177,9 @@ describe("getDashboardData (integration)", () => {
     expect(recentActivities[0]?.groundHandlingSession?.durationMin).toBe(25);
     // The oldest activity (the training camp, 2024) must be excluded.
     expect(
-      recentActivities.some((activity) => activity.trainingCamp?.campType === "Initiation"),
+      recentActivities.some(
+        (activity) => activity.trainingCamp?.trainingCampTypeId === trainingCampTypeId,
+      ),
     ).toBe(false);
   });
 });

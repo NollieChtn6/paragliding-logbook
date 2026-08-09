@@ -8,19 +8,20 @@ import { updateTrainingCamp } from "./update-training-camp.service";
 let userId: string;
 let otherUserId: string;
 let schoolId: string;
+let trainingCampTypeId: string;
+let otherTrainingCampTypeId: string;
 let trainingCampId: string;
 let activityId: string;
 
 const validTrainingCampInput = {
   startDate: "2025-01-10",
   endDate: "2025-01-15",
-  campType: "Perfectionnement",
 };
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, school] = await Promise.all([
+  const [user, otherUser, school, trainingCampType, otherTrainingCampType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `update-tc-${suffix}@paragliding-logbook.local`,
@@ -34,12 +35,20 @@ beforeAll(async () => {
       },
     }),
     prisma.school.create({ data: { name: `Update Training Camp Test School ${suffix}` } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INIT" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   schoolId = school.id;
+  trainingCampTypeId = trainingCampType.id;
+  otherTrainingCampTypeId = otherTrainingCampType.id;
 
-  const trainingCamp = await createTrainingCamp(userId, { ...validTrainingCampInput, schoolId });
+  const trainingCamp = await createTrainingCamp(userId, {
+    ...validTrainingCampInput,
+    schoolId,
+    trainingCampTypeId,
+  });
   trainingCampId = trainingCamp.id;
   activityId = trainingCamp.activityId;
 });
@@ -59,13 +68,13 @@ describe("updateTrainingCamp (integration)", () => {
     const updated = await updateTrainingCamp(userId, activityId, {
       ...validTrainingCampInput,
       schoolId,
-      campType: "Initiation",
+      trainingCampTypeId: otherTrainingCampTypeId,
       summary: "Bilan mis à jour.",
       certification: "Brevet de pilote",
     });
 
     expect(updated.id).toBe(trainingCampId);
-    expect(updated.campType).toBe("Initiation");
+    expect(updated.trainingCampTypeId).toBe(otherTrainingCampTypeId);
     expect(updated.summary).toBe("Bilan mis à jour.");
     expect(updated.certification).toBe("Brevet de pilote");
   });
@@ -74,6 +83,7 @@ describe("updateTrainingCamp (integration)", () => {
     const updated = await updateTrainingCamp(userId, activityId, {
       ...validTrainingCampInput,
       schoolId,
+      trainingCampTypeId,
     });
 
     expect(updated.summary).toBeNull();
@@ -85,21 +95,40 @@ describe("updateTrainingCamp (integration)", () => {
       updateTrainingCamp(userId, activityId, {
         ...validTrainingCampInput,
         schoolId,
+        trainingCampTypeId,
         startDate: "2025-01-15",
         endDate: "2025-01-10",
       }),
     ).rejects.toThrow();
   });
 
+  it("fails when the training camp type does not exist", async () => {
+    await expect(
+      updateTrainingCamp(userId, activityId, {
+        ...validTrainingCampInput,
+        schoolId,
+        trainingCampTypeId: crypto.randomUUID(),
+      }),
+    ).rejects.toThrow();
+  });
+
   it("throws ActivityNotFoundError when the activity does not exist", async () => {
     await expect(
-      updateTrainingCamp(userId, crypto.randomUUID(), { ...validTrainingCampInput, schoolId }),
+      updateTrainingCamp(userId, crypto.randomUUID(), {
+        ...validTrainingCampInput,
+        schoolId,
+        trainingCampTypeId,
+      }),
     ).rejects.toThrow(ActivityNotFoundError);
   });
 
   it("throws ActivityNotFoundError when the activity belongs to another user", async () => {
     await expect(
-      updateTrainingCamp(otherUserId, activityId, { ...validTrainingCampInput, schoolId }),
+      updateTrainingCamp(otherUserId, activityId, {
+        ...validTrainingCampInput,
+        schoolId,
+        trainingCampTypeId,
+      }),
     ).rejects.toThrow(ActivityNotFoundError);
   });
 });

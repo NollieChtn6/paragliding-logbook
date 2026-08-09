@@ -15,10 +15,11 @@ type NewActivityFormProps = {
   activityTypes: { code: string }[];
   sites: { id: string; name: string }[];
   flightTypes: { id: string; code: string }[];
+  trainingCampTypes: { id: string; code: string }[];
   schools: { id: string; name: string }[];
   trainingCamps: {
     id: string;
-    campType: string;
+    trainingCampType: { code: string };
     startDate: Date;
     endDate: Date;
     school: { name: string };
@@ -38,6 +39,7 @@ export function NewActivityForm({
   activityTypes,
   sites,
   flightTypes,
+  trainingCampTypes,
   schools,
   trainingCamps,
 }: NewActivityFormProps) {
@@ -68,7 +70,11 @@ export function NewActivityForm({
         />
       )}
       {selectedCode === "TRAINING_CAMP" && (
-        <TrainingCampForm schools={schools} action={createTrainingCampAction} />
+        <TrainingCampForm
+          schools={schools}
+          trainingCampTypes={trainingCampTypes}
+          action={createTrainingCampAction}
+        />
       )}
       {selectedCode === "GROUND_HANDLING" && (
         <GroundHandlingSessionForm

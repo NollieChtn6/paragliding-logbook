@@ -59,19 +59,23 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
   }
 
   if (activity.trainingCamp) {
-    const schools = await prisma.school.findMany({ select: { id: true, name: true } });
+    const [schools, trainingCampTypes] = await Promise.all([
+      prisma.school.findMany({ select: { id: true, name: true } }),
+      prisma.trainingCampType.findMany({ select: { id: true, code: true } }),
+    ]);
 
     return (
       <div className="flex flex-col gap-6">
         <PageHeader title="Modifier le stage" />
         <TrainingCampForm
           schools={schools}
+          trainingCampTypes={trainingCampTypes}
           action={updateTrainingCampAction.bind(null, activity.id)}
           defaultValues={{
             startDate: activity.trainingCamp.startDate,
             endDate: activity.trainingCamp.endDate,
             schoolId: activity.trainingCamp.schoolId,
-            campType: activity.trainingCamp.campType,
+            trainingCampTypeId: activity.trainingCamp.trainingCampTypeId,
             summary: activity.trainingCamp.summary ?? undefined,
             certification: activity.trainingCamp.certification ?? undefined,
           }}

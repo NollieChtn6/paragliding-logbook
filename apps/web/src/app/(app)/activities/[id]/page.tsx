@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { formatFlightLocation, getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
-import { FLIGHT_TYPE_LABELS } from "@/lib/reference-labels";
+import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 
 // Message affiché dans la boîte de confirmation quand le stage supprimé a
 // des vols/séances rattachés : trainingCampId est en onDelete: SetNull
@@ -47,6 +47,10 @@ function formatSitePoint(point: {
   site: { name: string };
 }): string {
   return `${point.site.name} — ${point.label} (${point.altitudeM} m)`;
+}
+
+function formatTrainingCampType(trainingCampType: { code: string }): string {
+  return TRAINING_CAMP_TYPE_LABELS[trainingCampType.code] ?? trainingCampType.code;
 }
 
 export default async function ActivityDetailPage(props: PageProps<"/activities/[id]">) {
@@ -100,7 +104,10 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
           <Field label="Observations" value={activity.flight.observations} />
           <Field label="Points d'amélioration" value={activity.flight.improvementPoints} />
           {activity.flight.trainingCamp && (
-            <Field label="Stage associé" value={activity.flight.trainingCamp.campType} />
+            <Field
+              label="Stage associé"
+              value={formatTrainingCampType(activity.flight.trainingCamp.trainingCampType)}
+            />
           )}
         </dl>
       )}
@@ -109,7 +116,10 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         <>
           <dl className="flex flex-col gap-3">
             <Field label="École" value={activity.trainingCamp.school.name} />
-            <Field label="Type" value={activity.trainingCamp.campType} />
+            <Field
+              label="Type"
+              value={formatTrainingCampType(activity.trainingCamp.trainingCampType)}
+            />
             <Field label="Début" value={formatDate(activity.trainingCamp.startDate)} />
             <Field label="Fin" value={formatDate(activity.trainingCamp.endDate)} />
             {activity.trainingCamp.summary && (
@@ -182,7 +192,9 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
           {activity.groundHandlingSession.trainingCamp && (
             <Field
               label="Stage associé"
-              value={activity.groundHandlingSession.trainingCamp.campType}
+              value={formatTrainingCampType(
+                activity.groundHandlingSession.trainingCamp.trainingCampType,
+              )}
             />
           )}
         </dl>

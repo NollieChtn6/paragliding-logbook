@@ -8,6 +8,7 @@ let userId: string;
 let otherUserId: string;
 let siteId: string;
 let schoolId: string;
+let trainingCampTypeId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
 
@@ -42,16 +43,20 @@ beforeAll(async () => {
   });
   siteId = site.id;
 
-  const school = await prisma.school.create({
-    data: { name: `Integration Test School GHS ${suffix}` },
-  });
+  const [school, trainingCampType] = await Promise.all([
+    prisma.school.create({
+      data: { name: `Integration Test School GHS ${suffix}` },
+    }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+  ]);
   schoolId = school.id;
+  trainingCampTypeId = trainingCampType.id;
 
   const trainingCamp = await createTrainingCamp(userId, {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Perfectionnement",
+    trainingCampTypeId,
   });
   trainingCampId = trainingCamp.id;
 
@@ -59,7 +64,7 @@ beforeAll(async () => {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Stage d'un autre utilisateur",
+    trainingCampTypeId,
   });
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 });

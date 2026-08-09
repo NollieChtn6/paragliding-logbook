@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 export function listTrainingCamps(userId: string) {
   return prisma.trainingCamp.findMany({
     where: { activity: { userId } },
-    include: { school: true },
+    include: { school: true, trainingCampType: true },
     orderBy: { startDate: "desc" },
   });
 }
