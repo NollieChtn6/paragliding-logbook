@@ -67,10 +67,11 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Choisir et configurer la solution d'authentification — Better Auth (email + mot de passe, hash Argon2, adaptateur Prisma)
 - [x] Créer le modèle utilisateur — `User` + modèles Better Auth (`Session`, `Account`, `Verification`)
 - [x] Préparer la gestion multi-utilisateurs — chaque donnée métier reste liée à un `userId` résolu côté serveur depuis la session
-- [x] Page de connexion `/sign-in` (email + mot de passe, pas d'inscription publique — comptes créés par le seed), avec retour vers la page initialement demandée (`redirectTo`, validé contre les open redirects)
+- [x] Page de connexion `/sign-in` (email + mot de passe), avec retour vers la page initialement demandée (`redirectTo`, validé contre les open redirects)
 - [x] Protection des routes (`/activities`, `/activities/new`, `/activities/[id]`, `/flights/new`) : vérification optimiste dans `src/proxy.ts`, vérification faisant autorité via `requireCurrentUser()`
 - [x] `User.passwordHash` retiré : le hash Argon2 vit uniquement sur `Account.password` (Better Auth)
 - [x] Changement de mot de passe `/settings/security` — service `changePassword` (`src/features/account/`), utilise `auth.api.changePassword` de Better Auth (vérification/hash Argon2 déjà branchés), révoque les autres sessions à chaque changement, testé en intégration contre une vraie base
+- [x] Inscription publique `/sign-up` (email + mot de passe) — service `signUp` (`src/features/auth/`), utilise `auth.api.signUpEmail` de Better Auth, connexion automatique après inscription, `redirectTo` transmis entre `/sign-in` et `/sign-up`, comptes de développement retirés du seed (`prisma/seed.ts`)
 
 ---
 
@@ -78,7 +79,6 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 ### Authentification (backlog restreint)
 
-- [ ] Inscription publique (`/sign-up`) — volontairement hors MVP pour l'instant, comptes créés de manière contrôlée
 - [ ] Réinitialisation de mot de passe
 
 ### Gestion des activités

@@ -86,7 +86,7 @@ API intégrée Next.js
 - Better Auth
 - Email + mot de passe
 - Hash sécurisé des mots de passe avec Argon2
-- Pas d'inscription publique dans le MVP (`/sign-in` uniquement) : comptes créés de manière contrôlée
+- Inscription publique via `/sign-up` (`/sign-in` pour la connexion)
 
 Better Auth plutôt qu'Auth.js : Auth.js est passé en mode maintenance (son
 équipe est désormais celle de Better Auth, qui recommande Better Auth pour les
