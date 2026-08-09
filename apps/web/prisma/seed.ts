@@ -168,13 +168,13 @@ async function main() {
   // (upsert impossible) : vérification manuelle pour rester idempotent.
   let testSite = await prisma.site.findFirst({ where: { name: TEST_SITE_NAME } });
   if (!testSite) {
-    testSite = await prisma.site.create({ data: { name: TEST_SITE_NAME } });
+    testSite = await prisma.site.create({ data: { name: TEST_SITE_NAME, countryCode: "FR" } });
   }
   await ensureTestSitePoints(prisma, testSite.id);
 
   const testSchool = await prisma.school.findFirst({ where: { name: TEST_SCHOOL_NAME } });
   if (!testSchool) {
-    await prisma.school.create({ data: { name: TEST_SCHOOL_NAME } });
+    await prisma.school.create({ data: { name: TEST_SCHOOL_NAME, countryCode: "FR" } });
   }
 }
 

@@ -180,13 +180,13 @@ Champs :
 
 ### Site
 
-Lieu de pratique.
+Lieu de pratique. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md) : destiné à une future gestion applicative, pas seulement au seed.
 
 Champs :
 
 - name
 - region (optionnel)
-- country (optionnel)
+- countryCode (optionnel) — code pays ISO 3166-1 alpha-2 (`FR`, `CH`, `IT`, `ES`...), pas du texte libre
 - latitude (optionnel) — localisation approximative du site
 - longitude (optionnel)
 - primaryTakeoffPointId (optionnel, FK SitePoint) — décollage principal
@@ -200,7 +200,7 @@ Champs :
 
 ### SitePoint
 
-Point physique appartenant à un Site (décollage, atterrissage...). Un Site peut avoir plusieurs `SitePoint` d'un même `SitePointType` ; `Site.primaryTakeoffPointId`/`primaryLandingPointId` désignent le point principal, pas l'ensemble des points.
+Point physique appartenant à un Site (décollage, atterrissage...). Un Site peut avoir plusieurs `SitePoint` d'un même `SitePointType` ; `Site.primaryTakeoffPointId`/`primaryLandingPointId` désignent le point principal, pas l'ensemble des points. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Site`/`School`.
 
 Relations :
 
@@ -238,13 +238,18 @@ Valeurs initiales (peuplées par le seed) :
 
 ### School
 
-École fédérale de parapente.
+École fédérale de parapente. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Site`.
 
 Champs :
 
 - name
+- address (optionnel)
+- postalCode (optionnel)
+- city (optionnel)
+- countryCode (optionnel) — code pays ISO 3166-1 alpha-2, même convention que `Site.countryCode`
+- latitude (optionnel)
+- longitude (optionnel)
 - website (optionnel)
-- location (optionnel)
 - createdAt
 - updatedAt
 

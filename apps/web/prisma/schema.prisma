@@ -119,15 +119,18 @@ model Activity {
 /// gestion des sites pour l'instant, docs/todo.md). L'appartenance du point désigné
 /// au même Site et au bon SitePointType n'est pas exprimable nativement en
 /// Prisma/Postgres (pas de CHECK inter-lignes) : à valider côté applicatif.
+/// Référentiel éditorial destiné à une future gestion applicative (ADR 004,
+/// docs/decisions/004-editable-referentials.md) : countryCode est un code
+/// ISO 3166-1 alpha-2 (FR, CH, IT, ES...), pas du texte libre.
 model Site {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  region    String?
-  country   String?
-  latitude  Float?
-  longitude Float?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  region      String?
+  countryCode String?  @db.Char(2)
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   primaryTakeoffPointId String? @db.Uuid
   primaryLandingPointId String? @db.Uuid
@@ -135,7 +138,7 @@ model Site {
   primaryTakeoffPoint SitePoint? @relation("SitePrimaryTakeoff", fields: [primaryTakeoffPointId], references: [id], onDelete: SetNull)
   primaryLandingPoint SitePoint? @relation("SitePrimaryLanding", fields: [primaryLandingPointId], references: [id], onDelete: SetNull)
 
-  points                 SitePoint[]              @relation("SitePoints")
+  points                 SitePoint[]             @relation("SitePoints")
   groundHandlingSessions GroundHandlingSession[]
 
   @@index([primaryTakeoffPointId])
@@ -174,10 +177,10 @@ model FlightType {
 /// pas son rôle dans un Flight donné : un point TAKEOFF peut être utilisé comme
 /// arrivalPoint d'un vol (ex. cross qui atterrit sur le décollage d'un autre site).
 model SitePoint {
-  id              String  @id @default(uuid()) @db.Uuid
+  id              String @id @default(uuid()) @db.Uuid
   label           String
-  siteId          String  @db.Uuid
-  sitePointTypeId String  @db.Uuid
+  siteId          String @db.Uuid
+  sitePointTypeId String @db.Uuid
   latitude        Float
   longitude       Float
   altitudeM       Int
@@ -196,14 +199,23 @@ model SitePoint {
 }
 
 /// École fédérale de parapente. Donnée de référence partagée (pas de userId),
-/// au même titre que Site.
+/// au même titre que Site. Référentiel éditorial destiné à une future gestion
+/// applicative (ADR 004, docs/decisions/004-editable-referentials.md) :
+/// countryCode est un code ISO 3166-1 alpha-2 (FR, CH, IT, ES...), pas du
+/// texte libre — adresse structurée (address/postalCode/city/countryCode)
+/// plutôt que l'ancien champ location en texte libre.
 model School {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  website   String?
-  location  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  address     String?
+  postalCode  String?
+  city        String?
+  countryCode String?  @db.Char(2)
+  latitude    Float?
+  longitude   Float?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   trainingCamps TrainingCamp[]
 }
