@@ -5,15 +5,15 @@ import { listTrainingCamps } from "./list-training-camps.service";
 let userId: string;
 let otherUserId: string;
 let schoolId: string;
-let initTrainingCampTypeId: string;
-let progressionTrainingCampTypeId: string;
+let initiationTrainingCampTypeId: string;
+let autonomyTrainingCampTypeId: string;
 let sivTrainingCampTypeId: string;
 const activityIds: string[] = [];
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, school, initType, progressionType, sivType] = await Promise.all([
+  const [user, otherUser, school, initiationType, autonomyType, sivType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `list-training-camps-${suffix}@paragliding-logbook.local`,
@@ -27,15 +27,15 @@ beforeAll(async () => {
       },
     }),
     prisma.school.create({ data: { name: `List Training Camps Test School ${suffix}` } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INIT" } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INITIATION" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
     prisma.trainingCampType.findUniqueOrThrow({ where: { code: "SIV" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   schoolId = school.id;
-  initTrainingCampTypeId = initType.id;
-  progressionTrainingCampTypeId = progressionType.id;
+  initiationTrainingCampTypeId = initiationType.id;
+  autonomyTrainingCampTypeId = autonomyType.id;
   sivTrainingCampTypeId = sivType.id;
 
   const trainingCampActivityType = await prisma.activityType.findUniqueOrThrow({
@@ -51,7 +51,7 @@ beforeAll(async () => {
     data: {
       activityId: olderActivity.id,
       schoolId,
-      trainingCampTypeId: initTrainingCampTypeId,
+      trainingCampTypeId: initiationTrainingCampTypeId,
       startDate: new Date("2024-01-10"),
       endDate: new Date("2024-01-15"),
     },
@@ -64,7 +64,7 @@ beforeAll(async () => {
     data: {
       activityId: newerActivity.id,
       schoolId,
-      trainingCampTypeId: progressionTrainingCampTypeId,
+      trainingCampTypeId: autonomyTrainingCampTypeId,
       startDate: new Date("2025-06-01"),
       endDate: new Date("2025-06-10"),
     },
@@ -99,8 +99,8 @@ describe("listTrainingCamps (integration)", () => {
     const trainingCamps = await listTrainingCamps(userId);
 
     expect(trainingCamps).toHaveLength(2);
-    expect(trainingCamps[0]?.trainingCampType.code).toBe("PROGRESSION");
-    expect(trainingCamps[1]?.trainingCampType.code).toBe("INIT");
+    expect(trainingCamps[0]?.trainingCampType.code).toBe("AUTONOMY");
+    expect(trainingCamps[1]?.trainingCampType.code).toBe("INITIATION");
     expect(trainingCamps.some((camp) => camp.trainingCampType.code === "SIV")).toBe(false);
   });
 
