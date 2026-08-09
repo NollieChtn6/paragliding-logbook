@@ -178,10 +178,17 @@ Pas de `label`, même principe que les autres tables de référence ci-dessus. P
 
 Valeurs initiales (peuplées par le seed) :
 
-- INIT
-- PROGRESSION
+- INITIATION
+- AUTONOMY
+- ADVANCED
 - THERMAL
+- CROSS_COUNTRY
 - SIV
+- HIKE_AND_FLY
+- ACRO_DISCOVERY
+- ACRO_ADVANCED
+- SAFETY
+- OTHER
 
 ---
 

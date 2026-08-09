@@ -32,8 +32,15 @@ export const FLIGHT_TYPE_LABELS: Record<string, string> = {
 };
 
 export const TRAINING_CAMP_TYPE_LABELS: Record<string, string> = {
-  INIT: "Initiation",
-  PROGRESSION: "Progression",
+  INITIATION: "Initiation",
+  AUTONOMY: "Autonomie",
+  ADVANCED: "Perfectionnement",
   THERMAL: "Thermique",
+  CROSS_COUNTRY: "Distance",
   SIV: "SIV",
+  HIKE_AND_FLY: "Marche & vol",
+  ACRO_DISCOVERY: "Découverte acro",
+  ACRO_ADVANCED: "Acro avancée",
+  SAFETY: "Sécurité / pilotage",
+  OTHER: "Autre",
 };

@@ -42,16 +42,24 @@ function groupPointsBySite(points: SitePointOption[]): SitePointGroup[] {
   return [...groups.values()];
 }
 
-// 0°=N, 90°=E, 180°=S, 270°=O : convention déjà en place (SitePoint.orientationDeg),
-// simple conversion pour l'affichage (docs/decisions/005-flight-takeoff-landing-points.md,
-// point 11 — pas de nouvelle refonte de l'orientation dans cette PR).
+// Les degrés restent la donnée de référence en base (SitePoint.orientationDeg,
+// docs/decisions/005-flight-takeoff-landing-points.md point 11) : conversion
+// vers les 8 points cardinaux uniquement pour l'affichage. Rose des vents
+// complète (pas seulement N/E/S/O) : le seed (prisma/seed.ts) utilise aussi
+// les points intermédiaires (ex. SE, SO, NO), qui retombaient auparavant sur
+// un affichage en degrés bruts ("135°"), incohérent avec les points cardinaux
+// simples affichés en lettres.
 function formatOrientation(orientationDeg: number | null): string | null {
   if (orientationDeg === null) return null;
   const cardinals = [
     { deg: 0, label: "N" },
+    { deg: 45, label: "NE" },
     { deg: 90, label: "E" },
+    { deg: 135, label: "SE" },
     { deg: 180, label: "S" },
+    { deg: 225, label: "SO" },
     { deg: 270, label: "O" },
+    { deg: 315, label: "NO" },
   ];
   const exact = cardinals.find((c) => c.deg === orientationDeg);
   return exact ? exact.label : `${orientationDeg}°`;

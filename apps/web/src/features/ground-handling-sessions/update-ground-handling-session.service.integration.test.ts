@@ -40,7 +40,7 @@ beforeAll(async () => {
     }),
     prisma.site.create({ data: { name: `Update Ground Handling Test Site ${suffix}` } }),
     prisma.school.create({ data: { name: `Update Ground Handling Test School ${suffix}` } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;

@@ -39,7 +39,7 @@ beforeAll(async () => {
       prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
       prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
       prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
-      prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+      prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
     ]);
   userId = user.id;
   otherUserId = otherUser.id;
