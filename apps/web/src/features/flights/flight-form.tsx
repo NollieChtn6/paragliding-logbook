@@ -33,6 +33,8 @@ type FlightTypeOption = { id: string; code: string };
 type FlightFormActionState = { success: true } | { success: false; error: string };
 
 type FlightFormDefaultValues = {
+  // Porte aussi l'heure (voir toTimeInputValue ci-dessous) : pas de champ
+  // "time" séparé ici, un seul Date sert à préremplir les deux <Input>.
   date?: Date;
   trainingCampId?: string;
   durationMin?: number;
@@ -82,6 +84,7 @@ function formatFlightTypeOption(flightType: FlightTypeOption): string {
 
 const WIZARD_STEP_2_REQUIRED_FIELDS = [
   "date",
+  "time",
   "takeoffPointId",
   "landingPointId",
   "durationMin",
@@ -89,12 +92,17 @@ const WIZARD_STEP_2_REQUIRED_FIELDS = [
 ];
 const WIZARD_STEP_3_REQUIRED_FIELDS = ["observations", "improvementPoints"];
 
-// Format attendu par <Input type="date">. Cohérent avec la lecture : le
-// schéma Zod (flightSchema) parse "YYYY-MM-DD" en UTC minuit via
-// z.coerce.date(), donc toISOString().slice(0, 10) restitue exactement la
-// même date, indépendamment du fuseau du navigateur.
+// Format attendu par <Input type="date">/<Input type="time">. Cohérent avec
+// la lecture : le schéma Zod (flightSchema) combine ces deux chaînes en un
+// Date UTC littéral (pas de conversion de fuseau horaire), donc les relire
+// via toISOString().slice(...) restitue exactement les mêmes chaînes,
+// indépendamment du fuseau du navigateur.
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+function toTimeInputValue(date: Date): string {
+  return date.toISOString().slice(11, 16);
 }
 
 // Formulaire de vol partagé (shadcn/ui exclusivement, cf. CLAUDE.md), utilisé
@@ -188,17 +196,32 @@ export function FlightForm({
         <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
       )}
       <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="date">Date</Label>
-          <Input
-            id="date"
-            name="date"
-            type="date"
-            defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
-            required
-            aria-invalid={!!fieldErrors.date}
-          />
-          {fieldErrors.date && <p className="text-sm text-destructive">{fieldErrors.date}</p>}
+        <div className="flex gap-3">
+          <div className="flex flex-1 flex-col gap-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              defaultValue={defaultValues?.date ? toDateInputValue(defaultValues.date) : undefined}
+              required
+              aria-invalid={!!fieldErrors.date}
+            />
+            {fieldErrors.date && <p className="text-sm text-destructive">{fieldErrors.date}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="time">Heure</Label>
+            <Input
+              id="time"
+              name="time"
+              type="time"
+              defaultValue={defaultValues?.date ? toTimeInputValue(defaultValues.date) : undefined}
+              required
+              aria-invalid={!!fieldErrors.time}
+            />
+            {fieldErrors.time && <p className="text-sm text-destructive">{fieldErrors.time}</p>}
+          </div>
         </div>
 
         <SitePointCombobox

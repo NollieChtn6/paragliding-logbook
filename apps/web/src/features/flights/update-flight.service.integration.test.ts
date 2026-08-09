@@ -23,6 +23,7 @@ let activityId: string;
 
 const validFlightInput = {
   date: "2025-01-15",
+  time: "14:30",
   durationMin: "35",
   observations: "Integration test flight.",
   improvementPoints: "Work on approach phases.",

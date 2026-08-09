@@ -3,6 +3,7 @@ import { groundHandlingSchema } from "./ground-handling";
 
 const validGroundHandling = {
   date: "2025-01-15",
+  time: "10:00",
   siteId: "550e8400-e29b-41d4-a716-446655440000",
   durationMin: "30",
   exercises: "Contrôle au sol, gestion des surventes.",
@@ -58,6 +59,22 @@ describe("groundHandlingSchema", () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0]?.message).toBe("Les exercices travaillés sont obligatoires.");
+    }
+  });
+
+  it("rejects a malformed time with a French, user-friendly message", () => {
+    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, time: "25:99" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("L'heure de la séance est invalide.");
+    }
+  });
+
+  it("combines date and time into a single UTC Date", () => {
+    const result = groundHandlingSchema.safeParse(validGroundHandling);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.date.toISOString()).toBe("2025-01-15T10:00:00.000Z");
     }
   });
 });

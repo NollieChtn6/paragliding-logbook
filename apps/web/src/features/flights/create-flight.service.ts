@@ -101,7 +101,15 @@ export async function createFlight(userId: string, rawInput: unknown) {
         };
         throw new ZodError([issue]);
       }
-      if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
+      // Comparaison au jour près (pas à l'instant près) : startDate/endDate
+      // n'ont pas d'heure, alors qu'input.date en a désormais une (voir
+      // lib/validations/flight.ts) — comparer les instants complets
+      // rejetterait à tort un vol en fin de journée le dernier jour du
+      // stage (son heure dépasserait le minuit d'endDate).
+      const flightDay = input.date.toISOString().slice(0, 10);
+      const startDay = trainingCamp.startDate.toISOString().slice(0, 10);
+      const endDay = trainingCamp.endDate.toISOString().slice(0, 10);
+      if (flightDay < startDay || flightDay > endDay) {
         const issue: ZodIssue = {
           code: "custom",
           path: ["date"],

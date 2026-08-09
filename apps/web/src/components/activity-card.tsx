@@ -32,14 +32,19 @@ type ActivityCardProps = {
   href: string;
   type: ActivityCardType;
   title: string;
-  subtitle: string;
+  // 2 lignes distinctes plutôt qu'un sous-titre combiné (voir
+  // getActivitySummary, features/activities/activity-summary.ts) : avec le
+  // titre, 3 lignes au total — lisible sur mobile sans tout tronquer sur une
+  // seule ligne de sous-titre.
+  location: string;
+  dateInfo: string;
 };
 
 // Ligne de liste réutilisée par /activities et le dashboard (activités
 // récentes). Le glyphe par type vient de activity.activityType.code — pas
-// de dépendance à getActivitySummary (qui ne renvoie qu'un titre/sous-titre
-// textuels), l'appelant a toujours l'Activity complète sous la main.
-export function ActivityCard({ href, type, title, subtitle }: ActivityCardProps) {
+// de dépendance à getActivitySummary (qui ne renvoie que du texte),
+// l'appelant a toujours l'Activity complète sous la main.
+export function ActivityCard({ href, type, title, location, dateInfo }: ActivityCardProps) {
   const { icon: Icon, className } = ACTIVITY_TYPE_STYLE[type];
 
   return (
@@ -55,7 +60,8 @@ export function ActivityCard({ href, type, title, subtitle }: ActivityCardProps)
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-medium text-foreground">{title}</span>
-        <span className="block truncate text-sm text-muted-foreground">{subtitle}</span>
+        <span className="block truncate text-sm text-muted-foreground">{location}</span>
+        <span className="block truncate text-sm text-muted-foreground">{dateInfo}</span>
       </span>
     </Link>
   );

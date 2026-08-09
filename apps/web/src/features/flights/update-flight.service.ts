@@ -92,7 +92,11 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
         };
         throw new ZodError([issue]);
       }
-      if (input.date < trainingCamp.startDate || input.date > trainingCamp.endDate) {
+      // Comparaison au jour près, voir create-flight.service.ts.
+      const flightDay = input.date.toISOString().slice(0, 10);
+      const startDay = trainingCamp.startDate.toISOString().slice(0, 10);
+      const endDay = trainingCamp.endDate.toISOString().slice(0, 10);
+      if (flightDay < startDay || flightDay > endDay) {
         const issue: ZodIssue = {
           code: "custom",
           path: ["date"],

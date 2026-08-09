@@ -90,6 +90,7 @@ describe("deleteActivity (integration)", () => {
   it("deletes a Flight's Activity and the Flight along with it", async () => {
     const flight = await createFlight(userId, {
       date: "2025-01-15",
+      time: "14:30",
       takeoffPointId,
       landingPointId,
       durationMin: "35",
@@ -111,6 +112,7 @@ describe("deleteActivity (integration)", () => {
     const session = await createGroundHandlingSession(userId, {
       siteId,
       date: "2025-02-01",
+      time: "10:00",
       durationMin: "20",
       exercises: "Contrôle au sol",
     });
@@ -148,6 +150,7 @@ describe("deleteActivity (integration)", () => {
 
     const flight = await createFlight(userId, {
       date: "2025-01-12",
+      time: "14:30",
       takeoffPointId,
       landingPointId,
       durationMin: "35",
@@ -161,6 +164,7 @@ describe("deleteActivity (integration)", () => {
     const session = await createGroundHandlingSession(userId, {
       siteId,
       date: "2025-01-13",
+      time: "10:00",
       durationMin: "20",
       exercises: "Contrôle au sol",
       trainingCampId: trainingCamp.id,
@@ -186,6 +190,7 @@ describe("deleteActivity (integration)", () => {
   it("throws ActivityNotFoundError, and does not delete, when the activity belongs to another user", async () => {
     const flight = await createFlight(userId, {
       date: "2025-01-16",
+      time: "14:30",
       takeoffPointId,
       landingPointId,
       durationMin: "35",
