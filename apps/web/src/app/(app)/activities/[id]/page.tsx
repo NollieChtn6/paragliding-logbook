@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFlightLocation, getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { formatDurationMinutes } from "@/lib/format-duration";
 import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 import { cn } from "@/lib/utils";
 
@@ -166,7 +167,11 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
       {activity.flight && (
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard icon={Clock3} label="Durée" value={`${activity.flight.durationMin} min`} />
+            <StatCard
+              icon={Clock3}
+              label="Durée"
+              value={formatDurationMinutes(activity.flight.durationMin)}
+            />
             <StatCard
               icon={Tag}
               label="Type de vol"
@@ -267,7 +272,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                       {formatFlightLocation(flight)}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(flight.date)} · {flight.durationMin} min
+                      {formatDate(flight.date)} · {formatDurationMinutes(flight.durationMin)}
                     </span>
                   </li>
                 ))}
@@ -290,8 +295,8 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                       {groundHandlingSession.site.name}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {formatDate(groundHandlingSession.date)} · {groundHandlingSession.durationMin}{" "}
-                      min
+                      {formatDate(groundHandlingSession.date)} ·{" "}
+                      {formatDurationMinutes(groundHandlingSession.durationMin)}
                     </span>
                   </li>
                 ))}
@@ -307,7 +312,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
             <StatCard
               icon={Clock3}
               label="Durée"
-              value={`${activity.groundHandlingSession.durationMin} min`}
+              value={formatDurationMinutes(activity.groundHandlingSession.durationMin)}
             />
           </div>
 

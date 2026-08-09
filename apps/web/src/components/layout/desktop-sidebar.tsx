@@ -61,6 +61,7 @@ export function DesktopSidebar() {
           variant="outline"
           size="icon"
           aria-label="Paramètres de sécurité"
+          title="Paramètres de sécurité"
           render={
             <Link href="/settings/security">
               <Settings />

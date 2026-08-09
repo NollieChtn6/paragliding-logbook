@@ -16,7 +16,14 @@ type SelectClearButtonProps = {
 // permettre ce reset imperatif).
 export function SelectClearButton({ onClear, label }: SelectClearButtonProps) {
   return (
-    <Button type="button" variant="ghost" size="icon-sm" onClick={onClear} aria-label={label}>
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-sm"
+      onClick={onClear}
+      aria-label={label}
+      title={label}
+    >
       <X className="size-4" />
     </Button>
   );

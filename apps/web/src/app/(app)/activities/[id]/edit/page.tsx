@@ -3,6 +3,7 @@ import { updateFlightAction } from "@/actions/update-flight";
 import { updateGroundHandlingSessionAction } from "@/actions/update-ground-handling-session";
 import { updateTrainingCampAction } from "@/actions/update-training-camp";
 import { PageHeader } from "@/components/layout/page-header";
+import { LeaveFormButton } from "@/components/leave-form-button";
 import { getActivityById } from "@/features/activities";
 import { FlightForm } from "@/features/flights/flight-form";
 import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/ground-handling-session-form";
@@ -37,7 +38,16 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
 
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader title="Modifier le vol" />
+        <PageHeader
+          title="Modifier le vol"
+          actions={
+            <LeaveFormButton
+              href={`/activities/${activity.id}`}
+              title="Abandonner la modification ?"
+              description="Les modifications ne seront pas conservées."
+            />
+          }
+        />
         <FlightForm
           flightTypes={flightTypes}
           trainingCamps={trainingCamps}
@@ -66,7 +76,16 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
 
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader title="Modifier le stage" />
+        <PageHeader
+          title="Modifier le stage"
+          actions={
+            <LeaveFormButton
+              href={`/activities/${activity.id}`}
+              title="Abandonner la modification ?"
+              description="Les modifications ne seront pas conservées."
+            />
+          }
+        />
         <TrainingCampForm
           schools={schools}
           trainingCampTypes={trainingCampTypes}
@@ -94,7 +113,16 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
 
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader title="Modifier la séance" />
+        <PageHeader
+          title="Modifier la séance"
+          actions={
+            <LeaveFormButton
+              href={`/activities/${activity.id}`}
+              title="Abandonner la modification ?"
+              description="Les modifications ne seront pas conservées."
+            />
+          }
+        />
         <GroundHandlingSessionForm
           sites={sites}
           trainingCamps={trainingCamps}
