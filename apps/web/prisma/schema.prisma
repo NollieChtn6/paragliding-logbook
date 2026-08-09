@@ -276,7 +276,8 @@ model TrainingCamp {
 /// différence des autres tables de référence ci-dessus (demande explicite,
 /// pas un oubli). Pas de label : affichage via TRAINING_CAMP_TYPE_LABELS
 /// (src/lib/reference-labels.ts). Valeurs initiales (peuplées par le seed) :
-/// INIT, PROGRESSION, THERMAL, SIV.
+/// INITIATION, AUTONOMY, ADVANCED, THERMAL, CROSS_COUNTRY, SIV, HIKE_AND_FLY,
+/// ACRO_DISCOVERY, ACRO_ADVANCED, SAFETY, OTHER.
 model TrainingCampType {
   id        String   @id @default(uuid()) @db.Uuid
   code      String   @unique

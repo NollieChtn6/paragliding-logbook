@@ -26,7 +26,7 @@ const crossCountryFlightType = { id: "ft-cross-country", code: "CROSS_COUNTRY" }
 
 const trainingCampType = {
   id: "tct-1",
-  code: "PROGRESSION",
+  code: "AUTONOMY",
   createdAt: new Date("2025-01-01"),
   updatedAt: new Date("2025-01-01"),
 };
