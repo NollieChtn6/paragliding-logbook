@@ -5,7 +5,7 @@ const validTrainingCamp = {
   startDate: "2025-01-10",
   endDate: "2025-01-15",
   schoolId: "550e8400-e29b-41d4-a716-446655440000",
-  campType: "Perfectionnement",
+  trainingCampTypeId: "660e8400-e29b-41d4-a716-446655440001",
 };
 
 describe("trainingCampSchema", () => {
@@ -43,11 +43,14 @@ describe("trainingCampSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects an empty camp type with a French, user-friendly message", () => {
-    const result = trainingCampSchema.safeParse({ ...validTrainingCamp, campType: "  " });
+  it("rejects a malformed training camp type id with a French, user-friendly message", () => {
+    const result = trainingCampSchema.safeParse({
+      ...validTrainingCamp,
+      trainingCampTypeId: "not-a-uuid",
+    });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("Le type de stage est obligatoire.");
+      expect(result.error.issues[0]?.message).toBe("Le type de stage sélectionné est invalide.");
     }
   });
 

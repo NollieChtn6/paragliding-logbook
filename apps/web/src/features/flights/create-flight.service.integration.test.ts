@@ -12,6 +12,7 @@ let takeoffPointId: string;
 let landingPointId: string;
 let otherSiteTakeoffPointId: string;
 let flightTypeId: string;
+let trainingCampTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
@@ -26,26 +27,29 @@ const validFlightInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, takeoffType, landingType, flightType] = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: `integration-test-${suffix}@paragliding-logbook.local`,
-        name: "Integration Test User",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: `integration-test-other-${suffix}@paragliding-logbook.local`,
-        name: "Other User",
-      },
-    }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
-    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
-  ]);
+  const [user, otherUser, takeoffType, landingType, flightType, trainingCampType] =
+    await Promise.all([
+      prisma.user.create({
+        data: {
+          email: `integration-test-${suffix}@paragliding-logbook.local`,
+          name: "Integration Test User",
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: `integration-test-other-${suffix}@paragliding-logbook.local`,
+          name: "Other User",
+        },
+      }),
+      prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+      prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+      prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
+      prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+    ]);
   userId = user.id;
   otherUserId = otherUser.id;
   flightTypeId = flightType.id;
+  trainingCampTypeId = trainingCampType.id;
 
   const [site, otherSite] = await Promise.all([
     prisma.site.create({ data: { name: `Integration Test Site ${suffix}` } }),
@@ -99,7 +103,7 @@ beforeAll(async () => {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Perfectionnement",
+    trainingCampTypeId,
   });
   trainingCampId = trainingCamp.id;
 
@@ -107,7 +111,7 @@ beforeAll(async () => {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Stage d'un autre utilisateur",
+    trainingCampTypeId,
   });
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 });

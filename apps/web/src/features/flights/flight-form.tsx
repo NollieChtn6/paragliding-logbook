@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { FLIGHT_TYPE_LABELS } from "@/lib/reference-labels";
+import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 import { SitePointCombobox, type SitePointOption } from "./site-point-combobox";
 
 type TrainingCampOption = {
   id: string;
-  campType: string;
+  trainingCampType: { code: string };
   startDate: Date;
   endDate: Date;
   school: { name: string };
@@ -55,7 +55,10 @@ function formatDate(date: Date): string {
 }
 
 function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
-  return `${trainingCamp.campType} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
+  const typeLabel =
+    TRAINING_CAMP_TYPE_LABELS[trainingCamp.trainingCampType.code] ??
+    trainingCamp.trainingCampType.code;
+  return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
 }
 
 // Repli sur le code brut si un code existe en base sans entrée dans le

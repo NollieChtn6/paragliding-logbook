@@ -29,6 +29,15 @@ const flightTypes = [
   { code: "OTHER" },
 ];
 
+// Remplace l'ancien champ TrainingCamp.campType (texte libre), même principe
+// que les autres tables de référence ci-dessus (docs/decisions/003-reference-table-codes.md).
+const trainingCampTypes = [
+  { code: "INIT" },
+  { code: "PROGRESSION" },
+  { code: "THERMAL" },
+  { code: "SIV" },
+];
+
 // orientationDeg est un cap en degrés (0 = N, 90 = E, 180 = S, 270 = O) —
 // convention déjà en place (docs/decisions/005-flight-takeoff-landing-points.md
 // point 11 : pas de nouvelle refonte de l'orientation dans cette PR), les
@@ -186,6 +195,14 @@ async function main() {
       where: { code: flightType.code },
       update: {},
       create: flightType,
+    });
+  }
+
+  for (const trainingCampType of trainingCampTypes) {
+    await prisma.trainingCampType.upsert({
+      where: { code: trainingCampType.code },
+      update: {},
+      create: trainingCampType,
     });
   }
 

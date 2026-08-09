@@ -5,12 +5,15 @@ import { listTrainingCamps } from "./list-training-camps.service";
 let userId: string;
 let otherUserId: string;
 let schoolId: string;
+let initTrainingCampTypeId: string;
+let progressionTrainingCampTypeId: string;
+let sivTrainingCampTypeId: string;
 const activityIds: string[] = [];
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, school] = await Promise.all([
+  const [user, otherUser, school, initType, progressionType, sivType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `list-training-camps-${suffix}@paragliding-logbook.local`,
@@ -24,10 +27,16 @@ beforeAll(async () => {
       },
     }),
     prisma.school.create({ data: { name: `List Training Camps Test School ${suffix}` } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INIT" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "SIV" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
   schoolId = school.id;
+  initTrainingCampTypeId = initType.id;
+  progressionTrainingCampTypeId = progressionType.id;
+  sivTrainingCampTypeId = sivType.id;
 
   const trainingCampActivityType = await prisma.activityType.findUniqueOrThrow({
     where: { code: "TRAINING_CAMP" },
@@ -42,7 +51,7 @@ beforeAll(async () => {
     data: {
       activityId: olderActivity.id,
       schoolId,
-      campType: "Initiation",
+      trainingCampTypeId: initTrainingCampTypeId,
       startDate: new Date("2024-01-10"),
       endDate: new Date("2024-01-15"),
     },
@@ -55,7 +64,7 @@ beforeAll(async () => {
     data: {
       activityId: newerActivity.id,
       schoolId,
-      campType: "Perfectionnement",
+      trainingCampTypeId: progressionTrainingCampTypeId,
       startDate: new Date("2025-06-01"),
       endDate: new Date("2025-06-10"),
     },
@@ -68,7 +77,7 @@ beforeAll(async () => {
     data: {
       activityId: otherUserActivity.id,
       schoolId,
-      campType: "Stage d'un autre utilisateur",
+      trainingCampTypeId: sivTrainingCampTypeId,
       startDate: new Date("2025-01-01"),
       endDate: new Date("2025-01-05"),
     },
@@ -90,11 +99,9 @@ describe("listTrainingCamps (integration)", () => {
     const trainingCamps = await listTrainingCamps(userId);
 
     expect(trainingCamps).toHaveLength(2);
-    expect(trainingCamps[0]?.campType).toBe("Perfectionnement");
-    expect(trainingCamps[1]?.campType).toBe("Initiation");
-    expect(trainingCamps.some((camp) => camp.campType === "Stage d'un autre utilisateur")).toBe(
-      false,
-    );
+    expect(trainingCamps[0]?.trainingCampType.code).toBe("PROGRESSION");
+    expect(trainingCamps[1]?.trainingCampType.code).toBe("INIT");
+    expect(trainingCamps.some((camp) => camp.trainingCampType.code === "SIV")).toBe(false);
   });
 
   it("includes the School", async () => {
@@ -102,6 +109,14 @@ describe("listTrainingCamps (integration)", () => {
 
     for (const trainingCamp of trainingCamps) {
       expect(trainingCamp.school.id).toBe(schoolId);
+    }
+  });
+
+  it("includes the TrainingCampType", async () => {
+    const trainingCamps = await listTrainingCamps(userId);
+
+    for (const trainingCamp of trainingCamps) {
+      expect(trainingCamp.trainingCampType.id).toBe(trainingCamp.trainingCampTypeId);
     }
   });
 });

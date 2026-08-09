@@ -24,6 +24,13 @@ const landingType = { id: "spt-landing", code: "LANDING" };
 const localFlightType = { id: "ft-local", code: "LOCAL" };
 const crossCountryFlightType = { id: "ft-cross-country", code: "CROSS_COUNTRY" };
 
+const trainingCampType = {
+  id: "tct-1",
+  code: "PROGRESSION",
+  createdAt: new Date("2025-01-01"),
+  updatedAt: new Date("2025-01-01"),
+};
+
 const takeoffPoint = {
   id: "point-1",
   label: "Décollage principal",
@@ -140,7 +147,8 @@ describe("getActivitySummary", () => {
         id: "camp-1",
         activityId: "activity-1",
         schoolId: school.id,
-        campType: "Perfectionnement",
+        trainingCampTypeId: trainingCampType.id,
+        trainingCampType,
         startDate: new Date("2025-07-01"),
         endDate: new Date("2025-07-05"),
         summary: null,

@@ -147,14 +147,40 @@ Valeurs initiales (peuplées par le seed) :
 
 Spécialisation d'une Activity.
 
+Relations :
+
+- appartient à une Activity
+- appartient à une School
+- appartient à un TrainingCampType
+
 Champs :
 
 - startDate
 - endDate
-- schoolId
-- campType
 - summary (optionnel)
 - certification (optionnel)
+
+---
+
+### TrainingCampType
+
+Référentiel des types de stage (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`/`SitePointType`/`FlightType`). Remplace l'ancien champ `TrainingCamp.campType` (texte libre).
+
+Champs :
+
+- id
+- code (unique)
+- createdAt
+- updatedAt
+
+Pas de `label`, même principe que les autres tables de référence ci-dessus. Porte `createdAt`/`updatedAt` à la différence de celles-ci (demande explicite pour cette table).
+
+Valeurs initiales (peuplées par le seed) :
+
+- INIT
+- PROGRESSION
+- THERMAL
+- SIV
 
 ---
 
@@ -286,3 +312,5 @@ TrainingCamp 1,N Flight
 TrainingCamp 1,N GroundHandlingSession
 
 School 1,N TrainingCamp
+
+TrainingCampType 1,N TrainingCamp

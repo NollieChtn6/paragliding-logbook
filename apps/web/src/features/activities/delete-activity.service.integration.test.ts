@@ -13,36 +13,40 @@ let siteId: string;
 let takeoffPointId: string;
 let landingPointId: string;
 let flightTypeId: string;
+let trainingCampTypeId: string;
 let schoolId: string;
 const activityIds: string[] = [];
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school, takeoffType, landingType, flightType] = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: `delete-activity-${suffix}@paragliding-logbook.local`,
-        name: "Delete Activity Test User",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: `delete-activity-other-${suffix}@paragliding-logbook.local`,
-        name: "Other User",
-      },
-    }),
-    prisma.site.create({ data: { name: `Delete Activity Test Site ${suffix}` } }),
-    prisma.school.create({ data: { name: `Delete Activity Test School ${suffix}` } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
-    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
-  ]);
+  const [user, otherUser, site, school, takeoffType, landingType, flightType, trainingCampType] =
+    await Promise.all([
+      prisma.user.create({
+        data: {
+          email: `delete-activity-${suffix}@paragliding-logbook.local`,
+          name: "Delete Activity Test User",
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: `delete-activity-other-${suffix}@paragliding-logbook.local`,
+          name: "Other User",
+        },
+      }),
+      prisma.site.create({ data: { name: `Delete Activity Test Site ${suffix}` } }),
+      prisma.school.create({ data: { name: `Delete Activity Test School ${suffix}` } }),
+      prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+      prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+      prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
+      prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+    ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
   schoolId = school.id;
   flightTypeId = flightType.id;
+  trainingCampTypeId = trainingCampType.id;
 
   const [takeoffPoint, landingPoint] = await Promise.all([
     prisma.sitePoint.create({
@@ -123,7 +127,7 @@ describe("deleteActivity (integration)", () => {
       startDate: "2025-01-10",
       endDate: "2025-01-20",
       schoolId,
-      campType: "Perfectionnement",
+      trainingCampTypeId,
     });
     activityIds.push(trainingCamp.activityId);
 
@@ -138,7 +142,7 @@ describe("deleteActivity (integration)", () => {
       startDate: "2025-01-10",
       endDate: "2025-01-20",
       schoolId,
-      campType: "Perfectionnement",
+      trainingCampTypeId,
     });
     activityIds.push(trainingCamp.activityId);
 

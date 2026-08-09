@@ -1,3 +1,4 @@
+import { ZodError, type ZodIssue } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { prisma } from "@/lib/prisma";
 import { trainingCampSchema } from "@/lib/validations/training-camp";
@@ -16,11 +17,25 @@ export async function updateTrainingCamp(userId: string, activityId: string, raw
       throw new ActivityNotFoundError();
     }
 
+    // TrainingCampType est une donnée de référence partagée, même traitement
+    // que dans createTrainingCamp ci-dessus.
+    const trainingCampType = await tx.trainingCampType.findUnique({
+      where: { id: input.trainingCampTypeId },
+    });
+    if (!trainingCampType) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["trainingCampTypeId"],
+        message: "Ce type de stage n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+
     return tx.trainingCamp.update({
       where: { activityId },
       data: {
         schoolId: input.schoolId,
-        campType: input.campType,
+        trainingCampTypeId: input.trainingCampTypeId,
         startDate: input.startDate,
         endDate: input.endDate,
         // ?? null : un update Prisma ignore les champs undefined au lieu de

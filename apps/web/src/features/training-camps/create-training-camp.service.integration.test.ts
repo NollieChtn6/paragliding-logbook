@@ -5,28 +5,31 @@ import { createTrainingCamp } from "./create-training-camp.service";
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
 let schoolId: string;
+let trainingCampTypeId: string;
 
 const validTrainingCampInput = {
   startDate: "2025-01-10",
   endDate: "2025-01-15",
-  campType: "Perfectionnement",
 };
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const user = await prisma.user.create({
-    data: {
-      email: `integration-test-tc-${suffix}@paragliding-logbook.local`,
-      name: "Integration Test User",
-    },
-  });
+  const [user, school, trainingCampType] = await Promise.all([
+    prisma.user.create({
+      data: {
+        email: `integration-test-tc-${suffix}@paragliding-logbook.local`,
+        name: "Integration Test User",
+      },
+    }),
+    prisma.school.create({
+      data: { name: `Integration Test School ${suffix}` },
+    }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+  ]);
   userId = user.id;
-
-  const school = await prisma.school.create({
-    data: { name: `Integration Test School ${suffix}` },
-  });
   schoolId = school.id;
+  trainingCampTypeId = trainingCampType.id;
 });
 
 afterAll(async () => {
@@ -46,6 +49,7 @@ describe("createTrainingCamp (integration)", () => {
       const trainingCamp = await createTrainingCamp(userId, {
         ...validTrainingCampInput,
         schoolId,
+        trainingCampTypeId,
       });
       trainingCampId = trainingCamp.id;
       activityId = trainingCamp.activityId;
@@ -65,7 +69,7 @@ describe("createTrainingCamp (integration)", () => {
         where: { id: trainingCampId },
       });
       expect(trainingCamp.schoolId).toBe(schoolId);
-      expect(trainingCamp.campType).toBe("Perfectionnement");
+      expect(trainingCamp.trainingCampTypeId).toBe(trainingCampTypeId);
     });
 
     it("links the TrainingCamp to its Activity", async () => {
@@ -82,8 +86,19 @@ describe("createTrainingCamp (integration)", () => {
       createTrainingCamp(userId, {
         ...validTrainingCampInput,
         schoolId,
+        trainingCampTypeId,
         startDate: "2025-01-15",
         endDate: "2025-01-10",
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the training camp type does not exist", async () => {
+    await expect(
+      createTrainingCamp(userId, {
+        ...validTrainingCampInput,
+        schoolId,
+        trainingCampTypeId: crypto.randomUUID(),
       }),
     ).rejects.toThrow();
   });

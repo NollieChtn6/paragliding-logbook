@@ -18,7 +18,7 @@ export const trainingCampSchema = z
     startDate: z.coerce.date("La date de début est invalide."),
     endDate: z.coerce.date("La date de fin est invalide."),
     schoolId: z.string().uuid("L'école sélectionnée est invalide."),
-    campType: z.string().trim().min(1, "Le type de stage est obligatoire."),
+    trainingCampTypeId: z.string().uuid("Le type de stage sélectionné est invalide."),
     summary: optionalTrimmedString,
     certification: optionalTrimmedString,
   })

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 
 type TrainingCampFormActionState = { success: true } | { success: false; error: string };
 
@@ -20,13 +21,16 @@ type TrainingCampFormDefaultValues = {
   startDate?: Date;
   endDate?: Date;
   schoolId?: string;
-  campType?: string;
+  trainingCampTypeId?: string;
   summary?: string;
   certification?: string;
 };
 
+type TrainingCampTypeOption = { id: string; code: string };
+
 type TrainingCampFormProps = {
   schools: { id: string; name: string }[];
+  trainingCampTypes: TrainingCampTypeOption[];
   action: (
     prevState: TrainingCampFormActionState | null,
     formData: FormData,
@@ -34,6 +38,10 @@ type TrainingCampFormProps = {
   defaultValues?: TrainingCampFormDefaultValues;
   submitLabel?: string;
 };
+
+function formatTrainingCampTypeOption(trainingCampType: TrainingCampTypeOption): string {
+  return TRAINING_CAMP_TYPE_LABELS[trainingCampType.code] ?? trainingCampType.code;
+}
 
 // Format attendu par <Input type="date">, voir flight-form.tsx.
 function toDateInputValue(date: Date): string {
@@ -46,6 +54,7 @@ function toDateInputValue(date: Date): string {
 // "succès" à afficher ici.
 export function TrainingCampForm({
   schools,
+  trainingCampTypes,
   action,
   defaultValues,
   submitLabel = "Créer le stage",
@@ -107,8 +116,26 @@ export function TrainingCampForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="campType">Type de stage</Label>
-        <Input id="campType" name="campType" defaultValue={defaultValues?.campType} required />
+        <Label htmlFor="trainingCampTypeId">Type de stage</Label>
+        <Select name="trainingCampTypeId" defaultValue={defaultValues?.trainingCampTypeId} required>
+          <SelectTrigger id="trainingCampTypeId" className="w-full">
+            <SelectValue placeholder="Choisir un type de stage">
+              {(value: string | null) => {
+                const trainingCampType = trainingCampTypes.find((tct) => tct.id === value);
+                return trainingCampType
+                  ? formatTrainingCampTypeOption(trainingCampType)
+                  : "Choisir un type de stage";
+              }}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {trainingCampTypes.map((trainingCampType) => (
+              <SelectItem key={trainingCampType.id} value={trainingCampType.id}>
+                {formatTrainingCampTypeOption(trainingCampType)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex flex-col gap-2">

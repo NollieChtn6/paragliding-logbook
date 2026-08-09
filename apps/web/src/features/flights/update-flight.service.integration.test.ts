@@ -14,6 +14,7 @@ let takeoffPointId: string;
 let landingPointId: string;
 let otherSiteTakeoffPointId: string;
 let flightTypeId: string;
+let trainingCampTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
@@ -30,33 +31,44 @@ const validFlightInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, otherSite, school, takeoffType, landingType, flightType] =
-    await Promise.all([
-      prisma.user.create({
-        data: {
-          email: `update-flight-${suffix}@paragliding-logbook.local`,
-          name: "Update Flight Test User",
-        },
-      }),
-      prisma.user.create({
-        data: {
-          email: `update-flight-other-${suffix}@paragliding-logbook.local`,
-          name: "Other User",
-        },
-      }),
-      prisma.site.create({ data: { name: `Update Flight Test Site ${suffix}` } }),
-      prisma.site.create({ data: { name: `Update Flight Test Other Site ${suffix}` } }),
-      prisma.school.create({ data: { name: `Update Flight Test School ${suffix}` } }),
-      prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-      prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
-      prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
-    ]);
+  const [
+    user,
+    otherUser,
+    site,
+    otherSite,
+    school,
+    takeoffType,
+    landingType,
+    flightType,
+    trainingCampType,
+  ] = await Promise.all([
+    prisma.user.create({
+      data: {
+        email: `update-flight-${suffix}@paragliding-logbook.local`,
+        name: "Update Flight Test User",
+      },
+    }),
+    prisma.user.create({
+      data: {
+        email: `update-flight-other-${suffix}@paragliding-logbook.local`,
+        name: "Other User",
+      },
+    }),
+    prisma.site.create({ data: { name: `Update Flight Test Site ${suffix}` } }),
+    prisma.site.create({ data: { name: `Update Flight Test Other Site ${suffix}` } }),
+    prisma.school.create({ data: { name: `Update Flight Test School ${suffix}` } }),
+    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
+  ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
   otherSiteId = otherSite.id;
   schoolId = school.id;
   flightTypeId = flightType.id;
+  trainingCampTypeId = trainingCampType.id;
 
   const [takeoffPoint, landingPoint, otherSiteTakeoffPoint] = await Promise.all([
     prisma.sitePoint.create({
@@ -98,7 +110,7 @@ beforeAll(async () => {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Perfectionnement",
+    trainingCampTypeId,
   });
   trainingCampId = trainingCamp.id;
 
@@ -106,7 +118,7 @@ beforeAll(async () => {
     startDate: "2025-01-10",
     endDate: "2025-01-20",
     schoolId,
-    campType: "Stage d'un autre utilisateur",
+    trainingCampTypeId,
   });
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 

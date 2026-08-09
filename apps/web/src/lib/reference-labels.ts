@@ -30,3 +30,10 @@ export const FLIGHT_TYPE_LABELS: Record<string, string> = {
   TRAINING: "Entraînement",
   OTHER: "Autre",
 };
+
+export const TRAINING_CAMP_TYPE_LABELS: Record<string, string> = {
+  INIT: "Initiation",
+  PROGRESSION: "Progression",
+  THERMAL: "Thermique",
+  SIV: "SIV",
+};

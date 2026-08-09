@@ -16,12 +16,13 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
       takeoffPoint: SITE_POINT_INCLUDE,
       landingPoint: SITE_POINT_INCLUDE,
       flightType: true,
-      trainingCamp: true,
+      trainingCamp: { include: { trainingCampType: true } },
     },
   },
   trainingCamp: {
     include: {
       school: true,
+      trainingCampType: true,
       flights: {
         include: { takeoffPoint: SITE_POINT_INCLUDE, landingPoint: SITE_POINT_INCLUDE },
         orderBy: { date: "asc" },
@@ -29,7 +30,9 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
       groundHandlingSessions: { include: { site: true }, orderBy: { date: "asc" } },
     },
   },
-  groundHandlingSession: { include: { site: true, trainingCamp: true } },
+  groundHandlingSession: {
+    include: { site: true, trainingCamp: { include: { trainingCampType: true } } },
+  },
 } satisfies Prisma.ActivityInclude;
 
 export type ActivityWithDetails = Prisma.ActivityGetPayload<{
