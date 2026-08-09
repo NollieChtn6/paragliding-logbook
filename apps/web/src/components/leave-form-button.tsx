@@ -32,7 +32,7 @@ export function LeaveFormButton({ href = "/", label = "Annuler" }: LeaveFormButt
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Continuer la saisie</AlertDialogCancel>
-          <AlertDialogAction render={<Link href={href}>Quitter</Link>} />
+          <AlertDialogAction nativeButton={false} render={<Link href={href}>Quitter</Link>} />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
