@@ -126,9 +126,10 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.us
 
 - id
 - schoolId
-- trainingCampTypeId — type de stage, table de référence (`TrainingCampType` : INIT, PROGRESSION, THERMAL, SIV), pas de `label` — voir `TrainingCampType`
+- trainingCampTypeId — type de stage, table de référence (`TrainingCampType` : INITIATION, AUTONOMY, ADVANCED, THERMAL, CROSS_COUNTRY, SIV, HIKE_AND_FLY, ACRO_DISCOVERY, ACRO_ADVANCED, SAFETY, OTHER), pas de `label` — voir `TrainingCampType`
 - startDate
 - endDate
+- observations (nullable)
 - summary
 - certification (nullable)
 
@@ -145,7 +146,7 @@ Relation :
 ### TrainingCampType
 
 - id
-- code (unique) — `INIT`, `PROGRESSION`, `THERMAL`, `SIV`
+- code (unique) — `INITIATION`, `AUTONOMY`, `ADVANCED`, `THERMAL`, `CROSS_COUNTRY`, `SIV`, `HIKE_AND_FLY`, `ACRO_DISCOVERY`, `ACRO_ADVANCED`, `SAFETY`, `OTHER`
 - createdAt
 - updatedAt
 

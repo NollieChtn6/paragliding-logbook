@@ -25,6 +25,7 @@ type TrainingCampFormDefaultValues = {
   endDate?: Date;
   schoolId?: string;
   trainingCampTypeId?: string;
+  observations?: string;
   summary?: string;
   certification?: string;
 };
@@ -243,6 +244,15 @@ export function TrainingCampForm({
         <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
       )}
       <div className={cn(wizardStep === 2 ? "hidden" : "flex flex-col gap-4")}>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="observations">Observations</Label>
+          <Textarea
+            id="observations"
+            name="observations"
+            defaultValue={defaultValues?.observations}
+          />
+        </div>
+
         <div className="flex flex-col gap-2">
           <Label htmlFor="summary">Bilan</Label>
           <Textarea id="summary" name="summary" defaultValue={defaultValues?.summary} />

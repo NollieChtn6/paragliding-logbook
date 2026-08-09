@@ -196,6 +196,7 @@ Informations :
 - date fin
 - école
 - type de stage
+- observations
 - bilan
 - certification éventuelle
 

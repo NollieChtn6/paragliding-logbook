@@ -96,12 +96,13 @@ function trainingCampActivity(id: string): ActivityWithDetails {
       trainingCampTypeId: "tct-1",
       trainingCampType: {
         id: "tct-1",
-        code: "PROGRESSION",
+        code: "AUTONOMY",
         createdAt: new Date("2025-01-01"),
         updatedAt: new Date("2025-01-01"),
       },
       startDate: new Date("2025-07-01"),
       endDate: new Date("2025-07-05"),
+      observations: null,
       summary: null,
       certification: null,
       school: {

@@ -35,8 +35,8 @@ beforeAll(async () => {
       },
     }),
     prisma.school.create({ data: { name: `Update Training Camp Test School ${suffix}` } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "PROGRESSION" } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INIT" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
+    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INITIATION" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
@@ -69,12 +69,14 @@ describe("updateTrainingCamp (integration)", () => {
       ...validTrainingCampInput,
       schoolId,
       trainingCampTypeId: otherTrainingCampTypeId,
+      observations: "Observations mises à jour.",
       summary: "Bilan mis à jour.",
       certification: "Brevet de pilote",
     });
 
     expect(updated.id).toBe(trainingCampId);
     expect(updated.trainingCampTypeId).toBe(otherTrainingCampTypeId);
+    expect(updated.observations).toBe("Observations mises à jour.");
     expect(updated.summary).toBe("Bilan mis à jour.");
     expect(updated.certification).toBe("Brevet de pilote");
   });
@@ -86,6 +88,7 @@ describe("updateTrainingCamp (integration)", () => {
       trainingCampTypeId,
     });
 
+    expect(updated.observations).toBeNull();
     expect(updated.summary).toBeNull();
     expect(updated.certification).toBeNull();
   });

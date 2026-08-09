@@ -14,13 +14,22 @@ describe("trainingCampSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts optional summary and certification", () => {
+  it("accepts optional observations, summary and certification", () => {
     const result = trainingCampSchema.safeParse({
       ...validTrainingCamp,
+      observations: "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
       summary: "Progression rapide.",
       certification: "Brevet de pilote",
     });
     expect(result.success).toBe(true);
+  });
+
+  it("treats an empty observations as absent", () => {
+    const result = trainingCampSchema.safeParse({ ...validTrainingCamp, observations: "" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.observations).toBeUndefined();
+    }
   });
 
   it("treats an empty summary as absent", () => {
