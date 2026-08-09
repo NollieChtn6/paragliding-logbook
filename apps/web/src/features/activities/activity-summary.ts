@@ -1,10 +1,14 @@
-import { formatDurationMinutes } from "@/lib/format-duration";
 import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 import type { ActivityWithDetails } from "./queries";
 
+// 3 lignes distinctes (ActivityCard, components/activity-card.tsx) plutôt
+// qu'un sous-titre combiné : spécialité, lieu (école pour un stage, site
+// pour un vol/gonflage), puis dates — la durée n'y figure plus, réservée au
+// détail de l'activité (/activities/[id]).
 export type ActivitySummary = {
   title: string;
-  subtitle: string;
+  location: string;
+  dateInfo: string;
 };
 
 function formatDate(date: Date): string {
@@ -40,7 +44,8 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { flight } = activity;
     return {
       title: "Vol",
-      subtitle: `${formatFlightLocation(flight)} · ${formatDate(flight.date)} à ${formatTime(flight.date)} · ${formatDurationMinutes(flight.durationMin)}`,
+      location: formatFlightLocation(flight),
+      dateInfo: `${formatDate(flight.date)} à ${formatTime(flight.date)}`,
     };
   }
 
@@ -48,7 +53,8 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { trainingCamp } = activity;
     return {
       title: "Stage",
-      subtitle: `${trainingCamp.school.name} · ${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)}`,
+      location: trainingCamp.school.name,
+      dateInfo: `${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)}`,
     };
   }
 
@@ -56,12 +62,14 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { groundHandlingSession } = activity;
     return {
       title: "Gonflage",
-      subtitle: `${groundHandlingSession.site.name} · ${formatDate(groundHandlingSession.date)} à ${formatTime(groundHandlingSession.date)} · ${formatDurationMinutes(groundHandlingSession.durationMin)}`,
+      location: groundHandlingSession.site.name,
+      dateInfo: `${formatDate(groundHandlingSession.date)} à ${formatTime(groundHandlingSession.date)}`,
     };
   }
 
   return {
     title: ACTIVITY_TYPE_LABELS[activity.activityType.code] ?? activity.activityType.code,
-    subtitle: "",
+    location: "",
+    dateInfo: "",
   };
 }

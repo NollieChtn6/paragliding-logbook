@@ -94,7 +94,8 @@ export default async function Home() {
                   href={`/activities/${activity.id}`}
                   type={getActivityCardType(activity)}
                   title={summary.title}
-                  subtitle={summary.subtitle}
+                  location={summary.location}
+                  dateInfo={summary.dateInfo}
                 />
               );
             })}

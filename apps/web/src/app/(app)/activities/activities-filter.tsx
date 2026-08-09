@@ -17,7 +17,8 @@ type ActivityListItem = {
   id: string;
   type: ActivityCardType;
   title: string;
-  subtitle: string;
+  location: string;
+  dateInfo: string;
 };
 
 type ActivitiesFilterProps = {
@@ -123,7 +124,8 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
               href={`/activities/${activity.id}`}
               type={activity.type}
               title={activity.title}
-              subtitle={activity.subtitle}
+              location={activity.location}
+              dateInfo={activity.dateInfo}
             />
           ))}
         </div>
