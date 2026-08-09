@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Clock3, Tag } from "lucide-react";
+import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Clock3, Tag } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ACTIVITY_TYPE_STYLE, getActivityCardType } from "@/components/activity-card";
@@ -119,6 +119,14 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
 
   return (
     <div className="flex flex-col gap-6">
+      <Link
+        href="/activities"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        Retour aux activités
+      </Link>
+
       <PageHeader
         title={title}
         actions={
