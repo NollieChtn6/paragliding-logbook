@@ -89,6 +89,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
             type="button"
             onClick={toggleVisibility}
             aria-label={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
+            title={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
             className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -114,6 +115,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
             type="button"
             onClick={toggleVisibility}
             aria-label={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
+            title={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
             className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

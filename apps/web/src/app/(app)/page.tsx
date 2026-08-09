@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getActivitySummary } from "@/features/activities";
 import { getDashboardData } from "@/features/dashboard";
 import { requireCurrentUser } from "@/lib/current-user";
+import { formatDurationMinutes } from "@/lib/format-duration";
 import { getGreeting } from "@/lib/greeting";
 
 // Les statistiques et activités récentes doivent toujours refléter l'état
@@ -33,7 +34,7 @@ export default async function Home() {
         <StatCard
           icon={Hourglass}
           label="Temps de vol cumulé"
-          value={`${stats.totalFlightMinutes} min`}
+          value={formatDurationMinutes(stats.totalFlightMinutes)}
         />
         <StatCard
           icon={Clock3}
@@ -49,7 +50,7 @@ export default async function Home() {
         <StatCard
           icon={Hourglass}
           label="Temps de gonflage cumulé"
-          value={`${stats.totalGroundHandlingMinutes} min`}
+          value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
           tone="accent"
         />
         <StatCard

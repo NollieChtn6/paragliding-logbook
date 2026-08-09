@@ -135,7 +135,7 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Vol",
-      subtitle: "Site de test → Autre site · 15/06/2025 · 90 min",
+      subtitle: "Site de test → Autre site · 15/06/2025 · 1h30",
     });
   });
 

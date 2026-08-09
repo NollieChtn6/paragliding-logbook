@@ -25,6 +25,7 @@ export function ThemeToggle() {
       variant="outline"
       size="icon"
       aria-label={isDark ? "Passer en thème clair" : "Passer en thème sombre"}
+      title={isDark ? "Passer en thème clair" : "Passer en thème sombre"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       {isDark ? <Sun /> : <Moon />}
