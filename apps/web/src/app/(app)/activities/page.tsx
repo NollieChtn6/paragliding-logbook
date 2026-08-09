@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ActivityCard, getActivityCardType } from "@/components/activity-card";
+import { getActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { getActivitySummary, listActivities } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { ActivitiesFilter } from "./activities-filter";
 
 // La liste doit toujours refléter l'état actuel de la base, pas un
 // instantané figé au build.
@@ -39,20 +40,17 @@ export default async function ActivitiesPage() {
           }
         />
       ) : (
-        <div className="flex flex-col gap-2">
-          {activities.map((activity) => {
+        <ActivitiesFilter
+          activities={activities.map((activity) => {
             const summary = getActivitySummary(activity);
-            return (
-              <ActivityCard
-                key={activity.id}
-                href={`/activities/${activity.id}`}
-                type={getActivityCardType(activity)}
-                title={summary.title}
-                subtitle={summary.subtitle}
-              />
-            );
+            return {
+              id: activity.id,
+              type: getActivityCardType(activity),
+              title: summary.title,
+              subtitle: summary.subtitle,
+            };
           })}
-        </div>
+        />
       )}
     </div>
   );
