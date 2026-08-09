@@ -1,0 +1,44 @@
+{
+  "name": "paragliding-logbook",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "start": "pnpm --filter web start",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm --filter web run typecheck",
+    "test": "vitest run --passWithNoTests",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "prepare": "husky",
+    "prisma:generate": "pnpm --filter web run prisma:generate",
+    "prisma:migrate": "pnpm --filter web run prisma:migrate",
+    "prisma:seed": "pnpm --filter web run prisma:seed",
+    "prisma:studio": "pnpm --filter web run prisma:studio"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "dotenv": "^17.4.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "esbuild",
+      "prisma"
+    ],
+    "overrides": {
+      "better-call": "^1.3.7",
+      "@better-fetch/fetch": "^1.3.1"
+    }
+  }
+}

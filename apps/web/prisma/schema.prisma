@@ -1,0 +1,319 @@
+// MLD : voir docs/database-design.md et docs/domain-model.md.
+// Activity reste l'entité racine (ADR 001, docs/decisions/001-activity-model.md) :
+// exactement une des relations Flight/TrainingCamp/GroundHandlingSession doit être
+// renseignée, en cohérence avec activityType — non contraignable nativement en SQL/Prisma,
+// à valider côté Zod à l'implémentation des features.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// USER par défaut à l'inscription (docs/admin.md > Rôles) : jamais choisi par
+/// l'utilisateur, jamais exposé à Better Auth comme additionalField — voir
+/// lib/auth.ts. ADMIN attribué explicitement en base (pas d'interface pour
+/// l'instant, voir docs/todo.md).
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          UserRole @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  activities Activity[]
+  sessions   Session[]
+  accounts   Account[]
+}
+
+/// Modèles Better Auth (voir apps/web/src/lib/auth.ts). Noms de champs et
+/// relations imposés par l'adaptateur Prisma de Better Auth ; conventions
+/// d'identifiant (@id @default(uuid()) @db.Uuid) alignées sur le reste du
+/// schéma grâce à advanced.database.generateId: "uuid" dans la config.
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Compte de connexion (provider "credential" pour email + mot de passe).
+/// password porte le hash Argon2 : c'est le seul endroit où Better Auth
+/// lit/écrit le mot de passe (voir apps/web/src/lib/auth.ts).
+model Account {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @db.Uuid
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+/// Référentiel des types d'activité (table, pas un enum : extensible sans migration).
+/// Valeurs initiales prévues (docs/database-design.md) : FLIGHT, TRAINING_CAMP, GROUND_HANDLING.
+/// Pas de label : catégorie technique traduisible, le libellé affiché vit
+/// côté application (docs/decisions/003-reference-table-codes.md), pas en
+/// base — à distinguer d'une donnée métier éditoriale comme Site.name.
+model ActivityType {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+
+  activities Activity[]
+}
+
+/// Entrée générique du journal (timeline). Chaque Activity porte exactement une
+/// spécialisation (Flight, TrainingCamp ou GroundHandlingSession).
+model Activity {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  activityTypeId String   @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id])
+  activityType ActivityType @relation(fields: [activityTypeId], references: [id])
+
+  flight                Flight?
+  trainingCamp          TrainingCamp?
+  groundHandlingSession GroundHandlingSession?
+
+  @@index([userId])
+}
+
+/// Lieu de pratique général. Donnée de référence partagée (pas de userId) :
+/// lieu du monde réel, pas une donnée privée à un utilisateur. latitude/
+/// longitude restent une localisation approximative du lieu ; les coordonnées
+/// précises d'un point donné vivent sur SitePoint. Pas de notion de "point
+/// principal" : un Site peut avoir plusieurs points de décollage et
+/// plusieurs points d'atterrissage, aucun n'est privilégié (ADR 005,
+/// docs/decisions/005-flight-takeoff-landing-points.md — retrait de
+/// primaryTakeoffPointId/primaryLandingPointId, voir aussi ADR 002).
+/// Référentiel éditorial destiné à une future gestion applicative (ADR 004,
+/// docs/decisions/004-editable-referentials.md) : countryCode est un code
+/// ISO 3166-1 alpha-2 (FR, CH, IT, ES...), pas du texte libre.
+model Site {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  region      String?
+  countryCode String?  @db.Char(2)
+  latitude    Float?
+  longitude   Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  points                 SitePoint[]             @relation("SitePoints")
+  groundHandlingSessions GroundHandlingSession[]
+}
+
+/// Référentiel des types de point (table, pas un enum : extensible sans
+/// migration, même principe qu'ActivityType). Valeurs initiales (peuplées par
+/// le seed) : TAKEOFF, LANDING. Pas de label, même raison qu'ActivityType.
+model SitePointType {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+
+  points SitePoint[]
+}
+
+/// Référentiel des types de vol (table, pas un enum Prisma : extensible sans
+/// migration, même principe qu'ActivityType/SitePointType — remplace l'ancien
+/// enum FlightType, docs/decisions/003-reference-table-codes.md). Pas de
+/// label. Valeurs initiales (peuplées par le seed) : LOCAL, CROSS_COUNTRY,
+/// SOARING, THERMAL, TRAINING, OTHER.
+model FlightType {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+
+  flights Flight[]
+}
+
+/// Point physique appartenant à un Site (décollage, atterrissage...). Un Site
+/// peut avoir plusieurs points d'un même SitePointType, aucun n'est "principal"
+/// (ADR 005, docs/decisions/005-flight-takeoff-landing-points.md). latitude/
+/// longitude/altitudeM non nullables : un point représente un lieu physique
+/// précis (utilisation future dans une carte). orientationDeg nullable :
+/// pertinent pour un décollage, pas nécessairement pour un atterrissage.
+/// Un Flight référence directement son SitePoint de décollage (doit être de
+/// type TAKEOFF) et d'atterrissage (doit être de type LANDING) — contrainte
+/// vérifiée côté applicatif, pas exprimable nativement en Prisma/Postgres.
+model SitePoint {
+  id              String @id @default(uuid()) @db.Uuid
+  label           String
+  siteId          String @db.Uuid
+  sitePointTypeId String @db.Uuid
+  latitude        Float
+  longitude       Float
+  altitudeM       Int
+  orientationDeg  Int?
+
+  site          Site          @relation("SitePoints", fields: [siteId], references: [id])
+  sitePointType SitePointType @relation(fields: [sitePointTypeId], references: [id])
+
+  flightsAsTakeoff Flight[] @relation("FlightTakeoffPoint")
+  flightsAsLanding Flight[] @relation("FlightLandingPoint")
+
+  @@index([siteId])
+  @@index([sitePointTypeId])
+}
+
+/// École fédérale de parapente. Donnée de référence partagée (pas de userId),
+/// au même titre que Site. Référentiel éditorial destiné à une future gestion
+/// applicative (ADR 004, docs/decisions/004-editable-referentials.md) :
+/// countryCode est un code ISO 3166-1 alpha-2 (FR, CH, IT, ES...), pas du
+/// texte libre — adresse structurée (address/postalCode/city/countryCode)
+/// plutôt que l'ancien champ location en texte libre.
+model School {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  address     String?
+  postalCode  String?
+  city        String?
+  countryCode String?  @db.Char(2)
+  latitude    Float?
+  longitude   Float?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trainingCamps TrainingCamp[]
+}
+
+/// Spécialisation Vol (ADR 002, docs/decisions/002-site-point-model.md ;
+/// ADR 005, docs/decisions/005-flight-takeoff-landing-points.md).
+/// observations/improvementPoints obligatoires (règle métier
+/// docs/domain-model.md : encourager le suivi de progression). takeoffPoint
+/// (doit être un SitePoint de type TAKEOFF) et landingPoint (type LANDING,
+/// contrainte vérifiée côté applicatif) peuvent appartenir à des Sites
+/// différents (ex. vol de cross qui atterrit sur le décollage d'un autre
+/// site) : aucune contrainte ne les lie au même Site, et aucune règle ne
+/// compare plus leurs altitudes (l'arrivée peut être plus haute que le
+/// départ). takeoffAltitudeM/landingAltitudeM retirés : redondants avec
+/// takeoffPoint.altitudeM/landingPoint.altitudeM. flightTypeId remplace
+/// l'ancien enum FlightType (ADR 003, docs/decisions/003-reference-table-codes.md).
+model Flight {
+  id                String   @id @default(uuid()) @db.Uuid
+  activityId        String   @unique @db.Uuid
+  trainingCampId    String?  @db.Uuid
+  takeoffPointId    String   @db.Uuid
+  landingPointId    String   @db.Uuid
+  flightTypeId      String   @db.Uuid
+  date              DateTime
+  durationMin       Int
+  observations      String
+  improvementPoints String
+
+  activity     Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
+  takeoffPoint SitePoint     @relation("FlightTakeoffPoint", fields: [takeoffPointId], references: [id])
+  landingPoint SitePoint     @relation("FlightLandingPoint", fields: [landingPointId], references: [id])
+  flightType   FlightType    @relation(fields: [flightTypeId], references: [id])
+
+  @@index([trainingCampId])
+  @@index([takeoffPointId])
+  @@index([landingPointId])
+  @@index([flightTypeId])
+}
+
+/// Spécialisation Stage (TrainingCamp). startDate <= endDate et les vols et
+/// séances de gonflage associés doivent avoir une date dans cet intervalle :
+/// règles applicatives (docs/domain-model.md), non exprimables nativement en Prisma.
+/// trainingCampTypeId remplace l'ancien champ campType (texte libre) : table
+/// de référence TrainingCampType (docs/decisions/003-reference-table-codes.md).
+model TrainingCamp {
+  id                 String   @id @default(uuid()) @db.Uuid
+  activityId         String   @unique @db.Uuid
+  schoolId           String   @db.Uuid
+  trainingCampTypeId String   @db.Uuid
+  startDate          DateTime
+  endDate            DateTime
+  observations       String?
+  summary            String?
+  certification      String?
+
+  activity               Activity                @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  school                 School                  @relation(fields: [schoolId], references: [id])
+  trainingCampType       TrainingCampType        @relation(fields: [trainingCampTypeId], references: [id])
+  flights                Flight[]
+  groundHandlingSessions GroundHandlingSession[]
+
+  @@index([schoolId])
+  @@index([trainingCampTypeId])
+}
+
+/// Référentiel des types de stage (table, pas un enum : extensible sans
+/// migration, même principe qu'ActivityType/SitePointType/FlightType,
+/// docs/decisions/003-reference-table-codes.md). Remplace l'ancien champ
+/// TrainingCamp.campType (texte libre). Porte createdAt/updatedAt à la
+/// différence des autres tables de référence ci-dessus (demande explicite,
+/// pas un oubli). Pas de label : affichage via TRAINING_CAMP_TYPE_LABELS
+/// (src/lib/reference-labels.ts). Valeurs initiales (peuplées par le seed) :
+/// INITIATION, AUTONOMY, ADVANCED, THERMAL, CROSS_COUNTRY, SIV, HIKE_AND_FLY,
+/// ACRO_DISCOVERY, ACRO_ADVANCED, SAFETY, OTHER.
+model TrainingCampType {
+  id        String   @id @default(uuid()) @db.Uuid
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainingCamps TrainingCamp[]
+}
+
+/// Spécialisation Gonflage. exercises obligatoire (règle métier docs/domain-model.md).
+model GroundHandlingSession {
+  id             String   @id @default(uuid()) @db.Uuid
+  activityId     String   @unique @db.Uuid
+  siteId         String   @db.Uuid
+  trainingCampId String?  @db.Uuid
+  date           DateTime
+  durationMin    Int
+  exercises      String
+  difficulties   String?
+  feeling        String?
+
+  activity     Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  site         Site          @relation(fields: [siteId], references: [id])
+  trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
+
+  @@index([siteId])
+  @@index([trainingCampId])
+}
