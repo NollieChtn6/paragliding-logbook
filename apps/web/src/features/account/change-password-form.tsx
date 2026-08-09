@@ -13,8 +13,11 @@ type ToggleVisibilityButtonProps = {
   onToggle: () => void;
 };
 
-// Répété sur les 3 champs, tous pilotés par le même état showPassword (voir
-// ChangePasswordForm) — mêmes icônes Eye/EyeOff que sign-in-form.tsx.
+// Réutilisé sur newPassword/confirmPassword (mêmes icônes Eye/EyeOff que
+// sign-in-form.tsx) — pas sur currentPassword, qui ne sert qu'à confirmer
+// l'identité de l'utilisateur avant modification (voir ChangePasswordForm) :
+// rien à "vérifier visuellement" sur un mot de passe qu'on n'est pas en
+// train de saisir pour la première fois, contrairement aux deux autres.
 function ToggleVisibilityButton({ visible, onToggle }: ToggleVisibilityButtonProps) {
   return (
     <button
@@ -29,9 +32,13 @@ function ToggleVisibilityButton({ visible, onToggle }: ToggleVisibilityButtonPro
   );
 }
 
-export function ChangePasswordForm() {
+type ChangePasswordFormProps = {
+  email: string;
+};
+
+export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
   const [state, formAction, isPending] = useActionState(changePasswordAction, null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -44,24 +51,29 @@ export function ChangePasswordForm() {
     }
   }, [state]);
 
-  const passwordFieldType = showPassword ? "text" : "password";
-  const toggleVisibility = () => setShowPassword((value) => !value);
+  const newPasswordFieldType = showNewPassword ? "text" : "password";
+  const toggleNewPasswordVisibility = () => setShowNewPassword((value) => !value);
 
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+      {/* Champ caché autoComplete="username" : sans lui, le navigateur n'a
+      aucun moyen d'associer le champ "Mot de passe actuel" (ci-dessous) au
+      bon compte enregistré — ce formulaire ne contient pas d'email visible.
+      Il proposait alors l'identifiant/mot de passe d'un tout autre compte
+      déjà mémorisé sur ce domaine (ex. un compte de test). Voir la
+      spécification WHATWG sur le remplissage automatique des champs cachés :
+      un input hidden porte bien autoComplete pour ce cas précis. */}
+      <input type="text" name="username" value={email} autoComplete="username" readOnly hidden />
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="currentPassword">Mot de passe actuel</Label>
-        <div className="relative">
-          <Input
-            id="currentPassword"
-            name="currentPassword"
-            type={passwordFieldType}
-            className="pr-9"
-            autoComplete="current-password"
-            required
-          />
-          <ToggleVisibilityButton visible={showPassword} onToggle={toggleVisibility} />
-        </div>
+        <Input
+          id="currentPassword"
+          name="currentPassword"
+          type="password"
+          autoComplete="current-password"
+          required
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -70,13 +82,16 @@ export function ChangePasswordForm() {
           <Input
             id="newPassword"
             name="newPassword"
-            type={passwordFieldType}
+            type={newPasswordFieldType}
             className="pr-9"
             autoComplete="new-password"
             minLength={12}
             required
           />
-          <ToggleVisibilityButton visible={showPassword} onToggle={toggleVisibility} />
+          <ToggleVisibilityButton
+            visible={showNewPassword}
+            onToggle={toggleNewPasswordVisibility}
+          />
         </div>
         <p className="text-sm text-muted-foreground">Au moins 12 caractères.</p>
       </div>
@@ -87,12 +102,15 @@ export function ChangePasswordForm() {
           <Input
             id="confirmPassword"
             name="confirmPassword"
-            type={passwordFieldType}
+            type={newPasswordFieldType}
             className="pr-9"
             autoComplete="new-password"
             required
           />
-          <ToggleVisibilityButton visible={showPassword} onToggle={toggleVisibility} />
+          <ToggleVisibilityButton
+            visible={showNewPassword}
+            onToggle={toggleNewPasswordVisibility}
+          />
         </div>
       </div>
 
