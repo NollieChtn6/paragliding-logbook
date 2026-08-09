@@ -1,4 +1,4 @@
-import { Settings, ShieldCheck } from "lucide-react";
+import { Settings } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -9,20 +9,20 @@ import { MobileBottomNav } from "./mobile-bottom-nav";
 
 type AppShellProps = {
   children: React.ReactNode;
-  // Lien Administration affiché uniquement pour un rôle ADMIN (docs/admin.md
-  // > Navigation) : masquer le lien n'est qu'une amélioration UX, la
-  // véritable protection reste requireAdmin() côté serveur (app/admin/layout.tsx).
-  isAdmin?: boolean;
 };
 
 // Chrome commun des pages authentifiées (racine du route group (app), voir
-// app/(app)/layout.tsx). DesktopSidebar porte marque + thème + déconnexion
-// à partir de md ; en dessous, une bande haute minimale assure la même
-// fonction puisque DesktopSidebar est masquée en mobile.
-export function AppShell({ children, isAdmin = false }: AppShellProps) {
+// app/(app)/layout.tsx). Jamais rendu pour un rôle ADMIN : le layout
+// redirige vers /admin avant d'atteindre ce composant (docs/admin.md >
+// Navigation — un admin n'a pas d'usage de l'interface des autres
+// utilisateurs), donc pas de lien Administration ici. DesktopSidebar porte
+// marque + thème + déconnexion à partir de md ; en dessous, une bande haute
+// minimale assure la même fonction puisque DesktopSidebar est masquée en
+// mobile.
+export function AppShell({ children }: AppShellProps) {
   return (
     <div className="flex min-h-svh">
-      <DesktopSidebar isAdmin={isAdmin} />
+      <DesktopSidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
@@ -32,20 +32,6 @@ export function AppShell({ children, isAdmin = false }: AppShellProps) {
           </span>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            {isAdmin && (
-              <Button
-                nativeButton={false}
-                variant="outline"
-                size="icon"
-                aria-label="Administration"
-                title="Administration"
-                render={
-                  <Link href="/admin">
-                    <ShieldCheck />
-                  </Link>
-                }
-              />
-            )}
             <Button
               nativeButton={false}
               variant="outline"

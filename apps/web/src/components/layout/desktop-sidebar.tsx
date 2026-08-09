@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, ShieldCheck } from "lucide-react";
+import { Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -9,15 +9,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
-type DesktopSidebarProps = {
-  isAdmin?: boolean;
-};
-
 // Colonne fixe visible à partir de md, masquée en dessous (MobileBottomNav
 // prend le relais). Porte la marque, la navigation, et le thème/déconnexion
 // en pied — MobileBottomNav n'a que la navigation, ces deux actions vivent
-// dans la bande haute mobile d'AppShell.
-export function DesktopSidebar({ isAdmin = false }: DesktopSidebarProps) {
+// dans la bande haute mobile d'AppShell. Jamais rendue pour un rôle ADMIN
+// (voir app-shell.tsx), donc pas de lien Administration ici.
+export function DesktopSidebar() {
   const pathname = usePathname();
 
   return (
@@ -60,20 +57,6 @@ export function DesktopSidebar({ isAdmin = false }: DesktopSidebarProps) {
 
       <div className="flex items-center justify-between border-t border-sidebar-border pt-4">
         <ThemeToggle />
-        {isAdmin && (
-          <Button
-            nativeButton={false}
-            variant="outline"
-            size="icon"
-            aria-label="Administration"
-            title="Administration"
-            render={
-              <Link href="/admin">
-                <ShieldCheck />
-              </Link>
-            }
-          />
-        )}
         <Button
           nativeButton={false}
           variant="outline"

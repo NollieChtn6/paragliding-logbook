@@ -1,21 +1,27 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
+import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ADMIN_NAV_ITEMS, isAdminNavItemActive } from "./admin-nav-items";
 
 // Chrome dédié à /admin (docs/admin.md > Interface, Navigation) : mêmes
 // tokens/composants que AppShell (components/layout/app-shell.tsx) — pas de
 // seconde identité visuelle — mais navigation propre à l'espace admin (les
-// entrées de l'app principale n'ont pas leur place ici). "Retour à
-// l'application" toujours visible, desktop et mobile (exigence explicite du
-// document de specs). Pas de barre de navigation basse façon
-// MobileBottomNav sur mobile : une rangée d'onglets défilante suffit pour
-// un espace secondaire, sans surcharger l'écran.
+// entrées de l'app principale n'ont pas leur place ici). Pas de lien
+// "Retour à l'application" : un admin n'a aucun usage de l'interface des
+// autres utilisateurs (app/(app)/layout.tsx y redirige vers /admin), donc
+// seule la déconnexion a du sens ici. Le changement de mot de passe
+// (/settings/security), lui, doit rester accessible aux deux rôles — même
+// bouton icône que dans AppShell/DesktopSidebar, la page vit hors du route
+// group (app), voir app/settings/layout.tsx. Pas de barre de navigation
+// basse façon MobileBottomNav sur mobile : une rangée d'onglets défilante
+// suffit pour un espace secondaire, sans surcharger l'écran.
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -57,13 +63,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex items-center justify-between border-t border-sidebar-border pt-4">
           <ThemeToggle />
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" aria-hidden />
-            Retour
-          </Link>
+          <Button
+            nativeButton={false}
+            variant="outline"
+            size="icon"
+            aria-label="Paramètres de sécurité"
+            title="Paramètres de sécurité"
+            render={
+              <Link href="/settings/security">
+                <Settings />
+              </Link>
+            }
+          />
+          <SignOutButton />
         </div>
       </aside>
 
@@ -74,13 +86,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </span>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 px-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="size-4" aria-hidden />
-              Retour
-            </Link>
+            <Button
+              nativeButton={false}
+              variant="outline"
+              size="icon"
+              aria-label="Paramètres de sécurité"
+              title="Paramètres de sécurité"
+              render={
+                <Link href="/settings/security">
+                  <Settings />
+                </Link>
+              }
+            />
+            <SignOutButton />
           </div>
         </header>
 
