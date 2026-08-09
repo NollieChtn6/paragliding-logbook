@@ -292,12 +292,20 @@ export function GroundHandlingSessionForm({
           <Button type="button" variant="outline" onClick={onWizardBack}>
             Précédent
           </Button>
+          {/* key distinct sur les deux boutons : sans ça, passer de l'étape 2
+          à 3 fait muter le même nœud DOM de type="button" à type="submit"
+          au lieu d'en monter un nouveau, et le clic en cours peut être
+          traité par le navigateur comme un clic sur le bouton (désormais)
+          submit — soumission accidentelle avant toute saisie à l'étape 3.
+          Masqué ici par le required sur exercises (bloque la soumission via
+          la validation native), mais bien réel — même bug plus visible sur
+          TrainingCampForm, où aucun champ n'est requis. */}
           {wizardStep === 2 ? (
-            <Button type="button" onClick={handleWizardNext}>
+            <Button key="next" type="button" onClick={handleWizardNext}>
               Suivant
             </Button>
           ) : (
-            <Button type="submit" disabled={isPending}>
+            <Button key="submit" type="submit" disabled={isPending}>
               {isPending ? "Enregistrement..." : submitLabel}
             </Button>
           )}
