@@ -76,6 +76,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
             endDate: activity.trainingCamp.endDate,
             schoolId: activity.trainingCamp.schoolId,
             trainingCampTypeId: activity.trainingCamp.trainingCampTypeId,
+            observations: activity.trainingCamp.observations ?? undefined,
             summary: activity.trainingCamp.summary ?? undefined,
             certification: activity.trainingCamp.certification ?? undefined,
           }}

@@ -256,6 +256,7 @@ model TrainingCamp {
   trainingCampTypeId String   @db.Uuid
   startDate          DateTime
   endDate            DateTime
+  observations       String?
   summary            String?
   certification      String?
 

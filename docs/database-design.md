@@ -157,6 +157,7 @@ Champs :
 
 - startDate
 - endDate
+- observations (optionnel)
 - summary (optionnel)
 - certification (optionnel)
 

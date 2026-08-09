@@ -43,6 +43,7 @@ export async function createTrainingCamp(userId: string, rawInput: unknown) {
         trainingCampTypeId: input.trainingCampTypeId,
         startDate: input.startDate,
         endDate: input.endDate,
+        observations: input.observations,
         summary: input.summary,
         certification: input.certification,
       },

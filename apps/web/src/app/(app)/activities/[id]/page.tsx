@@ -236,9 +236,14 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
             />
           </div>
 
-          {(activity.trainingCamp.summary || activity.trainingCamp.certification) && (
+          {(activity.trainingCamp.observations ||
+            activity.trainingCamp.summary ||
+            activity.trainingCamp.certification) && (
             <Card>
               <CardContent className="flex flex-col gap-4">
+                {activity.trainingCamp.observations && (
+                  <NoteSection title="Observations" text={activity.trainingCamp.observations} />
+                )}
                 {activity.trainingCamp.summary && (
                   <NoteSection title="Bilan" text={activity.trainingCamp.summary} />
                 )}

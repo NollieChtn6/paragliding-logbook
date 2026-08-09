@@ -151,6 +151,7 @@ describe("getActivitySummary", () => {
         trainingCampType,
         startDate: new Date("2025-07-01"),
         endDate: new Date("2025-07-05"),
+        observations: null,
         summary: null,
         certification: null,
         school,
