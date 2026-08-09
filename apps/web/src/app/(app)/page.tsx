@@ -1,4 +1,4 @@
-import { Activity, Clock3, Gauge, Plane, Wind } from "lucide-react";
+import { Clock3, GraduationCap, Hourglass, Plane, Wind } from "lucide-react";
 import Link from "next/link";
 import { ActivityCard, getActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
@@ -31,12 +31,12 @@ export default async function Home() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatCard icon={Plane} label="Vols" value={stats.flightCount} />
         <StatCard
-          icon={Clock3}
+          icon={Hourglass}
           label="Temps de vol cumulé"
           value={`${stats.totalFlightMinutes} min`}
         />
         <StatCard
-          icon={Gauge}
+          icon={Clock3}
           label="Temps moyen par vol"
           value={stats.averageFlightMinutes === null ? "—" : `${stats.averageFlightMinutes} min`}
         />
@@ -47,17 +47,25 @@ export default async function Home() {
           tone="accent"
         />
         <StatCard
-          icon={Clock3}
+          icon={Hourglass}
           label="Temps de gonflage cumulé"
           value={`${stats.totalGroundHandlingMinutes} min`}
           tone="accent"
         />
-        <StatCard icon={Activity} label="Activités enregistrées" value={stats.totalActivityCount} />
+        <StatCard
+          icon={GraduationCap}
+          label="Formations suivies"
+          value={stats.trainingCampCount}
+          tone="accent"
+        />
       </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium tracking-tight text-foreground">Activités récentes</h2>
+          <h2 className="text-lg font-medium tracking-tight text-foreground">
+            Activités récentes
+            <span className="text-muted-foreground"> · {stats.totalActivityCount} au total</span>
+          </h2>
           <Link href="/activities" className="text-sm font-medium text-primary hover:underline">
             Voir tout
           </Link>
