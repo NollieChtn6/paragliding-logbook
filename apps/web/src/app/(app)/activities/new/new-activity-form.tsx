@@ -98,7 +98,12 @@ export function NewActivityForm({
     <div className="flex flex-col gap-6">
       <StepIndicator step={step} />
 
-      <div hidden={step !== 1} className="flex flex-col gap-6 duration-300 animate-in fade-in-0">
+      <div
+        className={cn(
+          "duration-300 animate-in fade-in-0",
+          step !== 1 ? "hidden" : "flex flex-col gap-6",
+        )}
+      >
         <RadioGroup value={selectedCode} onValueChange={setSelectedCode}>
           <div className="grid gap-3 sm:grid-cols-3">
             {activityTypes

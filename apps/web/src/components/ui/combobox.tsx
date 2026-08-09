@@ -131,7 +131,7 @@ function ComboboxItem({ className, children, ...props }: ComboboxPrimitive.Item.
     <ComboboxPrimitive.Item
       data-slot="combobox-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex w-full cursor-pointer items-center gap-2 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground not-data-[variant=destructive]:data-highlighted:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -158,7 +158,11 @@ function ComboboxLabel({ className, ...props }: ComboboxPrimitive.GroupLabel.Pro
   return (
     <ComboboxPrimitive.GroupLabel
       data-slot="combobox-label"
-      className={cn("px-2 py-1.5 text-xs text-muted-foreground", className)}
+      // Regroupe les points par site (ex. site-point-combobox.tsx) : mis en
+      // avant (couleur, taille, graisse) par rapport aux ComboboxItem
+      // (text-sm par défaut) pour bien distinguer le site des points de
+      // décollage/atterrissage qu'il contient.
+      className={cn("px-2 py-1.5 text-sm font-semibold text-primary", className)}
       {...props}
     />
   );

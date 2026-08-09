@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { SelectClearButton } from "@/components/select-clear-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { getFieldErrors } from "@/lib/form-validation";
 import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
+import { cn } from "@/lib/utils";
 
 type TrainingCampFormActionState = { success: true } | { success: false; error: string };
 
@@ -43,6 +46,8 @@ type TrainingCampFormProps = {
   onWizardNext?: () => void;
 };
 
+const WIZARD_STEP_2_REQUIRED_FIELDS = ["startDate", "endDate", "schoolId", "trainingCampTypeId"];
+
 function formatTrainingCampTypeOption(trainingCampType: TrainingCampTypeOption): string {
   return TRAINING_CAMP_TYPE_LABELS[trainingCampType.code] ?? trainingCampType.code;
 }
@@ -68,6 +73,16 @@ export function TrainingCampForm({
 }: TrainingCampFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
   const formRef = useRef<HTMLFormElement>(null);
+  // Select contrôlé : voir flight-form.tsx pour la justification (bouton
+  // croix de réinitialisation).
+  const [schoolId, setSchoolId] = useState(defaultValues?.schoolId ?? "");
+  const [trainingCampTypeId, setTrainingCampTypeId] = useState(
+    defaultValues?.trainingCampTypeId ?? "",
+  );
+  // Erreurs de validation affichées en ligne sous chaque champ : voir
+  // flight-form.tsx pour la justification (toasts réservés à la
+  // soumission/succès).
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (state?.success === false) {
@@ -76,9 +91,33 @@ export function TrainingCampForm({
   }, [state]);
 
   function handleWizardNext() {
-    if (formRef.current?.reportValidity()) {
-      onWizardNext?.();
+    const form = formRef.current;
+    if (!form) return;
+
+    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
     }
+
+    // Règle métier docs/domain-model.md (Stage) : startDate <= endDate — voir
+    // lib/validations/training-camp.ts (même message), pas exprimable par
+    // une contrainte HTML statique puisqu'elle compare deux champs entre
+    // eux. Vérifiée ici pour bloquer le passage à l'étape 3.
+    const startDateInput = form.elements.namedItem("startDate");
+    const endDateInput = form.elements.namedItem("endDate");
+    const startDateValue =
+      startDateInput instanceof HTMLInputElement ? startDateInput.value : undefined;
+    const endDateValue = endDateInput instanceof HTMLInputElement ? endDateInput.value : undefined;
+    if (startDateValue && endDateValue && new Date(startDateValue) > new Date(endDateValue)) {
+      setFieldErrors({
+        startDate: "Doit être antérieure ou égale à la date de fin.",
+      });
+      return;
+    }
+
+    setFieldErrors({});
+    onWizardNext?.();
   }
 
   return (
@@ -86,7 +125,7 @@ export function TrainingCampForm({
       {!wizardStep && (
         <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
       )}
-      <div hidden={wizardStep === 3} className="flex flex-col gap-4">
+      <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex flex-col gap-2">
           <Label htmlFor="startDate">Date de début</Label>
           <Input
@@ -97,7 +136,11 @@ export function TrainingCampForm({
               defaultValues?.startDate ? toDateInputValue(defaultValues.startDate) : undefined
             }
             required
+            aria-invalid={!!fieldErrors.startDate}
           />
+          {fieldErrors.startDate && (
+            <p className="text-sm text-destructive">{fieldErrors.startDate}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -110,61 +153,96 @@ export function TrainingCampForm({
               defaultValues?.endDate ? toDateInputValue(defaultValues.endDate) : undefined
             }
             required
+            aria-invalid={!!fieldErrors.endDate}
           />
+          {fieldErrors.endDate && <p className="text-sm text-destructive">{fieldErrors.endDate}</p>}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="schoolId">École</Label>
-          <Select name="schoolId" defaultValue={defaultValues?.schoolId} required>
-            <SelectTrigger id="schoolId" className="w-full">
-              <SelectValue placeholder="Choisir une école">
-                {(value: string | null) =>
-                  schools.find((school) => school.id === value)?.name ?? "Choisir une école"
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {schools.map((school) => (
-                <SelectItem key={school.id} value={school.id}>
-                  {school.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-1.5">
+            <Select
+              name="schoolId"
+              value={schoolId}
+              onValueChange={(value) => setSchoolId(value ?? "")}
+              required
+            >
+              <SelectTrigger
+                id="schoolId"
+                className="w-full flex-1"
+                aria-invalid={!!fieldErrors.schoolId}
+              >
+                <SelectValue placeholder="Choisir une école">
+                  {(value: string | null) =>
+                    schools.find((school) => school.id === value)?.name ?? "Choisir une école"
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {schools.map((school) => (
+                  <SelectItem key={school.id} value={school.id}>
+                    {school.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {schoolId && (
+              <SelectClearButton onClear={() => setSchoolId("")} label="Effacer l'école" />
+            )}
+          </div>
+          {fieldErrors.schoolId && (
+            <p className="text-sm text-destructive">{fieldErrors.schoolId}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="trainingCampTypeId">Type de stage</Label>
-          <Select
-            name="trainingCampTypeId"
-            defaultValue={defaultValues?.trainingCampTypeId}
-            required
-          >
-            <SelectTrigger id="trainingCampTypeId" className="w-full">
-              <SelectValue placeholder="Choisir un type de stage">
-                {(value: string | null) => {
-                  const trainingCampType = trainingCampTypes.find((tct) => tct.id === value);
-                  return trainingCampType
-                    ? formatTrainingCampTypeOption(trainingCampType)
-                    : "Choisir un type de stage";
-                }}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {trainingCampTypes.map((trainingCampType) => (
-                <SelectItem key={trainingCampType.id} value={trainingCampType.id}>
-                  {formatTrainingCampTypeOption(trainingCampType)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-1.5">
+            <Select
+              name="trainingCampTypeId"
+              value={trainingCampTypeId}
+              onValueChange={(value) => setTrainingCampTypeId(value ?? "")}
+              required
+            >
+              <SelectTrigger
+                id="trainingCampTypeId"
+                className="w-full flex-1"
+                aria-invalid={!!fieldErrors.trainingCampTypeId}
+              >
+                <SelectValue placeholder="Choisir un type de stage">
+                  {(value: string | null) => {
+                    const trainingCampType = trainingCampTypes.find((tct) => tct.id === value);
+                    return trainingCampType
+                      ? formatTrainingCampTypeOption(trainingCampType)
+                      : "Choisir un type de stage";
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {trainingCampTypes.map((trainingCampType) => (
+                  <SelectItem key={trainingCampType.id} value={trainingCampType.id}>
+                    {formatTrainingCampTypeOption(trainingCampType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {trainingCampTypeId && (
+              <SelectClearButton
+                onClear={() => setTrainingCampTypeId("")}
+                label="Effacer le type de stage"
+              />
+            )}
+          </div>
+          {fieldErrors.trainingCampTypeId && (
+            <p className="text-sm text-destructive">{fieldErrors.trainingCampTypeId}</p>
+          )}
         </div>
       </div>
 
       {!wizardStep && (
         <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
       )}
-      <div hidden={wizardStep === 2} className="flex flex-col gap-4">
+      <div className={cn(wizardStep === 2 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex flex-col gap-2">
           <Label htmlFor="summary">Bilan</Label>
           <Textarea id="summary" name="summary" defaultValue={defaultValues?.summary} />
