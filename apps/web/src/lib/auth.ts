@@ -4,14 +4,13 @@ import { nextCookies } from "better-auth/next-js";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
-// Pas d'inscription publique dans le MVP (CLAUDE.md > Authentification) :
-// disableSignUp bloque l'endpoint sign-up au niveau API, pas seulement
-// l'absence de page. Les comptes sont créés uniquement par le seed pour l'instant.
+// Inscription publique (CLAUDE.md > Authentification) : email + mot de passe
+// via /sign-up (src/app/sign-up), auth.api.signUpEmail reste l'unique
+// responsable de la création du compte credential (voir features/auth/sign-up.service.ts).
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true,
     password: {
       hash: hashPassword,
       verify: ({ password, hash }) => verifyPassword(password, hash),

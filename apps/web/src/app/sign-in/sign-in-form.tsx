@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { signInAction } from "@/actions/sign-in";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,8 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
       toast.add({ title: state.error, type: "error" });
     }
   }, [state]);
+
+  const signUpHref = `/sign-up?redirectTo=${encodeURIComponent(redirectTo)}`;
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -60,6 +63,13 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
       </Button>
 
       {state?.success === false && <p className="text-destructive">{state.error}</p>}
+
+      <p className="text-center text-sm text-muted-foreground">
+        Pas encore de compte ?{" "}
+        <Link href={signUpHref} className="font-medium text-primary hover:underline">
+          Créer un compte
+        </Link>
+      </p>
     </form>
   );
 }
