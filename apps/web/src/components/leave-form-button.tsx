@@ -15,20 +15,31 @@ import { Button } from "@/components/ui/button";
 type LeaveFormButtonProps = {
   href?: string;
   label?: string;
+  title?: string;
+  description?: string;
 };
 
 // Même pattern que delete-activity-button.tsx (AlertDialog de confirmation) :
 // ici la destination est une simple navigation (Link), pas une Server
 // Action — AlertDialogAction est un Button polymorphe, render={<Link .../>}
-// fonctionne comme dans activities/[id]/page.tsx.
-export function LeaveFormButton({ href = "/", label = "Annuler" }: LeaveFormButtonProps) {
+// fonctionne comme dans activities/[id]/page.tsx. title/description
+// paramétrables : utilisé à la fois en création (/activities/new) et en
+// modification (/activities/[id]/edit), où le texte par défaut
+// ("la création"/"seront perdues") ne conviendrait pas — voir
+// activities/[id]/edit/page.tsx pour le texte adapté à la modification.
+export function LeaveFormButton({
+  href = "/",
+  label = "Annuler",
+  title = "Abandonner la création ?",
+  description = "Les informations saisies seront perdues.",
+}: LeaveFormButtonProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger render={<Button variant="ghost">{label}</Button>} />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Abandonner la création ?</AlertDialogTitle>
-          <AlertDialogDescription>Les informations saisies seront perdues.</AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Continuer la saisie</AlertDialogCancel>

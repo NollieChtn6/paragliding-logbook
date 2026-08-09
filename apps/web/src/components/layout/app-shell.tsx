@@ -29,6 +29,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               variant="outline"
               size="icon"
               aria-label="Paramètres de sécurité"
+              title="Paramètres de sécurité"
               render={
                 <Link href="/settings/security">
                   <Settings />
