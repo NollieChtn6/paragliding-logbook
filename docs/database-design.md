@@ -117,7 +117,7 @@ Relations :
 
 Champs :
 
-- date
+- date — porte aussi l'heure (`DateTime`, pas de conversion de fuseau horaire), nécessaire pour ordonner plusieurs vols le même jour
 - durationMin
 - observations
 - improvementPoints
@@ -209,7 +209,7 @@ Relations :
 
 Champs :
 
-- date
+- date — porte aussi l'heure, même principe que `Flight.date`
 - durationMin
 - exercises
 - difficulties (optionnel)

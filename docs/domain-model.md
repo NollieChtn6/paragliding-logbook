@@ -115,7 +115,7 @@ Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 
 - id
 - trainingCampId (nullable)
-- date
+- date — porte aussi l'heure (voir ci-dessous)
 - takeoffPointId — `SitePoint` de décollage (doit être de type TAKEOFF)
 - landingPointId — `SitePoint` d'atterrissage (doit être de type LANDING)
 - durationMin
@@ -124,6 +124,15 @@ Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 - improvementPoints
 
 Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.userId`), pas de duplication sur `Flight`. Pas de `siteId` ni d'altitudes propres : dérivées de `takeoffPoint`/`landingPoint` (voir `SitePoint`), pour éviter de stocker deux fois la même information physique. Le `Flight` ne référence jamais directement un `Site` : les sites de décollage et d'atterrissage se déduisent de `takeoffPoint.site`/`landingPoint.site`, potentiellement différents (voir ADR 005) — important pour les vols de distance.
+
+`date` porte une heure (saisie via un champ dédié, combinée en un seul
+`DateTime`) en plus du jour : nécessaire pour ordonner plusieurs vols le
+même jour (`getActivityEventDate`, `features/activities/queries.ts`), sans
+quoi ils seraient tous ancrés à minuit et indistinguables par ordre
+chronologique. L'heure est stockée telle qu'elle est saisie, sans
+conversion de fuseau horaire (voir `lib/validations/flight.ts`) — pas de
+notion de fuseau utilisateur dans l'application. Pas de champ "date de fin"
+séparé : se déduit de `date` + `durationMin` au besoin, à l'affichage.
 
 ---
 
@@ -139,6 +148,10 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.us
 - certification (nullable)
 
 Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de duplication sur `TrainingCamp`.
+
+Pas d'heure sur `startDate`/`endDate`, contrairement à `Flight.date`/
+`GroundHandlingSession.date` : un stage s'étend déjà sur plusieurs jours,
+l'heure n'apporterait rien pour l'ordonner (voir `getActivityEventDate`).
 
 Relation :
 
@@ -163,7 +176,7 @@ Table de référence (pas un enum), même principe qu'`ActivityType`/`SitePointT
 
 - id
 - trainingCampId (nullable)
-- date
+- date — porte aussi l'heure, même principe que `Flight.date`
 - siteId
 - durationMin
 - exercises

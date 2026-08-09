@@ -14,6 +14,7 @@ let otherUserTrainingCampId: string;
 
 const validGroundHandlingInput = {
   date: "2025-01-15",
+  time: "10:00",
   durationMin: "30",
   exercises: "Contrôle au sol, gestion des surventes.",
 };
@@ -143,6 +144,19 @@ describe("createGroundHandlingSession (integration)", () => {
         siteId,
         trainingCampId,
         date: "2025-01-12",
+      });
+      expect(groundHandlingSession.trainingCampId).toBe(trainingCampId);
+    });
+
+    // Régression : voir create-flight.service.integration.test.ts (même
+    // raisonnement, comparaison au jour près requise).
+    it("succeeds for a late-evening session on the training camp's exact end date", async () => {
+      const groundHandlingSession = await createGroundHandlingSession(userId, {
+        ...validGroundHandlingInput,
+        siteId,
+        trainingCampId,
+        date: "2025-01-20",
+        time: "22:30",
       });
       expect(groundHandlingSession.trainingCampId).toBe(trainingCampId);
     });

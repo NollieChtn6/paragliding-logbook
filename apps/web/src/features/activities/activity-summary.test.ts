@@ -94,7 +94,7 @@ describe("getActivitySummary", () => {
         landingPointId: landingPoint.id,
         flightTypeId: localFlightType.id,
         trainingCampId: null,
-        date: new Date("2025-06-15"),
+        date: new Date("2025-06-15T09:15:00.000Z"),
         durationMin: 35,
         observations: "RAS",
         improvementPoints: "RAS",
@@ -107,7 +107,8 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Vol",
-      subtitle: "Site de test · 15/06/2025 · 35 min",
+      location: "Site de test",
+      dateInfo: "15/06/2025 à 09:15",
     });
   });
 
@@ -122,7 +123,7 @@ describe("getActivitySummary", () => {
         landingPointId: landingPoint.id,
         flightTypeId: crossCountryFlightType.id,
         trainingCampId: null,
-        date: new Date("2025-06-15"),
+        date: new Date("2025-06-15T13:45:00.000Z"),
         durationMin: 90,
         observations: "RAS",
         improvementPoints: "RAS",
@@ -135,7 +136,8 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Vol",
-      subtitle: "Site de test → Autre site · 15/06/2025 · 1h30",
+      location: "Site de test → Autre site",
+      dateInfo: "15/06/2025 à 13:45",
     });
   });
 
@@ -162,7 +164,8 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Stage",
-      subtitle: "École de test · 01/07/2025 → 05/07/2025",
+      location: "École de test",
+      dateInfo: "01/07/2025 → 05/07/2025",
     });
   });
 
@@ -175,7 +178,7 @@ describe("getActivitySummary", () => {
         activityId: "activity-1",
         siteId: site.id,
         trainingCampId: null,
-        date: new Date("2025-03-10"),
+        date: new Date("2025-03-10T18:00:00.000Z"),
         durationMin: 45,
         exercises: "Contrôle au sol",
         difficulties: null,
@@ -187,7 +190,8 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Gonflage",
-      subtitle: "Site de test · 10/03/2025 · 45 min",
+      location: "Site de test",
+      dateInfo: "10/03/2025 à 18:00",
     });
   });
 
@@ -199,7 +203,8 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "UNKNOWN_TYPE",
-      subtitle: "",
+      location: "",
+      dateInfo: "",
     });
   });
 });

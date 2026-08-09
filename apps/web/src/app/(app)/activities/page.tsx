@@ -47,7 +47,8 @@ export default async function ActivitiesPage() {
               id: activity.id,
               type: getActivityCardType(activity),
               title: summary.title,
-              subtitle: summary.subtitle,
+              location: summary.location,
+              dateInfo: summary.dateInfo,
             };
           })}
         />

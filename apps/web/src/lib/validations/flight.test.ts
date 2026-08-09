@@ -3,6 +3,7 @@ import { flightSchema } from "./flight";
 
 const validFlight = {
   date: "2025-01-15",
+  time: "14:30",
   takeoffPointId: "550e8400-e29b-41d4-a716-446655440000",
   landingPointId: "660e8400-e29b-41d4-a716-446655440001",
   durationMin: "35",
@@ -59,5 +60,25 @@ describe("flightSchema", () => {
       date: tomorrow.toISOString().slice(0, 10),
     });
     expect(result.success).toBe(false);
+  });
+
+  it("rejects a malformed time with a French, user-friendly message", () => {
+    const result = flightSchema.safeParse({ ...validFlight, time: "25:99" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("L'heure du vol est invalide.");
+    }
+  });
+
+  // L'heure permet d'ordonner plusieurs vols le même jour (voir
+  // getActivityEventDate, features/activities/queries.ts) : combinée en un
+  // Date UTC littéral, sans conversion de fuseau horaire (voir le
+  // commentaire au-dessus de flightSchema).
+  it("combines date and time into a single UTC Date", () => {
+    const result = flightSchema.safeParse(validFlight);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.date.toISOString()).toBe("2025-01-15T14:30:00.000Z");
+    }
   });
 });

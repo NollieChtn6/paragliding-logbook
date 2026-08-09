@@ -19,6 +19,7 @@ let otherUserTrainingCampId: string;
 
 const validFlightInput = {
   date: "2025-01-15",
+  time: "14:30",
   durationMin: "35",
   observations: "Integration test flight.",
   improvementPoints: "Work on approach phases.",
@@ -265,6 +266,24 @@ describe("createFlight (integration)", () => {
         flightTypeId,
         trainingCampId,
         date: "2025-01-12",
+      });
+      expect(flight.trainingCampId).toBe(trainingCampId);
+    });
+
+    // Régression : startDate/endDate n'ont pas d'heure (minuit), alors que
+    // date en a désormais une (voir lib/validations/flight.ts) — comparer
+    // les instants complets rejetterait à tort un vol en soirée le dernier
+    // jour du stage, son heure dépassant le minuit d'endDate. La comparaison
+    // doit se faire au jour près (voir create-flight.service.ts).
+    it("succeeds for a late-evening flight on the training camp's exact end date", async () => {
+      const flight = await createFlight(userId, {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId,
+        flightTypeId,
+        trainingCampId,
+        date: "2025-01-20",
+        time: "22:30",
       });
       expect(flight.trainingCampId).toBe(trainingCampId);
     });
