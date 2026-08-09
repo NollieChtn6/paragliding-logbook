@@ -3,6 +3,7 @@ import { deleteSchoolAction } from "@/actions/delete-school";
 import { updateSchoolAction } from "@/actions/update-school";
 import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 import { PageHeader } from "@/components/layout/page-header";
+import { LeaveFormButton } from "@/components/leave-form-button";
 import { getSchool } from "@/features/schools";
 import { SchoolForm } from "@/features/schools/school-form";
 
@@ -21,10 +22,17 @@ export default async function EditSchoolPage(props: PageProps<"/admin/schools/[i
       <PageHeader
         title={`Modifier ${school.name}`}
         actions={
-          <AdminDeleteButton
-            action={deleteSchoolAction.bind(null, school.id)}
-            entityLabel={`l'école « ${school.name} »`}
-          />
+          <>
+            <LeaveFormButton
+              href="/admin/schools"
+              title="Abandonner la modification ?"
+              description="Les modifications ne seront pas conservées."
+            />
+            <AdminDeleteButton
+              action={deleteSchoolAction.bind(null, school.id)}
+              entityLabel={`l'école « ${school.name} »`}
+            />
+          </>
         }
       />
 

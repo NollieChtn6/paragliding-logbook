@@ -5,6 +5,7 @@ import { deleteSiteAction } from "@/actions/delete-site";
 import { updateSiteAction } from "@/actions/update-site";
 import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 import { PageHeader } from "@/components/layout/page-header";
+import { LeaveFormButton } from "@/components/leave-form-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSite } from "@/features/sites";
@@ -26,10 +27,17 @@ export default async function EditSitePage(props: PageProps<"/admin/sites/[id]/e
       <PageHeader
         title={`Modifier ${site.name}`}
         actions={
-          <AdminDeleteButton
-            action={deleteSiteAction.bind(null, site.id)}
-            entityLabel={`le site « ${site.name} »`}
-          />
+          <>
+            <LeaveFormButton
+              href="/admin/sites"
+              title="Abandonner la modification ?"
+              description="Les modifications ne seront pas conservées."
+            />
+            <AdminDeleteButton
+              action={deleteSiteAction.bind(null, site.id)}
+              entityLabel={`le site « ${site.name} »`}
+            />
+          </>
         }
       />
 

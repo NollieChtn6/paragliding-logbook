@@ -3,6 +3,7 @@ import { deleteSitePointAction } from "@/actions/delete-site-point";
 import { updateSitePointAction } from "@/actions/update-site-point";
 import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 import { PageHeader } from "@/components/layout/page-header";
+import { LeaveFormButton } from "@/components/leave-form-button";
 import { getSitePoint } from "@/features/site-points";
 import { SitePointForm } from "@/features/site-points/site-point-form";
 import { prisma } from "@/lib/prisma";
@@ -26,10 +27,17 @@ export default async function EditSitePointPage(props: PageProps<"/admin/site-po
       <PageHeader
         title={`Modifier ${point.label}`}
         actions={
-          <AdminDeleteButton
-            action={deleteSitePointAction.bind(null, point.id)}
-            entityLabel={`le point « ${point.label} »`}
-          />
+          <>
+            <LeaveFormButton
+              href={`/admin/sites/${point.siteId}/edit`}
+              title="Abandonner la modification ?"
+              description="Les modifications ne seront pas conservées."
+            />
+            <AdminDeleteButton
+              action={deleteSitePointAction.bind(null, point.id)}
+              entityLabel={`le point « ${point.label} »`}
+            />
+          </>
         }
       />
 
