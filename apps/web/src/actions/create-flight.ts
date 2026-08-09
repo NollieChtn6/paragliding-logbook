@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type CreateFlightActionState = { success: true } | { success: false; error: string };
 
@@ -31,5 +32,5 @@ export async function createFlightAction(
   // "/") : la page d'accueil affiche un lien "Se connecter" qui prête à
   // confusion juste après une création réussie, alors que la session est
   // toujours valide.
-  redirect("/activities");
+  redirect(withToast("/activities", "Vol créé."));
 }

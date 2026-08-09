@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { createFlightAction } from "./create-flight";
 
 // Ne re-teste pas les règles métier Flight (déjà couvertes par
@@ -33,7 +34,7 @@ describe("createFlightAction", () => {
       CURRENT_USER.id,
       expect.objectContaining({ departurePointId: "some-point" }),
     );
-    expect(redirect).toHaveBeenCalledWith("/activities");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Vol créé."));
   });
 
   it("maps a ZodError from createFlight to a validation error message", async () => {

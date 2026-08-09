@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
+import { withToast } from "@/lib/toast-redirect";
 
 export type SignInActionState = { success: true } | { success: false; error: string };
 
@@ -32,5 +33,5 @@ export async function signInAction(
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect(redirectTo);
+  redirect(withToast(redirectTo, "Connexion réussie."));
 }

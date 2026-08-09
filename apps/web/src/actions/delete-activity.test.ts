@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ActivityNotFoundError, deleteActivity } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { deleteActivityAction } from "./delete-activity";
 
 // Même approche que update-flight.test.ts : deleteActivity et
@@ -29,7 +30,7 @@ describe("deleteActivityAction", () => {
     await deleteActivityAction(ACTIVITY_ID, null, new FormData());
 
     expect(deleteActivity).toHaveBeenCalledWith(CURRENT_USER.id, ACTIVITY_ID);
-    expect(redirect).toHaveBeenCalledWith("/activities");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Activité supprimée."));
   });
 
   it("calls notFound when the activity does not belong to the current user", async () => {

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { auth } from "@/lib/auth";
+import { withToast } from "@/lib/toast-redirect";
 import { signInAction } from "./sign-in";
 
 // Ne re-teste pas signInEmail lui-même (déjà couvert par
@@ -39,7 +40,7 @@ describe("signInAction", () => {
     expect(auth.api.signInEmail).toHaveBeenCalledWith({
       body: { email: "dev@example.local", password: "correct-password" },
     });
-    expect(redirect).toHaveBeenCalledWith("/activities");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Connexion réussie."));
   });
 
   it("redirects to redirectTo when it is a safe internal path", async () => {
@@ -52,7 +53,7 @@ describe("signInAction", () => {
 
     await signInAction(null, formData);
 
-    expect(redirect).toHaveBeenCalledWith("/activities/new");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities/new", "Connexion réussie."));
   });
 
   it("falls back to /activities when redirectTo is an external URL (open redirect)", async () => {
@@ -65,7 +66,7 @@ describe("signInAction", () => {
 
     await signInAction(null, formData);
 
-    expect(redirect).toHaveBeenCalledWith("/activities");
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Connexion réussie."));
   });
 
   it("maps any signInEmail failure to a generic error, without leaking the cause", async () => {

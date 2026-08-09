@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type UpdateGroundHandlingSessionActionState =
   | { success: true }
@@ -31,5 +32,5 @@ export async function updateGroundHandlingSessionAction(
     return { success: false, error: "Erreur lors de la modification de la séance." };
   }
 
-  redirect(`/activities/${activityId}`);
+  redirect(withToast(`/activities/${activityId}`, "Séance modifiée."));
 }

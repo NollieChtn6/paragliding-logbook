@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type UpdateTrainingCampActionState = { success: true } | { success: false; error: string };
 
@@ -29,5 +30,5 @@ export async function updateTrainingCampAction(
     return { success: false, error: "Erreur lors de la modification du stage." };
   }
 
-  redirect(`/activities/${activityId}`);
+  redirect(withToast(`/activities/${activityId}`, "Stage modifié."));
 }

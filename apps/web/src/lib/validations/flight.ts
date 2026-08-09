@@ -4,7 +4,7 @@ import { z } from "zod";
 // laissé vide : on la normalise en undefined avant validation.
 const optionalUuid = z.preprocess(
   (value) => (value === "" ? undefined : value),
-  z.string().uuid().optional(),
+  z.string().uuid("Le stage sélectionné est invalide.").optional(),
 );
 
 // Règles métier docs/domain-model.md (Vol) :
@@ -26,14 +26,17 @@ const optionalUuid = z.preprocess(
 // plus un enum Prisma validable en mémoire.
 export const flightSchema = z
   .object({
-    date: z.coerce.date(),
-    departurePointId: z.string().uuid(),
-    arrivalPointId: z.string().uuid(),
+    date: z.coerce.date("La date du vol est invalide."),
+    departurePointId: z.string().uuid("Le point de départ est invalide."),
+    arrivalPointId: z.string().uuid("Le point d'arrivée est invalide."),
     trainingCampId: optionalUuid,
-    durationMin: z.coerce.number().int().positive(),
-    flightTypeId: z.string().uuid(),
-    observations: z.string().trim().min(1),
-    improvementPoints: z.string().trim().min(1),
+    durationMin: z.coerce
+      .number("La durée doit être un nombre de minutes.")
+      .int("La durée doit être un nombre entier de minutes.")
+      .positive("La durée doit être strictement positive."),
+    flightTypeId: z.string().uuid("Le type de vol est invalide."),
+    observations: z.string().trim().min(1, "Les observations sont obligatoires."),
+    improvementPoints: z.string().trim().min(1, "Les points d'amélioration sont obligatoires."),
   })
   // `new Date()` évalué à chaque validation (et non figé au chargement du
   // module) pour rester correct sur un process serveur longue durée.

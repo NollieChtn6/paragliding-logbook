@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { updateFlightAction } from "./update-flight";
 
 // Même approche que create-flight.test.ts : updateFlight et
@@ -34,7 +35,7 @@ describe("updateFlightAction", () => {
       ACTIVITY_ID,
       expect.objectContaining({ departurePointId: "some-point" }),
     );
-    expect(redirect).toHaveBeenCalledWith(`/activities/${ACTIVITY_ID}`);
+    expect(redirect).toHaveBeenCalledWith(withToast(`/activities/${ACTIVITY_ID}`, "Vol modifié."));
   });
 
   it("maps a ZodError from updateFlight to a validation error message", async () => {

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type CreateGroundHandlingSessionActionState =
   | { success: true }
@@ -30,5 +31,5 @@ export async function createGroundHandlingSessionAction(
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect("/activities");
+  redirect(withToast("/activities", "Séance créée."));
 }

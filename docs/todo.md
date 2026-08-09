@@ -35,6 +35,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Initialiser shadcn/ui
 - [x] Remplacer le boilerplate Next.js par un shell applicatif minimal
 - [x] Préparer une interface mobile-first
+- [x] Toasts de succès (connexion, création, modification, suppression) et d'erreur sur tous les formulaires — `components/ui/toast.tsx` (`@base-ui/react/toast`), `components/toast-listener.tsx` + `lib/toast-redirect.ts` pour afficher un toast après une redirection serveur
 
 #### Base de données
 
@@ -52,6 +53,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Service métier `createGroundHandlingSession` (`src/features/ground-handling-sessions/`), même structure que `createFlight`/`createTrainingCamp` — validation + transaction Prisma Activity/GroundHandlingSession, testé en intégration
 - [x] Hash des mots de passe avec Argon2 (`src/lib/password.ts`)
 - [x] `getCurrentUser()` (`src/lib/current-user.ts`) : résolution de l'utilisateur courant à partir de la vraie session Better Auth
+- [x] Messages de validation Zod en français sur tous les champs (`lib/validations/{flight,training-camp,ground-handling}.ts`) — évite qu'un message par défaut de Zod (anglais) remonte jusqu'à l'utilisateur via le toast/texte d'erreur
 
 #### Gestion des activités
 
