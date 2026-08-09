@@ -40,7 +40,8 @@ export async function updateTrainingCamp(userId: string, activityId: string, raw
         endDate: input.endDate,
         // ?? null : un update Prisma ignore les champs undefined au lieu de
         // les effacer, contrairement à create — nécessaire pour permettre de
-        // vider le bilan/la certification.
+        // vider les observations/le bilan/la certification.
+        observations: input.observations ?? null,
         summary: input.summary ?? null,
         certification: input.certification ?? null,
       },
