@@ -3,6 +3,7 @@
 import { notFound, redirect } from "next/navigation";
 import { ActivityNotFoundError, deleteActivity } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type DeleteActivityActionState = { success: true } | { success: false; error: string };
 
@@ -31,5 +32,5 @@ export async function deleteActivityAction(
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter. Vers la liste :
   // l'activité n'existe plus, /activities/[id] n'a plus de sens.
-  redirect("/activities");
+  redirect(withToast("/activities", "Activité supprimée."));
 }

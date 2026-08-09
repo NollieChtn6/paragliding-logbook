@@ -15,10 +15,10 @@ const optionalTrimmedString = z.preprocess(
 // — voir la validation dans create-flight.service.ts.
 export const trainingCampSchema = z
   .object({
-    startDate: z.coerce.date(),
-    endDate: z.coerce.date(),
-    schoolId: z.string().uuid(),
-    campType: z.string().trim().min(1),
+    startDate: z.coerce.date("La date de début est invalide."),
+    endDate: z.coerce.date("La date de fin est invalide."),
+    schoolId: z.string().uuid("L'école sélectionnée est invalide."),
+    campType: z.string().trim().min(1, "Le type de stage est obligatoire."),
     summary: optionalTrimmedString,
     certification: optionalTrimmedString,
   })

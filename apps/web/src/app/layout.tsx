@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Suspense } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ToastListener } from "@/components/toast-listener";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 // Plus Jakarta Sans (SIL OFL, docs/ui-directions.md) auto-hébergée : fichier
@@ -33,7 +36,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${fontSans.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Toaster>
+            <Suspense fallback={null}>
+              <ToastListener />
+            </Suspense>
+            {children}
+          </Toaster>
+        </ThemeProvider>
       </body>
     </html>
   );

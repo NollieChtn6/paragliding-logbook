@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 
 type TrainingCampOption = {
   id: string;
@@ -69,6 +70,12 @@ export function GroundHandlingSessionForm({
   submitLabel = "Créer la séance",
 }: GroundHandlingSessionFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+
+  useEffect(() => {
+    if (state?.success === false) {
+      toast.add({ title: state.error, type: "error" });
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

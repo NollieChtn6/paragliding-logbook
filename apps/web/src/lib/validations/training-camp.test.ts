@@ -43,9 +43,12 @@ describe("trainingCampSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects an empty camp type", () => {
+  it("rejects an empty camp type with a French, user-friendly message", () => {
     const result = trainingCampSchema.safeParse({ ...validTrainingCamp, campType: "  " });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe("Le type de stage est obligatoire.");
+    }
   });
 
   it("rejects a start date after the end date", () => {

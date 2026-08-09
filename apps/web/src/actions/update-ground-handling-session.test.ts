@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { updateGroundHandlingSessionAction } from "./update-ground-handling-session";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn() }));
@@ -31,7 +32,9 @@ describe("updateGroundHandlingSessionAction", () => {
       ACTIVITY_ID,
       expect.objectContaining({ siteId: "some-site" }),
     );
-    expect(redirect).toHaveBeenCalledWith(`/activities/${ACTIVITY_ID}`);
+    expect(redirect).toHaveBeenCalledWith(
+      withToast(`/activities/${ACTIVITY_ID}`, "Séance modifiée."),
+    );
   });
 
   it("maps a ZodError from updateGroundHandlingSession to a validation error message", async () => {

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 
 export type CreateTrainingCampActionState = { success: true } | { success: false; error: string };
 
@@ -28,5 +29,5 @@ export async function createTrainingCampAction(
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect("/activities");
+  redirect(withToast("/activities", "Stage créé."));
 }

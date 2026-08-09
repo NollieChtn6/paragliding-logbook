@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
+import { withToast } from "@/lib/toast-redirect";
 import { updateTrainingCampAction } from "./update-training-camp";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn() }));
@@ -31,7 +32,9 @@ describe("updateTrainingCampAction", () => {
       ACTIVITY_ID,
       expect.objectContaining({ schoolId: "some-school" }),
     );
-    expect(redirect).toHaveBeenCalledWith(`/activities/${ACTIVITY_ID}`);
+    expect(redirect).toHaveBeenCalledWith(
+      withToast(`/activities/${ACTIVITY_ID}`, "Stage modifié."),
+    );
   });
 
   it("maps a ZodError from updateTrainingCamp to a validation error message", async () => {
