@@ -273,12 +273,21 @@ export function TrainingCampForm({
           <Button type="button" variant="outline" onClick={onWizardBack}>
             Précédent
           </Button>
+          {/* key distinct sur les deux boutons : sans ça, passer de l'étape 2
+          à 3 fait muter le même nœud DOM de type="button" à type="submit"
+          au lieu d'en monter un nouveau — le clic en cours peut alors être
+          traité par le navigateur comme un clic sur le bouton (désormais)
+          submit et soumettre le formulaire immédiatement, avant toute saisie
+          à l'étape 3. Aucun champ de l'étape 3 n'étant obligatoire ici (à la
+          différence de FlightForm/GroundHandlingSessionForm, où le
+          required bloquait cette soumission accidentelle via la validation
+          native), le bug était pleinement visible sur ce formulaire. */}
           {wizardStep === 2 ? (
-            <Button type="button" onClick={handleWizardNext}>
+            <Button key="next" type="button" onClick={handleWizardNext}>
               Suivant
             </Button>
           ) : (
-            <Button type="submit" disabled={isPending}>
+            <Button key="submit" type="submit" disabled={isPending}>
               {isPending ? "Enregistrement..." : submitLabel}
             </Button>
           )}
