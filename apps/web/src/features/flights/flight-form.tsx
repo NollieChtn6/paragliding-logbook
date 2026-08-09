@@ -7,15 +7,14 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { FLIGHT_TYPE_LABELS, SITE_POINT_TYPE_LABELS } from "@/lib/reference-labels";
+import { FLIGHT_TYPE_LABELS } from "@/lib/reference-labels";
+import { SitePointCombobox, type SitePointOption } from "./site-point-combobox";
 
 type TrainingCampOption = {
   id: string;
@@ -25,22 +24,12 @@ type TrainingCampOption = {
   school: { name: string };
 };
 
-type SitePointOption = {
-  id: string;
-  label: string;
-  altitudeM: number;
-  site: { id: string; name: string };
-  sitePointType: { code: string };
-};
-
 type FlightTypeOption = { id: string; code: string };
 
 type FlightFormActionState = { success: true } | { success: false; error: string };
 
 type FlightFormDefaultValues = {
   date?: Date;
-  departurePointId?: string;
-  arrivalPointId?: string;
   trainingCampId?: string;
   durationMin?: number;
   flightTypeId?: string;
@@ -49,7 +38,6 @@ type FlightFormDefaultValues = {
 };
 
 type FlightFormProps = {
-  points: SitePointOption[];
   flightTypes: FlightTypeOption[];
   trainingCamps?: TrainingCampOption[];
   action: (
@@ -57,6 +45,8 @@ type FlightFormProps = {
     formData: FormData,
   ) => Promise<FlightFormActionState>;
   defaultValues?: FlightFormDefaultValues;
+  defaultTakeoffPoint?: SitePointOption;
+  defaultLandingPoint?: SitePointOption;
   submitLabel?: string;
 };
 
@@ -76,43 +66,6 @@ function formatFlightTypeOption(flightType: FlightTypeOption): string {
   return FLIGHT_TYPE_LABELS[flightType.code] ?? flightType.code;
 }
 
-function sitePointTypeLabel(point: SitePointOption): string {
-  return SITE_POINT_TYPE_LABELS[point.sitePointType.code] ?? point.sitePointType.code;
-}
-
-// Un point peut être choisi comme départ ou arrivée quel que soit son
-// SitePointType habituel (un décollage peut être utilisé comme point
-// d'arrivée d'un cross) : le libellé garde le type à titre indicatif, sans
-// filtrer la liste.
-function formatSitePointOption(point: SitePointOption): string {
-  return `${point.site.name} — ${point.label} (${sitePointTypeLabel(point)}, ${point.altitudeM} m)`;
-}
-
-// Libellé d'un point à l'intérieur de son groupe (le nom du site est déjà le
-// SelectLabel du groupe, pas besoin de le répéter).
-function formatSitePointItemLabel(point: SitePointOption): string {
-  return `${point.label} (${sitePointTypeLabel(point)}, ${point.altitudeM} m)`;
-}
-
-type SitePointGroup = { site: { id: string; name: string }; points: SitePointOption[] };
-
-// Regroupe les points par site : la liste de choix devient plus lisible que
-// des libellés plats répétant le nom du site (préféré à un double sélecteur
-// Site puis Point — voir la discussion, pas justifié tant que peu de sites
-// existent, cf. docs/todo.md "Créer la gestion des sites de vol").
-function groupPointsBySite(points: SitePointOption[]): SitePointGroup[] {
-  const groups = new Map<string, SitePointGroup>();
-  for (const point of points) {
-    const group = groups.get(point.site.id);
-    if (group) {
-      group.points.push(point);
-    } else {
-      groups.set(point.site.id, { site: point.site, points: [point] });
-    }
-  }
-  return [...groups.values()];
-}
-
 // Format attendu par <Input type="date">. Cohérent avec la lecture : le
 // schéma Zod (flightSchema) parse "YYYY-MM-DD" en UTC minuit via
 // z.coerce.date(), donc toISOString().slice(0, 10) restitue exactement la
@@ -127,15 +80,15 @@ function toDateInputValue(date: Date): string {
 // createFlightAction/updateFlightAction redirigent en cas de succès : il n'y
 // a pas d'état "succès" à afficher ici.
 export function FlightForm({
-  points,
   flightTypes,
   trainingCamps = [],
   action,
   defaultValues,
+  defaultTakeoffPoint,
+  defaultLandingPoint,
   submitLabel = "Créer le vol",
 }: FlightFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
-  const pointGroups = groupPointsBySite(points);
 
   useEffect(() => {
     if (state?.success === false) {
@@ -156,57 +109,21 @@ export function FlightForm({
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="departurePointId">Point de départ</Label>
-        <Select name="departurePointId" defaultValue={defaultValues?.departurePointId} required>
-          <SelectTrigger id="departurePointId" className="w-full">
-            <SelectValue placeholder="Choisir un point de départ">
-              {(value: string | null) => {
-                const point = points.find((p) => p.id === value);
-                return point ? formatSitePointOption(point) : "Choisir un point de départ";
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {pointGroups.map((group) => (
-              <SelectGroup key={group.site.id}>
-                <SelectLabel>{group.site.name}</SelectLabel>
-                {group.points.map((point) => (
-                  <SelectItem key={point.id} value={point.id}>
-                    {formatSitePointItemLabel(point)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <SitePointCombobox
+        type="TAKEOFF"
+        name="takeoffPointId"
+        label="Décollage"
+        placeholder="Rechercher un décollage..."
+        defaultPoint={defaultTakeoffPoint}
+      />
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="arrivalPointId">Point d&apos;arrivée</Label>
-        <Select name="arrivalPointId" defaultValue={defaultValues?.arrivalPointId} required>
-          <SelectTrigger id="arrivalPointId" className="w-full">
-            <SelectValue placeholder="Choisir un point d'arrivée">
-              {(value: string | null) => {
-                const point = points.find((p) => p.id === value);
-                return point ? formatSitePointOption(point) : "Choisir un point d'arrivée";
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {pointGroups.map((group) => (
-              <SelectGroup key={group.site.id}>
-                <SelectLabel>{group.site.name}</SelectLabel>
-                {group.points.map((point) => (
-                  <SelectItem key={point.id} value={point.id}>
-                    {formatSitePointItemLabel(point)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <SitePointCombobox
+        type="LANDING"
+        name="landingPointId"
+        label="Atterrissage"
+        placeholder="Rechercher un atterrissage..."
+        defaultPoint={defaultLandingPoint}
+      />
 
       {trainingCamps.length > 0 && (
         <div className="flex flex-col gap-2">

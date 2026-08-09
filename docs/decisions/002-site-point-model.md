@@ -1,5 +1,7 @@
 # ADR 002 - Modèle Site / SitePoint pour les vols
 
+> **Note (2026-08) :** la notion de "point principal" (`Site.primaryTakeoffPointId`/`primaryLandingPointId`) et les champs `Flight.departurePointId`/`arrivalPointId` décrits ci-dessous ont été abandonnés au profit de `Flight.takeoffPointId`/`landingPointId` avec contrainte de type. Voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`, pour la décision actuelle. Ce document est conservé tel quel pour l'historique.
+
 ## Contexte
 
 `Flight` référençait un `Site` unique (`Flight.siteId`) avec ses propres `takeoffAltitudeM`/`landingAltitudeM`. Ce modèle ne permettait pas de représenter précisément un point de décollage/atterrissage (coordonnées GPS, orientation), ni un vol dont le départ et l'arrivée appartiennent à des sites différents (ex. vol de cross qui atterrit sur le décollage d'un autre site).

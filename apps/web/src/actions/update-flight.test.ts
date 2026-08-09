@@ -26,14 +26,14 @@ describe("updateFlightAction", () => {
   it("calls updateFlight with the current user id, the activity id, and redirects on success", async () => {
     vi.mocked(updateFlight).mockResolvedValue({} as never);
     const formData = new FormData();
-    formData.set("departurePointId", "some-point");
+    formData.set("takeoffPointId", "some-point");
 
     await updateFlightAction(ACTIVITY_ID, null, formData);
 
     expect(updateFlight).toHaveBeenCalledWith(
       CURRENT_USER.id,
       ACTIVITY_ID,
-      expect.objectContaining({ departurePointId: "some-point" }),
+      expect.objectContaining({ takeoffPointId: "some-point" }),
     );
     expect(redirect).toHaveBeenCalledWith(withToast(`/activities/${ACTIVITY_ID}`, "Vol modifié."));
   });

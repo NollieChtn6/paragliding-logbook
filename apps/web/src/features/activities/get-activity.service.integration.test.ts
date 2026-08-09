@@ -51,8 +51,8 @@ beforeAll(async () => {
   await prisma.flight.create({
     data: {
       activityId: activity.id,
-      departurePointId: pointId,
-      arrivalPointId: pointId,
+      takeoffPointId: pointId,
+      landingPointId: pointId,
       date: new Date("2025-06-15"),
       durationMin: 35,
       flightTypeId: flightType.id,
@@ -78,7 +78,7 @@ describe("getActivityById (integration)", () => {
 
     expect(activity?.id).toBe(activityId);
     expect(activity?.flight?.observations).toBe("Vol de test");
-    expect(activity?.flight?.departurePoint.site.id).toBe(siteId);
+    expect(activity?.flight?.takeoffPoint.site.id).toBe(siteId);
   });
 
   it("returns null when the activity belongs to another user", async () => {

@@ -88,8 +88,8 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
       {activity.flight && (
         <dl className="flex flex-col gap-3">
           <Field label="Date" value={formatDate(activity.flight.date)} />
-          <Field label="Point de départ" value={formatSitePoint(activity.flight.departurePoint)} />
-          <Field label="Point d'arrivée" value={formatSitePoint(activity.flight.arrivalPoint)} />
+          <Field label="Décollage" value={formatSitePoint(activity.flight.takeoffPoint)} />
+          <Field label="Atterrissage" value={formatSitePoint(activity.flight.landingPoint)} />
           <Field label="Durée" value={`${activity.flight.durationMin} min`} />
           <Field
             label="Type de vol"

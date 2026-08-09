@@ -4,11 +4,15 @@
 
 ### 'Flight'
 
-Vol réalisé en parapente, entre un point de départ et un point d'arrivée (chacun rattaché à un site), et éventuellement à un stage. Départ et arrivée peuvent appartenir à des sites différents (ex. vol de cross qui atterrit sur le décollage d'un autre site).
+Vol réalisé en parapente, entre un point de décollage et un point d'atterrissage (chacun rattaché à un site), et éventuellement à un stage. Décollage et atterrissage peuvent appartenir à des sites différents (ex. vol de cross qui atterrit sur le décollage d'un autre site).
+
+### 'Site'
+
+Lieu général de pratique (une station, une vallée...) sans point précis associé : le site ne désigne aucun décollage ni atterrissage particulier, ce rôle appartient exclusivement à `SitePoint` (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`).
 
 ### 'SitePoint'
 
-Point physique appartenant à un site (décollage, atterrissage...). Un site peut avoir plusieurs points d'un même type ; voir `Site.primaryTakeoffPointId`/`primaryLandingPointId` pour le point principal.
+Point physique précis appartenant à un site — décollage ou atterrissage, selon son `SitePointType`. Un site peut avoir plusieurs points d'un même type ; aucun n'est désigné comme "principal" (voir ADR 005).
 
 ### 'TrainingCamp'
 
@@ -46,10 +50,10 @@ docs/database-design.md pour le détail des modèles `Session`/`Account`/`Verifi
 - countryCode (optionnel) — code pays ISO 3166-1 alpha-2 (`FR`, `CH`, `IT`, `ES`...), pas du texte libre
 - latitude (optionnel) — localisation approximative du site
 - longitude (optionnel)
-- primaryTakeoffPointId (optionnel) — décollage principal du site, parmi ses éventuels `SitePoint` de type TAKEOFF
-- primaryLandingPointId (optionnel) — atterrissage principal du site, parmi ses éventuels `SitePoint` de type LANDING
 - createdAt
 - updatedAt
+
+Pas de notion de "point principal" : un `Site` ne référence aucun `SitePoint` (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`).
 
 Les sites seront saisis manuellement dans un premier temps. Donnée de référence partagée (pas de `userId`) : c'est un lieu du monde réel, pas une donnée privée à un utilisateur. Référentiel éditorial destiné à une future gestion applicative (ADR 004, `docs/decisions/004-editable-referentials.md`), à distinguer des tables de référence techniques comme `ActivityType`/`FlightType`/`SitePointType` (ADR 003) : `Site.name` reste une donnée métier éditoriale, jamais un code.
 
@@ -60,7 +64,7 @@ Les sites seront saisis manuellement dans un premier temps. Donnée de référen
 - id
 - label
 - siteId — site auquel appartient le point
-- sitePointTypeId — fonction habituelle du point dans le référentiel du site (décollage, atterrissage...), pas son rôle dans un `Flight` donné : un point de type TAKEOFF peut être utilisé comme point d'arrivée d'un vol
+- sitePointTypeId — TAKEOFF ou LANDING : détermine le rôle que ce point peut jouer dans un `Flight` (`takeoffPointId` doit référencer un point TAKEOFF, `landingPointId` un point LANDING — vérifié côté applicatif, voir ADR 005)
 - latitude, longitude — coordonnées précises (utilisation future dans une carte)
 - altitudeM
 - orientationDeg (optionnel) — pertinent pour un décollage, pas nécessairement pour un atterrissage
@@ -103,14 +107,14 @@ Donnée de référence partagée (pas de `userId`), au même titre que `Site`.
 - id
 - trainingCampId (nullable)
 - date
-- departurePointId — `SitePoint` de départ
-- arrivalPointId — `SitePoint` d'arrivée
+- takeoffPointId — `SitePoint` de décollage (doit être de type TAKEOFF)
+- landingPointId — `SitePoint` d'atterrissage (doit être de type LANDING)
 - durationMin
 - flightTypeId — type de vol, table de référence (`FlightType` : LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER), pas de `label` — voir `SitePointType`
 - observations
 - improvementPoints
 
-Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.userId`), pas de duplication sur `Flight`. Pas de `siteId` ni d'altitudes propres : dérivées de `departurePoint`/`arrivalPoint` (voir `SitePoint`), pour éviter de stocker deux fois la même information physique.
+Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.userId`), pas de duplication sur `Flight`. Pas de `siteId` ni d'altitudes propres : dérivées de `takeoffPoint`/`landingPoint` (voir `SitePoint`), pour éviter de stocker deux fois la même information physique. Le `Flight` ne référence jamais directement un `Site` : les sites de décollage et d'atterrissage se déduisent de `takeoffPoint.site`/`landingPoint.site`, potentiellement différents (voir ADR 005) — important pour les vols de distance.
 
 ---
 
@@ -156,7 +160,8 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 - la durée doit être **strictement positive** ;
 - les observations et points d’amélioration sont obligatoires afin d’encourager le suivi de progression ;
 - la date du vol ne peut pas être **dans le futur** ;
-- departurePoint et arrivalPoint doivent exister, mais aucune contrainte ne compare leurs altitudes ni n'exige qu'ils appartiennent au même site (un vol de cross peut atterrir sur le décollage d'un autre site, potentiellement plus haut).
+- takeoffPoint doit exister et être un `SitePoint` de type TAKEOFF ; landingPoint doit exister et être un `SitePoint` de type LANDING (vérifié côté applicatif, pas exprimable en contrainte SQL — voir ADR 005) ;
+- aucune contrainte ne compare leurs altitudes ni n'exige qu'ils appartiennent au même site (un vol de cross peut atterrir sur le décollage d'un autre site, potentiellement plus haut).
 
 ### Stage
 

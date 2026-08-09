@@ -10,8 +10,8 @@ import { deleteActivity } from "./delete-activity.service";
 let userId: string;
 let otherUserId: string;
 let siteId: string;
-let departurePointId: string;
-let arrivalPointId: string;
+let takeoffPointId: string;
+let landingPointId: string;
 let flightTypeId: string;
 let schoolId: string;
 const activityIds: string[] = [];
@@ -44,10 +44,10 @@ beforeAll(async () => {
   schoolId = school.id;
   flightTypeId = flightType.id;
 
-  const [departurePoint, arrivalPoint] = await Promise.all([
+  const [takeoffPoint, landingPoint] = await Promise.all([
     prisma.sitePoint.create({
       data: {
-        label: "Departure",
+        label: "Takeoff",
         siteId,
         sitePointTypeId: takeoffType.id,
         latitude: 45.9,
@@ -57,7 +57,7 @@ beforeAll(async () => {
     }),
     prisma.sitePoint.create({
       data: {
-        label: "Arrival",
+        label: "Landing",
         siteId,
         sitePointTypeId: landingType.id,
         latitude: 45.8,
@@ -66,8 +66,8 @@ beforeAll(async () => {
       },
     }),
   ]);
-  departurePointId = departurePoint.id;
-  arrivalPointId = arrivalPoint.id;
+  takeoffPointId = takeoffPoint.id;
+  landingPointId = landingPoint.id;
 });
 
 afterAll(async () => {
@@ -86,8 +86,8 @@ describe("deleteActivity (integration)", () => {
   it("deletes a Flight's Activity and the Flight along with it", async () => {
     const flight = await createFlight(userId, {
       date: "2025-01-15",
-      departurePointId,
-      arrivalPointId,
+      takeoffPointId,
+      landingPointId,
       durationMin: "35",
       flightTypeId,
       observations: "RAS",
@@ -144,8 +144,8 @@ describe("deleteActivity (integration)", () => {
 
     const flight = await createFlight(userId, {
       date: "2025-01-12",
-      departurePointId,
-      arrivalPointId,
+      takeoffPointId,
+      landingPointId,
       durationMin: "35",
       flightTypeId,
       trainingCampId: trainingCamp.id,
@@ -182,8 +182,8 @@ describe("deleteActivity (integration)", () => {
   it("throws ActivityNotFoundError, and does not delete, when the activity belongs to another user", async () => {
     const flight = await createFlight(userId, {
       date: "2025-01-16",
-      departurePointId,
-      arrivalPointId,
+      takeoffPointId,
+      landingPointId,
       durationMin: "35",
       flightTypeId,
       observations: "RAS",

@@ -10,17 +10,17 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString("fr-FR");
 }
 
-// departurePoint et arrivalPoint peuvent appartenir à des sites différents
+// takeoffPoint et landingPoint peuvent appartenir à des sites différents
 // (ex. cross) : n'affiche qu'un seul nom quand c'est le même site, "A → B"
 // sinon. Exportée : réutilisée telle quelle par /activities/[id] pour la
 // liste condensée "Vols associés" d'un stage.
 export function formatFlightLocation(flight: {
-  departurePoint: { site: { name: string } };
-  arrivalPoint: { site: { name: string } };
+  takeoffPoint: { site: { name: string } };
+  landingPoint: { site: { name: string } };
 }): string {
-  const departureSite = flight.departurePoint.site.name;
-  const arrivalSite = flight.arrivalPoint.site.name;
-  return departureSite === arrivalSite ? departureSite : `${departureSite} → ${arrivalSite}`;
+  const takeoffSite = flight.takeoffPoint.site.name;
+  const landingSite = flight.landingPoint.site.name;
+  return takeoffSite === landingSite ? takeoffSite : `${takeoffSite} → ${landingSite}`;
 }
 
 // Résumé condensé affiché dans la liste /activities (le détail complet est

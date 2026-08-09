@@ -17,24 +17,49 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
     }
 
     // SitePoint est une donnée de référence partagée (comme Site) : simple
-    // vérification d'existence, pas de contrôle de propriété.
-    const [departurePoint, arrivalPoint] = await Promise.all([
-      tx.sitePoint.findUnique({ where: { id: input.departurePointId } }),
-      tx.sitePoint.findUnique({ where: { id: input.arrivalPointId } }),
+    // vérification d'existence, pas de contrôle de propriété. Le type du
+    // point est vérifié en plus de son existence
+    // (docs/decisions/005-flight-takeoff-landing-points.md) : takeoffPointId
+    // doit référencer un point TAKEOFF, landingPointId un point LANDING.
+    const [takeoffPoint, landingPoint] = await Promise.all([
+      tx.sitePoint.findUnique({
+        where: { id: input.takeoffPointId },
+        include: { sitePointType: true },
+      }),
+      tx.sitePoint.findUnique({
+        where: { id: input.landingPointId },
+        include: { sitePointType: true },
+      }),
     ]);
-    if (!departurePoint) {
+    if (!takeoffPoint) {
       const issue: ZodIssue = {
         code: "custom",
-        path: ["departurePointId"],
-        message: "Ce point de départ n'existe pas.",
+        path: ["takeoffPointId"],
+        message: "Ce point de décollage n'existe pas.",
       };
       throw new ZodError([issue]);
     }
-    if (!arrivalPoint) {
+    if (takeoffPoint.sitePointType.code !== "TAKEOFF") {
       const issue: ZodIssue = {
         code: "custom",
-        path: ["arrivalPointId"],
-        message: "Ce point d'arrivée n'existe pas.",
+        path: ["takeoffPointId"],
+        message: "Ce point n'est pas un point de décollage.",
+      };
+      throw new ZodError([issue]);
+    }
+    if (!landingPoint) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["landingPointId"],
+        message: "Ce point d'atterrissage n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+    if (landingPoint.sitePointType.code !== "LANDING") {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["landingPointId"],
+        message: "Ce point n'est pas un point d'atterrissage.",
       };
       throw new ZodError([issue]);
     }
@@ -80,8 +105,8 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
     return tx.flight.update({
       where: { activityId },
       data: {
-        departurePointId: input.departurePointId,
-        arrivalPointId: input.arrivalPointId,
+        takeoffPointId: input.takeoffPointId,
+        landingPointId: input.landingPointId,
         // ?? null (pas juste input.trainingCampId) : contrairement à create,
         // un update Prisma ignore les champs undefined au lieu de les
         // effacer — nécessaire pour permettre de retirer le stage associé.
