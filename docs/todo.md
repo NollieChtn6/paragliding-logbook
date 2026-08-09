@@ -70,6 +70,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Page de connexion `/sign-in` (email + mot de passe, pas d'inscription publique — comptes créés par le seed), avec retour vers la page initialement demandée (`redirectTo`, validé contre les open redirects)
 - [x] Protection des routes (`/activities`, `/activities/new`, `/activities/[id]`, `/flights/new`) : vérification optimiste dans `src/proxy.ts`, vérification faisant autorité via `requireCurrentUser()`
 - [x] `User.passwordHash` retiré : le hash Argon2 vit uniquement sur `Account.password` (Better Auth)
+- [x] Changement de mot de passe `/settings/security` — service `changePassword` (`src/features/account/`), utilise `auth.api.changePassword` de Better Auth (vérification/hash Argon2 déjà branchés), révoque les autres sessions à chaque changement, testé en intégration contre une vraie base
 
 ---
 

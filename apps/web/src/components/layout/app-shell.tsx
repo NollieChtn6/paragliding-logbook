@@ -1,6 +1,9 @@
+import { Settings } from "lucide-react";
+import Link from "next/link";
 import type * as React from "react";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
@@ -21,6 +24,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
           <div className="flex items-center gap-1">
             <ThemeToggle />
+            <Button
+              nativeButton={false}
+              variant="outline"
+              size="icon"
+              aria-label="Paramètres de sécurité"
+              render={
+                <Link href="/settings/security">
+                  <Settings />
+                </Link>
+              }
+            />
             <SignOutButton />
           </div>
         </header>
