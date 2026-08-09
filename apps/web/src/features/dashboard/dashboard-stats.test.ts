@@ -131,6 +131,7 @@ describe("getDashboardStats", () => {
       averageFlightMinutes: null,
       groundHandlingSessionCount: 0,
       totalGroundHandlingMinutes: 0,
+      trainingCampCount: 0,
       totalActivityCount: 0,
     });
   });
@@ -164,5 +165,17 @@ describe("getDashboardStats", () => {
     const stats = getDashboardStats(activities);
 
     expect(stats.totalActivityCount).toBe(3);
+  });
+
+  it("counts training camps only", () => {
+    const activities = [
+      trainingCampActivity("1"),
+      trainingCampActivity("2"),
+      flightActivity("3", 30),
+    ];
+
+    const stats = getDashboardStats(activities);
+
+    expect(stats.trainingCampCount).toBe(2);
   });
 });

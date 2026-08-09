@@ -6,6 +6,7 @@ export type DashboardStats = {
   averageFlightMinutes: number | null;
   groundHandlingSessionCount: number;
   totalGroundHandlingMinutes: number;
+  trainingCampCount: number;
   totalActivityCount: number;
 };
 
@@ -23,6 +24,7 @@ export function getDashboardStats(activities: ActivityWithDetails[]): DashboardS
     (sum, session) => sum + session.durationMin,
     0,
   );
+  const trainingCampCount = activities.filter((activity) => activity.trainingCamp).length;
 
   return {
     flightCount: flights.length,
@@ -31,6 +33,7 @@ export function getDashboardStats(activities: ActivityWithDetails[]): DashboardS
       flights.length > 0 ? Math.round(totalFlightMinutes / flights.length) : null,
     groundHandlingSessionCount: groundHandlingSessions.length,
     totalGroundHandlingMinutes,
+    trainingCampCount,
     totalActivityCount: activities.length,
   };
 }
