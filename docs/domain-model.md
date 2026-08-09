@@ -161,6 +161,12 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 - la durée doit être strictement positive ;
 - les exercices travaillés sont obligatoires.
 
+### Suppression
+
+Une activité (Vol, Stage ou Gonflage) se supprime en supprimant son `Activity` : la spécialisation associée (`Flight`/`TrainingCamp`/`GroundHandlingSession`) est supprimée en cascade par la base (`onDelete: Cascade` sur la relation vers `Activity`). Un seul service (`deleteActivity`) suffit donc pour les trois types.
+
+Cas particulier du Stage : les vols et séances de gonflage qui lui sont rattachés (`trainingCampId`) ne sont **pas** supprimés avec lui — la contrainte est en `onDelete: SetNull`, ils sont seulement dissociés du stage. Décision produit délibérée (pas seulement le comportement par défaut de Prisma) : supprimer un stage ne doit pas faire perdre des vols/séances déjà enregistrés.
+
 ---
 
 ## Priorité MVP
