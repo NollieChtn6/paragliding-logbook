@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { Settings, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -7,14 +7,22 @@ import { Button } from "@/components/ui/button";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
+type AppShellProps = {
+  children: React.ReactNode;
+  // Lien Administration affiché uniquement pour un rôle ADMIN (docs/admin.md
+  // > Navigation) : masquer le lien n'est qu'une amélioration UX, la
+  // véritable protection reste requireAdmin() côté serveur (app/admin/layout.tsx).
+  isAdmin?: boolean;
+};
+
 // Chrome commun des pages authentifiées (racine du route group (app), voir
 // app/(app)/layout.tsx). DesktopSidebar porte marque + thème + déconnexion
 // à partir de md ; en dessous, une bande haute minimale assure la même
 // fonction puisque DesktopSidebar est masquée en mobile.
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, isAdmin = false }: AppShellProps) {
   return (
     <div className="flex min-h-svh">
-      <DesktopSidebar />
+      <DesktopSidebar isAdmin={isAdmin} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
@@ -24,11 +32,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
           <div className="flex items-center gap-1">
             <ThemeToggle />
+            {isAdmin && (
+              <Button
+                nativeButton={false}
+                variant="outline"
+                size="icon"
+                aria-label="Administration"
+                title="Administration"
+                render={
+                  <Link href="/admin">
+                    <ShieldCheck />
+                  </Link>
+                }
+              />
+            )}
             <Button
               nativeButton={false}
               variant="outline"
               size="icon"
               aria-label="Paramètres de sécurité"
+              title="Paramètres de sécurité"
               render={
                 <Link href="/settings/security">
                   <Settings />

@@ -12,12 +12,22 @@ datasource db {
   provider = "postgresql"
 }
 
+/// USER par défaut à l'inscription (docs/admin.md > Rôles) : jamais choisi par
+/// l'utilisateur, jamais exposé à Better Auth comme additionalField — voir
+/// lib/auth.ts. ADMIN attribué explicitement en base (pas d'interface pour
+/// l'instant, voir docs/todo.md).
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String   @id @default(uuid()) @db.Uuid
   name          String
   email         String   @unique
   emailVerified Boolean  @default(false)
   image         String?
+  role          UserRole @default(USER)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
