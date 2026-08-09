@@ -1,3 +1,4 @@
+import { formatDurationMinutes } from "@/lib/format-duration";
 import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 import type { ActivityWithDetails } from "./queries";
 
@@ -31,7 +32,7 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { flight } = activity;
     return {
       title: "Vol",
-      subtitle: `${formatFlightLocation(flight)} · ${formatDate(flight.date)} · ${flight.durationMin} min`,
+      subtitle: `${formatFlightLocation(flight)} · ${formatDate(flight.date)} · ${formatDurationMinutes(flight.durationMin)}`,
     };
   }
 
@@ -47,7 +48,7 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { groundHandlingSession } = activity;
     return {
       title: "Gonflage",
-      subtitle: `${groundHandlingSession.site.name} · ${formatDate(groundHandlingSession.date)} · ${groundHandlingSession.durationMin} min`,
+      subtitle: `${groundHandlingSession.site.name} · ${formatDate(groundHandlingSession.date)} · ${formatDurationMinutes(groundHandlingSession.durationMin)}`,
     };
   }
 
