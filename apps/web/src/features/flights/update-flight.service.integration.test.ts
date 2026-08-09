@@ -9,8 +9,10 @@ import { updateFlight } from "./update-flight.service";
 let userId: string;
 let otherUserId: string;
 let siteId: string;
-let departurePointId: string;
-let arrivalPointId: string;
+let otherSiteId: string;
+let takeoffPointId: string;
+let landingPointId: string;
+let otherSiteTakeoffPointId: string;
 let flightTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
@@ -28,35 +30,38 @@ const validFlightInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school, takeoffType, landingType, flightType] = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: `update-flight-${suffix}@paragliding-logbook.local`,
-        name: "Update Flight Test User",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: `update-flight-other-${suffix}@paragliding-logbook.local`,
-        name: "Other User",
-      },
-    }),
-    prisma.site.create({ data: { name: `Update Flight Test Site ${suffix}` } }),
-    prisma.school.create({ data: { name: `Update Flight Test School ${suffix}` } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
-    prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
-  ]);
+  const [user, otherUser, site, otherSite, school, takeoffType, landingType, flightType] =
+    await Promise.all([
+      prisma.user.create({
+        data: {
+          email: `update-flight-${suffix}@paragliding-logbook.local`,
+          name: "Update Flight Test User",
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: `update-flight-other-${suffix}@paragliding-logbook.local`,
+          name: "Other User",
+        },
+      }),
+      prisma.site.create({ data: { name: `Update Flight Test Site ${suffix}` } }),
+      prisma.site.create({ data: { name: `Update Flight Test Other Site ${suffix}` } }),
+      prisma.school.create({ data: { name: `Update Flight Test School ${suffix}` } }),
+      prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+      prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+      prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
+    ]);
   userId = user.id;
   otherUserId = otherUser.id;
   siteId = site.id;
+  otherSiteId = otherSite.id;
   schoolId = school.id;
   flightTypeId = flightType.id;
 
-  const [departurePoint, arrivalPoint] = await Promise.all([
+  const [takeoffPoint, landingPoint, otherSiteTakeoffPoint] = await Promise.all([
     prisma.sitePoint.create({
       data: {
-        label: "Departure",
+        label: "Takeoff",
         siteId,
         sitePointTypeId: takeoffType.id,
         latitude: 45.9,
@@ -66,7 +71,7 @@ beforeAll(async () => {
     }),
     prisma.sitePoint.create({
       data: {
-        label: "Arrival",
+        label: "Landing",
         siteId,
         sitePointTypeId: landingType.id,
         latitude: 45.8,
@@ -74,9 +79,20 @@ beforeAll(async () => {
         altitudeM: 450,
       },
     }),
+    prisma.sitePoint.create({
+      data: {
+        label: "Other Site Takeoff",
+        siteId: otherSiteId,
+        sitePointTypeId: takeoffType.id,
+        latitude: 46.0,
+        longitude: 7.0,
+        altitudeM: 1800,
+      },
+    }),
   ]);
-  departurePointId = departurePoint.id;
-  arrivalPointId = arrivalPoint.id;
+  takeoffPointId = takeoffPoint.id;
+  landingPointId = landingPoint.id;
+  otherSiteTakeoffPointId = otherSiteTakeoffPoint.id;
 
   const trainingCamp = await createTrainingCamp(userId, {
     startDate: "2025-01-10",
@@ -96,8 +112,8 @@ beforeAll(async () => {
 
   const flight = await createFlight(userId, {
     ...validFlightInput,
-    departurePointId,
-    arrivalPointId,
+    takeoffPointId,
+    landingPointId,
     flightTypeId,
   });
   flightId = flight.id;
@@ -112,8 +128,8 @@ afterAll(async () => {
     where: { activity: { userId: { in: [userId, otherUserId] } } },
   });
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
-  await prisma.sitePoint.deleteMany({ where: { siteId } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.sitePoint.deleteMany({ where: { siteId: { in: [siteId, otherSiteId] } } });
+  await prisma.site.deleteMany({ where: { id: { in: [siteId, otherSiteId] } } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -123,8 +139,8 @@ describe("updateFlight (integration)", () => {
   it("updates the Flight with the submitted data", async () => {
     const updated = await updateFlight(userId, activityId, {
       ...validFlightInput,
-      departurePointId,
-      arrivalPointId,
+      takeoffPointId,
+      landingPointId,
       flightTypeId,
       durationMin: "50",
       observations: "Updated observations.",
@@ -135,11 +151,31 @@ describe("updateFlight (integration)", () => {
     expect(updated.observations).toBe("Updated observations.");
   });
 
+  it("accepts a takeoff point and a landing point belonging to two different sites", async () => {
+    const updated = await updateFlight(userId, activityId, {
+      ...validFlightInput,
+      takeoffPointId: otherSiteTakeoffPointId,
+      landingPointId,
+      flightTypeId,
+    });
+
+    expect(updated.takeoffPointId).toBe(otherSiteTakeoffPointId);
+    expect(updated.landingPointId).toBe(landingPointId);
+
+    // Remet les points d'origine pour ne pas affecter les tests suivants.
+    await updateFlight(userId, activityId, {
+      ...validFlightInput,
+      takeoffPointId,
+      landingPointId,
+      flightTypeId,
+    });
+  });
+
   it("clears an optional field when it is omitted from the input", async () => {
     await updateFlight(userId, activityId, {
       ...validFlightInput,
-      departurePointId,
-      arrivalPointId,
+      takeoffPointId,
+      landingPointId,
       flightTypeId,
       trainingCampId,
       date: "2025-01-12",
@@ -147,8 +183,8 @@ describe("updateFlight (integration)", () => {
 
     const withCamp = await updateFlight(userId, activityId, {
       ...validFlightInput,
-      departurePointId,
-      arrivalPointId,
+      takeoffPointId,
+      landingPointId,
       flightTypeId,
     });
 
@@ -159,20 +195,44 @@ describe("updateFlight (integration)", () => {
     await expect(
       updateFlight(userId, activityId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId,
         durationMin: "-10",
       }),
     ).rejects.toThrow();
   });
 
-  it("fails when the departure point does not exist", async () => {
+  it("fails when the takeoff point does not exist", async () => {
     await expect(
       updateFlight(userId, activityId, {
         ...validFlightInput,
-        departurePointId: crypto.randomUUID(),
-        arrivalPointId,
+        takeoffPointId: crypto.randomUUID(),
+        landingPointId,
+        flightTypeId,
+      }),
+    ).rejects.toThrow();
+  });
+
+  // docs/decisions/005-flight-takeoff-landing-points.md : takeoffPointId
+  // doit référencer un point TAKEOFF, landingPointId un point LANDING.
+  it("fails when the takeoff point is actually a landing point", async () => {
+    await expect(
+      updateFlight(userId, activityId, {
+        ...validFlightInput,
+        takeoffPointId: landingPointId,
+        landingPointId,
+        flightTypeId,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the landing point is actually a takeoff point", async () => {
+    await expect(
+      updateFlight(userId, activityId, {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId: takeoffPointId,
         flightTypeId,
       }),
     ).rejects.toThrow();
@@ -182,8 +242,8 @@ describe("updateFlight (integration)", () => {
     await expect(
       updateFlight(userId, activityId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId: crypto.randomUUID(),
       }),
     ).rejects.toThrow();
@@ -193,8 +253,8 @@ describe("updateFlight (integration)", () => {
     await expect(
       updateFlight(userId, crypto.randomUUID(), {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId,
       }),
     ).rejects.toThrow(ActivityNotFoundError);
@@ -204,8 +264,8 @@ describe("updateFlight (integration)", () => {
     await expect(
       updateFlight(otherUserId, activityId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId,
       }),
     ).rejects.toThrow(ActivityNotFoundError);
@@ -217,8 +277,8 @@ describe("updateFlight (integration)", () => {
       await expect(
         updateFlight(userId, activityId, {
           ...validFlightInput,
-          departurePointId,
-          arrivalPointId,
+          takeoffPointId,
+          landingPointId,
           flightTypeId,
           trainingCampId,
           date: "2025-01-25",
@@ -230,8 +290,8 @@ describe("updateFlight (integration)", () => {
       await expect(
         updateFlight(userId, activityId, {
           ...validFlightInput,
-          departurePointId,
-          arrivalPointId,
+          takeoffPointId,
+          landingPointId,
           flightTypeId,
           trainingCampId: otherUserTrainingCampId,
           date: "2025-01-12",

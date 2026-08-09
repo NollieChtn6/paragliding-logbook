@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-// Réutilisé pour departurePoint/arrivalPoint, à deux niveaux (Flight direct
+// Réutilisé pour takeoffPoint/landingPoint, à deux niveaux (Flight direct
 // et TrainingCamp.flights) : évite de dupliquer le même include.
 const SITE_POINT_INCLUDE = { include: { site: true, sitePointType: true } } satisfies {
   include: Prisma.SitePointInclude;
@@ -13,8 +13,8 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
   activityType: true,
   flight: {
     include: {
-      departurePoint: SITE_POINT_INCLUDE,
-      arrivalPoint: SITE_POINT_INCLUDE,
+      takeoffPoint: SITE_POINT_INCLUDE,
+      landingPoint: SITE_POINT_INCLUDE,
       flightType: true,
       trainingCamp: true,
     },
@@ -23,7 +23,7 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
     include: {
       school: true,
       flights: {
-        include: { departurePoint: SITE_POINT_INCLUDE, arrivalPoint: SITE_POINT_INCLUDE },
+        include: { takeoffPoint: SITE_POINT_INCLUDE, landingPoint: SITE_POINT_INCLUDE },
         orderBy: { date: "asc" },
       },
       groundHandlingSessions: { include: { site: true }, orderBy: { date: "asc" } },

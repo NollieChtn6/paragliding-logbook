@@ -14,13 +14,6 @@ import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 type NewActivityFormProps = {
   activityTypes: { code: string }[];
   sites: { id: string; name: string }[];
-  points: {
-    id: string;
-    label: string;
-    altitudeM: number;
-    site: { id: string; name: string };
-    sitePointType: { code: string };
-  }[];
   flightTypes: { id: string; code: string }[];
   schools: { id: string; name: string }[];
   trainingCamps: {
@@ -44,7 +37,6 @@ const NO_SELECTION = "";
 export function NewActivityForm({
   activityTypes,
   sites,
-  points,
   flightTypes,
   schools,
   trainingCamps,
@@ -70,7 +62,6 @@ export function NewActivityForm({
 
       {selectedCode === "FLIGHT" && (
         <FlightForm
-          points={points}
           flightTypes={flightTypes}
           trainingCamps={trainingCamps}
           action={createFlightAction}

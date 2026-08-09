@@ -106,7 +106,7 @@ Spécialisation d'une Activity.
 Relations :
 
 - appartient à une Activity
-- departurePoint et arrivalPoint : chacun un SitePoint, potentiellement de sites différents (voir SitePoint ci-dessous)
+- takeoffPoint et landingPoint : chacun un SitePoint, potentiellement de sites différents (voir SitePoint ci-dessous)
 - peut appartenir à un TrainingCamp
 - appartient à un FlightType
 
@@ -117,7 +117,7 @@ Champs :
 - observations
 - improvementPoints
 
-Pas de `siteId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `departurePoint.altitudeM`/`arrivalPoint.altitudeM`.
+Pas de `siteId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `takeoffPoint.altitudeM`/`landingPoint.altitudeM`. Le `Flight` ne référence jamais un `Site` directement (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`) : `takeoffPointId` doit référencer un `SitePoint` de type TAKEOFF, `landingPointId` un `SitePoint` de type LANDING — non exprimable en contrainte SQL (le type dépend d'une autre table), vérifié côté applicatif.
 
 ---
 
@@ -189,18 +189,16 @@ Champs :
 - countryCode (optionnel) — code pays ISO 3166-1 alpha-2 (`FR`, `CH`, `IT`, `ES`...), pas du texte libre
 - latitude (optionnel) — localisation approximative du site
 - longitude (optionnel)
-- primaryTakeoffPointId (optionnel, FK SitePoint) — décollage principal
-- primaryLandingPointId (optionnel, FK SitePoint) — atterrissage principal
 - createdAt
 - updatedAt
 
-`primaryTakeoffPointId`/`primaryLandingPointId` doivent référencer un `SitePoint` du même `Site` et du bon `SitePointType` (TAKEOFF/LANDING respectivement) : non exprimable nativement en Postgres/Prisma (pas de CHECK inter-lignes), vérifié côté applicatif.
+Pas de notion de "point principal" : un `Site` ne référence aucun `SitePoint` (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`, qui revient sur ce choix initialement décrit dans l'ADR 002).
 
 ---
 
 ### SitePoint
 
-Point physique appartenant à un Site (décollage, atterrissage...). Un Site peut avoir plusieurs `SitePoint` d'un même `SitePointType` ; `Site.primaryTakeoffPointId`/`primaryLandingPointId` désignent le point principal, pas l'ensemble des points. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Site`/`School`.
+Point physique précis appartenant à un Site : décollage ou atterrissage, selon son `SitePointType`. Un Site peut avoir plusieurs `SitePoint` d'un même `SitePointType` ; aucun n'est désigné comme "principal" (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`). Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Site`/`School`.
 
 Relations :
 
@@ -214,7 +212,7 @@ Champs :
 - altitudeM
 - orientationDeg (optionnel)
 
-Le type d'un `SitePoint` est sa fonction habituelle dans le référentiel du site, pas son rôle dans un `Flight` donné : un point TAKEOFF peut être utilisé comme `arrivalPoint` d'un vol.
+Le type d'un `SitePoint` (TAKEOFF/LANDING) détermine directement le rôle qu'il peut jouer dans un `Flight` : `takeoffPointId` doit référencer un point TAKEOFF, `landingPointId` un point LANDING (voir ADR 005).
 
 ---
 
@@ -273,15 +271,11 @@ Activity 1,0..1 GroundHandlingSession
 
 Site 1,N SitePoint
 
-Site 0..1,1 SitePoint (primaryTakeoffPoint)
-
-Site 0..1,1 SitePoint (primaryLandingPoint)
-
 SitePointType 1,N SitePoint
 
-SitePoint 1,N Flight (departurePoint)
+SitePoint 1,N Flight (takeoffPoint)
 
-SitePoint 1,N Flight (arrivalPoint)
+SitePoint 1,N Flight (landingPoint)
 
 FlightType 1,N Flight
 

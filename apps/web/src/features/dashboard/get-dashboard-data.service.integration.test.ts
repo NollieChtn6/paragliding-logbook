@@ -75,8 +75,8 @@ beforeAll(async () => {
     await prisma.flight.create({
       data: {
         activityId: activity.id,
-        departurePointId: pointId,
-        arrivalPointId: pointId,
+        takeoffPointId: pointId,
+        landingPointId: pointId,
         date: new Date(date),
         durationMin,
         flightTypeId: flightType.id,
@@ -129,8 +129,8 @@ beforeAll(async () => {
   await prisma.flight.create({
     data: {
       activityId: otherUserActivity.id,
-      departurePointId: pointId,
-      arrivalPointId: pointId,
+      takeoffPointId: pointId,
+      landingPointId: pointId,
       date: new Date("2025-06-01"),
       durationMin: 999,
       flightTypeId: flightType.id,

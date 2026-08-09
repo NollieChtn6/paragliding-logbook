@@ -9,8 +9,6 @@ const site = {
   countryCode: null,
   latitude: null,
   longitude: null,
-  primaryTakeoffPointId: null,
-  primaryLandingPointId: null,
   createdAt: new Date("2025-01-01"),
   updatedAt: new Date("2025-01-01"),
 };
@@ -26,7 +24,7 @@ const landingType = { id: "spt-landing", code: "LANDING" };
 const localFlightType = { id: "ft-local", code: "LOCAL" };
 const crossCountryFlightType = { id: "ft-cross-country", code: "CROSS_COUNTRY" };
 
-const departurePoint = {
+const takeoffPoint = {
   id: "point-1",
   label: "Décollage principal",
   siteId: site.id,
@@ -39,7 +37,7 @@ const departurePoint = {
   sitePointType: takeoffType,
 };
 
-const arrivalPoint = {
+const landingPoint = {
   id: "point-2",
   label: "Atterrissage principal",
   siteId: site.id,
@@ -78,23 +76,23 @@ const baseActivity = {
 };
 
 describe("getActivitySummary", () => {
-  it("summarizes a Flight departing and arriving at the same site", () => {
+  it("summarizes a Flight taking off and landing at the same site", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
       activityType: { id: "at-1", code: "FLIGHT" },
       flight: {
         id: "flight-1",
         activityId: "activity-1",
-        departurePointId: departurePoint.id,
-        arrivalPointId: arrivalPoint.id,
+        takeoffPointId: takeoffPoint.id,
+        landingPointId: landingPoint.id,
         flightTypeId: localFlightType.id,
         trainingCampId: null,
         date: new Date("2025-06-15"),
         durationMin: 35,
         observations: "RAS",
         improvementPoints: "RAS",
-        departurePoint,
-        arrivalPoint,
+        takeoffPoint,
+        landingPoint,
         flightType: localFlightType,
         trainingCamp: null,
       },
@@ -106,23 +104,23 @@ describe("getActivitySummary", () => {
     });
   });
 
-  it("summarizes a Flight departing and arriving at different sites", () => {
+  it("summarizes a Flight taking off and landing at different sites", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
       activityType: { id: "at-1", code: "FLIGHT" },
       flight: {
         id: "flight-2",
         activityId: "activity-1",
-        departurePointId: departurePoint.id,
-        arrivalPointId: arrivalPoint.id,
+        takeoffPointId: takeoffPoint.id,
+        landingPointId: landingPoint.id,
         flightTypeId: crossCountryFlightType.id,
         trainingCampId: null,
         date: new Date("2025-06-15"),
         durationMin: 90,
         observations: "RAS",
         improvementPoints: "RAS",
-        departurePoint,
-        arrivalPoint: { ...arrivalPoint, site: otherSite },
+        takeoffPoint,
+        landingPoint: { ...landingPoint, site: otherSite },
         flightType: crossCountryFlightType,
         trainingCamp: null,
       },

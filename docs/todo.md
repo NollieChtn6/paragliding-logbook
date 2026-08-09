@@ -182,8 +182,9 @@ Fonctionnalités :
 
 ### Sites de vol 🌍
 
-- [x] Modèle `Site`/`SitePoint`/`SitePointType` — un site peut avoir plusieurs points (décollage, atterrissage), chacun avec coordonnées GPS précises et altitude ; `Site.primaryTakeoffPointId`/`primaryLandingPointId` désignent le point principal
+- [x] Modèle `Site`/`SitePoint`/`SitePointType` — un site peut avoir plusieurs points (décollage, atterrissage), chacun avec coordonnées GPS précises et altitude ; pas de "point principal" (ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`)
 - [x] `Site.countryCode`/`School` enrichi (adresse structurée, code pays ISO) — prépare `School`/`Site`/`SitePoint` à une future gestion applicative sans construire l'interface (ADR 004, `docs/decisions/004-editable-referentials.md`)
+- [x] `Flight.takeoffPointId`/`landingPointId` avec contrainte de type applicative + recherche de points par nom dans le formulaire de vol (ADR 005)
 - [ ] Créer la gestion des sites de vol (interface de création/modification d'un `Site` et de ses `SitePoint` — actuellement seedés uniquement)
 - [ ] Ajouter un site manuellement
 - [ ] Prévoir une évolution vers des données externes (API)

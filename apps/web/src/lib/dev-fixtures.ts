@@ -8,7 +8,5 @@ export const DEV_USER_EMAIL = "dev@paragliding-logbook.local";
 // n'apparaissent pas dans l'historique de l'autre). Même mot de passe que
 // DEV_USER_EMAIL (DEV_USER_PASSWORD), pas de variable dédiée.
 export const DEV_USER_2_EMAIL = "dev2@paragliding-logbook.local";
-export const TEST_SITE_NAME = "Site de test";
+export const TEST_SITE_NAME = "Saint-Hilaire-du-Touvet";
 export const TEST_SCHOOL_NAME = "École de test";
-export const TEST_SITE_TAKEOFF_LABEL = "Décollage principal";
-export const TEST_SITE_LANDING_LABEL = "Atterrissage principal";

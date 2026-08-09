@@ -26,13 +26,13 @@ describe("createFlightAction", () => {
   it("calls createFlight with the current user id and redirects on success", async () => {
     vi.mocked(createFlight).mockResolvedValue({} as never);
     const formData = new FormData();
-    formData.set("departurePointId", "some-point");
+    formData.set("takeoffPointId", "some-point");
 
     await createFlightAction(null, formData);
 
     expect(createFlight).toHaveBeenCalledWith(
       CURRENT_USER.id,
-      expect.objectContaining({ departurePointId: "some-point" }),
+      expect.objectContaining({ takeoffPointId: "some-point" }),
     );
     expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Vol créé."));
   });

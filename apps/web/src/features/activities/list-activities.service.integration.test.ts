@@ -53,8 +53,8 @@ beforeAll(async () => {
   await prisma.flight.create({
     data: {
       activityId: olderActivity.id,
-      departurePointId: pointId,
-      arrivalPointId: pointId,
+      takeoffPointId: pointId,
+      landingPointId: pointId,
       date: new Date("2024-01-10"),
       durationMin: 20,
       flightTypeId: flightType.id,
@@ -69,8 +69,8 @@ beforeAll(async () => {
   await prisma.flight.create({
     data: {
       activityId: newerActivity.id,
-      departurePointId: pointId,
-      arrivalPointId: pointId,
+      takeoffPointId: pointId,
+      landingPointId: pointId,
       date: new Date("2025-06-15"),
       durationMin: 35,
       flightTypeId: flightType.id,
@@ -85,8 +85,8 @@ beforeAll(async () => {
   await prisma.flight.create({
     data: {
       activityId: otherUserActivity.id,
-      departurePointId: pointId,
-      arrivalPointId: pointId,
+      takeoffPointId: pointId,
+      landingPointId: pointId,
       date: new Date("2025-01-01"),
       durationMin: 20,
       flightTypeId: flightType.id,
@@ -117,12 +117,12 @@ describe("listActivities (integration)", () => {
     expect(activities.some((activity) => activity.userId === otherUserId)).toBe(false);
   });
 
-  it("includes the activityType and the Flight specialization with its departure Site", async () => {
+  it("includes the activityType and the Flight specialization with its takeoff Site", async () => {
     const activities = await listActivities(userId);
 
     for (const activity of activities) {
       expect(activity.activityType.code).toBe("FLIGHT");
-      expect(activity.flight?.departurePoint.site.id).toBe(siteId);
+      expect(activity.flight?.takeoffPoint.site.id).toBe(siteId);
     }
   });
 });

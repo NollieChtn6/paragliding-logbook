@@ -3,8 +3,8 @@ import { flightSchema } from "./flight";
 
 const validFlight = {
   date: "2025-01-15",
-  departurePointId: "550e8400-e29b-41d4-a716-446655440000",
-  arrivalPointId: "660e8400-e29b-41d4-a716-446655440001",
+  takeoffPointId: "550e8400-e29b-41d4-a716-446655440000",
+  landingPointId: "660e8400-e29b-41d4-a716-446655440001",
   durationMin: "35",
   flightTypeId: "770e8400-e29b-41d4-a716-446655440002",
   observations: "Quiet evening flight.",
@@ -17,20 +17,16 @@ describe("flightSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects a flight without a departure or arrival point", () => {
-    const { departurePointId, arrivalPointId, ...rest } = validFlight;
+  it("rejects a flight without a takeoff or landing point", () => {
+    const { takeoffPointId, landingPointId, ...rest } = validFlight;
     const result = flightSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
-  it("accepts the same point as both departure and arrival (top-landing)", () => {
-    const result = flightSchema.safeParse({
-      ...validFlight,
-      arrivalPointId: validFlight.departurePointId,
-    });
-    expect(result.success).toBe(true);
-  });
-
+  // Le format UUID seul ne distingue pas un point TAKEOFF d'un point LANDING
+  // (nécessite une lecture en base) : la contrainte de type est vérifiée
+  // dans le service, pas ici (docs/decisions/005-flight-takeoff-landing-points.md),
+  // voir create-flight.service.integration.test.ts.
   it("rejects a negative duration with a French, user-friendly message", () => {
     const result = flightSchema.safeParse({ ...validFlight, durationMin: "-10" });
     expect(result.success).toBe(false);

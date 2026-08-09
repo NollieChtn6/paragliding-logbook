@@ -7,8 +7,10 @@ import { createFlight } from "./create-flight.service";
 let userId: string;
 let otherUserId: string;
 let siteId: string;
-let departurePointId: string;
-let arrivalPointId: string;
+let otherSiteId: string;
+let takeoffPointId: string;
+let landingPointId: string;
+let otherSiteTakeoffPointId: string;
 let flightTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
@@ -45,15 +47,17 @@ beforeAll(async () => {
   otherUserId = otherUser.id;
   flightTypeId = flightType.id;
 
-  const site = await prisma.site.create({
-    data: { name: `Integration Test Site ${suffix}` },
-  });
+  const [site, otherSite] = await Promise.all([
+    prisma.site.create({ data: { name: `Integration Test Site ${suffix}` } }),
+    prisma.site.create({ data: { name: `Integration Test Other Site ${suffix}` } }),
+  ]);
   siteId = site.id;
+  otherSiteId = otherSite.id;
 
-  const [departurePoint, arrivalPoint] = await Promise.all([
+  const [takeoffPoint, landingPoint, otherSiteTakeoffPoint] = await Promise.all([
     prisma.sitePoint.create({
       data: {
-        label: "Departure",
+        label: "Takeoff",
         siteId,
         sitePointTypeId: takeoffType.id,
         latitude: 45.9,
@@ -63,7 +67,7 @@ beforeAll(async () => {
     }),
     prisma.sitePoint.create({
       data: {
-        label: "Arrival",
+        label: "Landing",
         siteId,
         sitePointTypeId: landingType.id,
         latitude: 45.8,
@@ -71,9 +75,20 @@ beforeAll(async () => {
         altitudeM: 450,
       },
     }),
+    prisma.sitePoint.create({
+      data: {
+        label: "Other Site Takeoff",
+        siteId: otherSiteId,
+        sitePointTypeId: takeoffType.id,
+        latitude: 46.0,
+        longitude: 7.0,
+        altitudeM: 1800,
+      },
+    }),
   ]);
-  departurePointId = departurePoint.id;
-  arrivalPointId = arrivalPoint.id;
+  takeoffPointId = takeoffPoint.id;
+  landingPointId = landingPoint.id;
+  otherSiteTakeoffPointId = otherSiteTakeoffPoint.id;
 
   const school = await prisma.school.create({
     data: { name: `Integration Test School ${suffix}` },
@@ -105,8 +120,8 @@ afterAll(async () => {
     where: { activity: { userId: { in: [userId, otherUserId] } } },
   });
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
-  await prisma.sitePoint.deleteMany({ where: { siteId } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.sitePoint.deleteMany({ where: { siteId: { in: [siteId, otherSiteId] } } });
+  await prisma.site.deleteMany({ where: { id: { in: [siteId, otherSiteId] } } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -120,8 +135,8 @@ describe("createFlight (integration)", () => {
     beforeAll(async () => {
       const flight = await createFlight(userId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId,
       });
       flightId = flight.id;
@@ -137,10 +152,10 @@ describe("createFlight (integration)", () => {
       expect(activity.activityType.code).toBe("FLIGHT");
     });
 
-    it("creates the Flight with the submitted data", async () => {
+    it("creates the Flight with the submitted takeoff and landing points", async () => {
       const flight = await prisma.flight.findUniqueOrThrow({ where: { id: flightId } });
-      expect(flight.departurePointId).toBe(departurePointId);
-      expect(flight.arrivalPointId).toBe(arrivalPointId);
+      expect(flight.takeoffPointId).toBe(takeoffPointId);
+      expect(flight.landingPointId).toBe(landingPointId);
       expect(flight.durationMin).toBe(35);
       expect(flight.flightTypeId).toBe(flightTypeId);
     });
@@ -154,35 +169,71 @@ describe("createFlight (integration)", () => {
     });
   });
 
+  it("accepts a takeoff point and a landing point belonging to two different sites", async () => {
+    const flight = await createFlight(userId, {
+      ...validFlightInput,
+      takeoffPointId: otherSiteTakeoffPointId,
+      landingPointId,
+      flightTypeId,
+    });
+    expect(flight.takeoffPointId).toBe(otherSiteTakeoffPointId);
+    expect(flight.landingPointId).toBe(landingPointId);
+  });
+
   it("fails with invalid data", async () => {
     await expect(
       createFlight(userId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId,
         durationMin: "-10",
       }),
     ).rejects.toThrow();
   });
 
-  it("fails when the departure point does not exist", async () => {
+  it("fails when the takeoff point does not exist", async () => {
     await expect(
       createFlight(userId, {
         ...validFlightInput,
-        departurePointId: crypto.randomUUID(),
-        arrivalPointId,
+        takeoffPointId: crypto.randomUUID(),
+        landingPointId,
         flightTypeId,
       }),
     ).rejects.toThrow();
   });
 
-  it("fails when the arrival point does not exist", async () => {
+  it("fails when the landing point does not exist", async () => {
     await expect(
       createFlight(userId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId: crypto.randomUUID(),
+        takeoffPointId,
+        landingPointId: crypto.randomUUID(),
+        flightTypeId,
+      }),
+    ).rejects.toThrow();
+  });
+
+  // docs/decisions/005-flight-takeoff-landing-points.md : takeoffPointId
+  // doit référencer un point TAKEOFF, landingPointId un point LANDING — non
+  // exprimable par la seule FK SQL, vérifié dans le service.
+  it("fails when the takeoff point is actually a landing point", async () => {
+    await expect(
+      createFlight(userId, {
+        ...validFlightInput,
+        takeoffPointId: landingPointId,
+        landingPointId,
+        flightTypeId,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the landing point is actually a takeoff point", async () => {
+    await expect(
+      createFlight(userId, {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId: takeoffPointId,
         flightTypeId,
       }),
     ).rejects.toThrow();
@@ -192,8 +243,8 @@ describe("createFlight (integration)", () => {
     await expect(
       createFlight(userId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId: crypto.randomUUID(),
       }),
     ).rejects.toThrow();
@@ -205,8 +256,8 @@ describe("createFlight (integration)", () => {
     it("succeeds when the flight date is within the training camp's interval", async () => {
       const flight = await createFlight(userId, {
         ...validFlightInput,
-        departurePointId,
-        arrivalPointId,
+        takeoffPointId,
+        landingPointId,
         flightTypeId,
         trainingCampId,
         date: "2025-01-12",
@@ -218,8 +269,8 @@ describe("createFlight (integration)", () => {
       await expect(
         createFlight(userId, {
           ...validFlightInput,
-          departurePointId,
-          arrivalPointId,
+          takeoffPointId,
+          landingPointId,
           flightTypeId,
           trainingCampId,
           date: "2025-01-05",
@@ -231,8 +282,8 @@ describe("createFlight (integration)", () => {
       await expect(
         createFlight(userId, {
           ...validFlightInput,
-          departurePointId,
-          arrivalPointId,
+          takeoffPointId,
+          landingPointId,
           flightTypeId,
           trainingCampId,
           date: "2025-01-25",
@@ -244,8 +295,8 @@ describe("createFlight (integration)", () => {
       await expect(
         createFlight(userId, {
           ...validFlightInput,
-          departurePointId,
-          arrivalPointId,
+          takeoffPointId,
+          landingPointId,
           flightTypeId,
           trainingCampId: otherUserTrainingCampId,
           date: "2025-01-12",
