@@ -36,7 +36,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${fontSans.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="flex min-h-full flex-col">
+      {/* suppressHydrationWarning : certaines extensions navigateur (ex.
+      ColorZilla) injectent un attribut sur <body> avant l'hydratation
+      (ex. cz-shortcut-listen), provoquant un faux positif d'avertissement
+      d'hydratation sans rapport avec notre code. */}
+      <body className="flex min-h-full flex-col" suppressHydrationWarning>
         {/* Hors de ThemeProvider/Toaster : ne dépend d'aucun état client,
         doit rester visible même si l'un de ces providers échoue. */}
         <EnvironmentBanner />

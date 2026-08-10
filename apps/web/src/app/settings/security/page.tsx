@@ -15,23 +15,28 @@ export default async function SecuritySettingsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title="Compte" description="Gérer votre profil et votre sécurité" />
 
-      <Card className="max-w-sm">
-        <CardHeader>
-          <CardTitle>Profil</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProfileForm name={user.name} />
-        </CardContent>
-      </Card>
+      {/* Côte à côte à partir de md : les deux formulaires sont courts et
+      indépendants, pas besoin de forcer un défilement vertical sur desktop.
+      Empilés sur mobile (flex-col par défaut). */}
+      <div className="flex flex-col gap-6 md:flex-row">
+        <Card className="md:flex-1">
+          <CardHeader>
+            <CardTitle>Profil</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ProfileForm name={user.name} />
+          </CardContent>
+        </Card>
 
-      <Card className="max-w-sm">
-        <CardHeader>
-          <CardTitle>Sécurité</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ChangePasswordForm email={user.email} />
-        </CardContent>
-      </Card>
+        <Card className="md:flex-1">
+          <CardHeader>
+            <CardTitle>Sécurité</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChangePasswordForm email={user.email} />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
