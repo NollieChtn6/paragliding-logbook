@@ -1,5 +1,5 @@
 import { APIError } from "better-auth/api";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { signUp } from "./sign-up.service";
@@ -14,6 +14,14 @@ function uniqueEmail(): string {
   createdEmails.push(email);
   return email;
 }
+
+// Neutralise SIGNUP_INVITE_CODE par défaut : les tests qui ne portent pas
+// dessus doivent rester indépendants du .env local de la machine qui
+// exécute les tests, les deux tests dédiés au code (plus bas) le
+// redéfinissent explicitement.
+beforeEach(() => {
+  vi.stubEnv("SIGNUP_INVITE_CODE", "");
+});
 
 afterEach(async () => {
   const users = await prisma.user.findMany({ where: { email: { in: createdEmails } } });
