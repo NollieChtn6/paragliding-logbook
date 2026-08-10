@@ -1,10 +1,26 @@
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Clock3, Tag } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowLeft,
+  ArrowUpRight,
+  ChevronRight,
+  Clock3,
+  GraduationCap,
+  Plane,
+  Tag,
+  Wind,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ACTIVITY_TYPE_STYLE, getActivityCardType } from "@/components/activity-card";
 import { DeleteActivityButton } from "@/components/delete-activity-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/stat-card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFlightLocation, getActivityById } from "@/features/activities";
@@ -84,15 +100,19 @@ function TrainingCampBadge({
   return (
     <Link
       href={`/activities/${trainingCamp.activityId}`}
-      className="inline-flex w-fit flex-col gap-0.5 rounded-2xl border border-border bg-card px-3 py-1.5 text-sm text-foreground shadow-sm transition-colors hover:bg-accent/5"
+      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
     >
-      <span className="font-medium">
-        Stage associé : {formatTrainingCampType(trainingCamp.trainingCampType)}
+      <GraduationCap className="size-4 flex-none text-accent" aria-hidden />
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="font-medium text-foreground">
+          Stage associé : {formatTrainingCampType(trainingCamp.trainingCampType)}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {trainingCamp.school.name} · {formatDate(trainingCamp.startDate)} →{" "}
+          {formatDate(trainingCamp.endDate)}
+        </span>
       </span>
-      <span className="text-muted-foreground">
-        {trainingCamp.school.name} · {formatDate(trainingCamp.startDate)} →{" "}
-        {formatDate(trainingCamp.endDate)}
-      </span>
+      <ChevronRight className="size-4 flex-none text-muted-foreground" aria-hidden />
     </Link>
   );
 }
@@ -139,6 +159,11 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         : "";
 
   return (
+    // Page en flux normal (pas de zone fixe/défilante) : Observations/Bilan
+    // doit toujours rester pleinement visible, jamais coupé par un
+    // conteneur en overflow-hidden. Le problème de scroll pour un stage
+    // avec beaucoup de vols/séances associés est réglé par l'Accordion
+    // ci-dessous (replié par défaut), pas par un découpage de la page.
     <div className="flex flex-col gap-6">
       <Link
         href="/activities"
@@ -185,46 +210,74 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
       </div>
 
       {activity.flight && (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard
-              icon={Clock3}
-              label="Durée"
-              value={formatDurationMinutes(activity.flight.durationMin)}
-            />
-            <StatCard
-              icon={Tag}
-              label="Type de vol"
-              value={
-                FLIGHT_TYPE_LABELS[activity.flight.flightType.code] ??
-                activity.flight.flightType.code
-              }
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard
+            icon={Clock3}
+            label="Durée"
+            value={formatDurationMinutes(activity.flight.durationMin)}
+          />
+          <StatCard
+            icon={Tag}
+            label="Type de vol"
+            value={
+              FLIGHT_TYPE_LABELS[activity.flight.flightType.code] ?? activity.flight.flightType.code
+            }
+          />
+        </div>
+      )}
 
+      {activity.trainingCamp && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard
+            icon={Tag}
+            label="Type de stage"
+            value={formatTrainingCampType(activity.trainingCamp.trainingCampType)}
+            tone="accent"
+          />
+          <StatCard
+            icon={Clock3}
+            label="Durée"
+            value={`${countStageDays(activity.trainingCamp.startDate, activity.trainingCamp.endDate)} j`}
+            tone="accent"
+          />
+        </div>
+      )}
+
+      {activity.groundHandlingSession && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard
+            icon={Clock3}
+            label="Durée"
+            value={formatDurationMinutes(activity.groundHandlingSession.durationMin)}
+          />
+        </div>
+      )}
+
+      {activity.flight && (
+        <>
           <Card>
             <CardContent className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <ArrowUpRight className="size-4 flex-none text-primary" aria-hidden />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {activity.flight.takeoffPoint.label}
+                  <p className="truncate text-sm font-medium uppercase text-foreground">
+                    {activity.flight.takeoffPoint.site.name}
                   </p>
                   <p className="truncate text-sm text-muted-foreground">
-                    {activity.flight.takeoffPoint.site.name} ·{" "}
-                    {activity.flight.takeoffPoint.altitudeM} m
+                    {activity.flight.takeoffPoint.label} · {activity.flight.takeoffPoint.altitudeM}{" "}
+                    m
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <ArrowDownLeft className="size-4 flex-none text-accent" aria-hidden />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {activity.flight.landingPoint.label}
+                  <p className="truncate text-sm font-medium uppercase text-foreground">
+                    {activity.flight.landingPoint.site.name}
                   </p>
                   <p className="truncate text-sm text-muted-foreground">
-                    {activity.flight.landingPoint.site.name} ·{" "}
-                    {activity.flight.landingPoint.altitudeM} m
+                    {activity.flight.landingPoint.label} · {activity.flight.landingPoint.altitudeM}{" "}
+                    m
                   </p>
                 </div>
               </div>
@@ -246,21 +299,6 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
 
       {activity.trainingCamp && (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard
-              icon={Tag}
-              label="Type de stage"
-              value={formatTrainingCampType(activity.trainingCamp.trainingCampType)}
-              tone="accent"
-            />
-            <StatCard
-              icon={Clock3}
-              label="Durée"
-              value={`${countStageDays(activity.trainingCamp.startDate, activity.trainingCamp.endDate)} j`}
-              tone="accent"
-            />
-          </div>
-
           {(activity.trainingCamp.observations ||
             activity.trainingCamp.summary ||
             activity.trainingCamp.certification) && (
@@ -279,65 +317,94 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
             </Card>
           )}
 
-          {activity.trainingCamp.flights.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <h2 className="text-lg font-medium tracking-tight text-foreground">Vols associés</h2>
-              <ul className="flex flex-col gap-2">
-                {activity.trainingCamp.flights.map((flight) => (
-                  <li
-                    key={flight.id}
-                    className="flex flex-col gap-0.5 rounded-2xl border border-border bg-card p-4 shadow-sm"
-                  >
-                    <span className="font-medium text-foreground">
-                      {formatFlightLocation(flight)}
+          {(activity.trainingCamp.flights.length > 0 ||
+            activity.trainingCamp.groundHandlingSessions.length > 0) && (
+            // Repliés par défaut : un stage avec beaucoup de vols/séances
+            // n'impose plus une liste entièrement dépliée d'entrée —
+            // multiple (pas exclusif) pour pouvoir ouvrir les deux
+            // sections en même temps si besoin.
+            <Accordion multiple>
+              {activity.trainingCamp.flights.length > 0 && (
+                <AccordionItem value="flights">
+                  <AccordionTrigger>
+                    <span className="flex items-center gap-2">
+                      <Plane className="size-4 text-primary" aria-hidden />
+                      Vols associés ({activity.trainingCamp.flights.length})
                     </span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatDate(flight.date)} à {formatTime(flight.date)} ·{" "}
-                      {formatDurationMinutes(flight.durationMin)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="flex flex-col gap-2">
+                      {activity.trainingCamp.flights.map((flight) => (
+                        <li key={flight.id}>
+                          <Link
+                            href={`/activities/${flight.activityId}`}
+                            className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
+                          >
+                            <span className="flex min-w-0 flex-col gap-0.5">
+                              <span className="font-medium text-foreground">
+                                {formatFlightLocation(flight)}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {formatDate(flight.date)} à {formatTime(flight.date)} ·{" "}
+                                {formatDurationMinutes(flight.durationMin)}
+                              </span>
+                            </span>
+                            <ChevronRight
+                              className="size-4 flex-none text-muted-foreground"
+                              aria-hidden
+                            />
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
 
-          {activity.trainingCamp.groundHandlingSessions.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <h2 className="text-lg font-medium tracking-tight text-foreground">
-                Séances associées
-              </h2>
-              <ul className="flex flex-col gap-2">
-                {activity.trainingCamp.groundHandlingSessions.map((groundHandlingSession) => (
-                  <li
-                    key={groundHandlingSession.id}
-                    className="flex flex-col gap-0.5 rounded-2xl border border-border bg-card p-4 shadow-sm"
-                  >
-                    <span className="font-medium text-foreground">
-                      {groundHandlingSession.site.name}
+              {activity.trainingCamp.groundHandlingSessions.length > 0 && (
+                <AccordionItem value="ground-handling-sessions">
+                  <AccordionTrigger>
+                    <span className="flex items-center gap-2">
+                      <Wind className="size-4 text-muted-foreground" aria-hidden />
+                      Séances associées ({activity.trainingCamp.groundHandlingSessions.length})
                     </span>
-                    <span className="text-sm text-muted-foreground">
-                      {formatDate(groundHandlingSession.date)} à{" "}
-                      {formatTime(groundHandlingSession.date)} ·{" "}
-                      {formatDurationMinutes(groundHandlingSession.durationMin)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="flex flex-col gap-2">
+                      {activity.trainingCamp.groundHandlingSessions.map((groundHandlingSession) => (
+                        <li key={groundHandlingSession.id}>
+                          <Link
+                            href={`/activities/${groundHandlingSession.activityId}`}
+                            className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
+                          >
+                            <span className="flex min-w-0 flex-col gap-0.5">
+                              <span className="font-medium text-foreground">
+                                {groundHandlingSession.site.name}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {formatDate(groundHandlingSession.date)} à{" "}
+                                {formatTime(groundHandlingSession.date)} ·{" "}
+                                {formatDurationMinutes(groundHandlingSession.durationMin)}
+                              </span>
+                            </span>
+                            <ChevronRight
+                              className="size-4 flex-none text-muted-foreground"
+                              aria-hidden
+                            />
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
           )}
         </>
       )}
 
       {activity.groundHandlingSession && (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard
-              icon={Clock3}
-              label="Durée"
-              value={formatDurationMinutes(activity.groundHandlingSession.durationMin)}
-            />
-          </div>
-
           <Card>
             <CardContent className="flex flex-col gap-4">
               <NoteSection
