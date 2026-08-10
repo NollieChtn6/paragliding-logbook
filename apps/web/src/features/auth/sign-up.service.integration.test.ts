@@ -1,7 +1,7 @@
 import { APIError } from "better-auth/api";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
-import { SignUpNotAllowedError } from "@/lib/signup-allowlist";
+import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { signUp } from "./sign-up.service";
 
 // Emails créés par les tests, nettoyés après chaque test (pas de beforeAll
@@ -75,9 +75,9 @@ describe("signUp (integration)", () => {
     ).rejects.toThrow(APIError);
   });
 
-  it("rejects sign-up with an email absent from SIGNUP_ALLOWED_EMAILS, without creating a user", async () => {
+  it("rejects sign-up with a wrong invite code, without creating a user", async () => {
     const email = uniqueEmail();
-    vi.stubEnv("SIGNUP_ALLOWED_EMAILS", "someone-else@paragliding-logbook.local");
+    vi.stubEnv("SIGNUP_INVITE_CODE", "482913");
 
     await expect(
       signUp({
@@ -85,21 +85,23 @@ describe("signUp (integration)", () => {
         email,
         password: "a-strong-password-12",
         confirmPassword: "a-strong-password-12",
+        inviteCode: "111111",
       }),
     ).rejects.toThrow(SignUpNotAllowedError);
 
     await expect(prisma.user.findUnique({ where: { email } })).resolves.toBeNull();
   });
 
-  it("allows sign-up with an email present in SIGNUP_ALLOWED_EMAILS", async () => {
+  it("allows sign-up with the correct invite code", async () => {
     const email = uniqueEmail();
-    vi.stubEnv("SIGNUP_ALLOWED_EMAILS", `other@paragliding-logbook.local,${email}`);
+    vi.stubEnv("SIGNUP_INVITE_CODE", "482913");
 
     await signUp({
       name: "Jane Doe",
       email,
       password: "a-strong-password-12",
       confirmPassword: "a-strong-password-12",
+      inviteCode: "482913",
     });
 
     await expect(prisma.user.findUnique({ where: { email } })).resolves.not.toBeNull();

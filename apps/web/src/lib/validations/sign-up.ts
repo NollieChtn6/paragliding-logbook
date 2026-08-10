@@ -20,6 +20,11 @@ export const signUpSchema = z
       .email("L'adresse email est invalide."),
     password: z.string().min(12, "Le mot de passe doit contenir au moins 12 caractères."),
     confirmPassword: z.string().min(1, "La confirmation est obligatoire."),
+    // Vérifié pour de bon dans signUp (features/auth/sign-up.service.ts,
+    // voir lib/signup-invite-code.ts) : ici, juste une chaîne transmise
+    // telle quelle, l'UI (sign-up-form.tsx) garantit déjà le format via
+    // InputOTP.
+    inviteCode: z.string().trim().optional().default(""),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "La confirmation ne correspond pas au mot de passe.",

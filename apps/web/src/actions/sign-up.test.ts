@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { signUp } from "@/features/auth";
-import { SignUpNotAllowedError } from "@/lib/signup-allowlist";
+import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { withToast } from "@/lib/toast-redirect";
 import { signUpAction } from "./sign-up";
 
@@ -108,7 +108,7 @@ describe("signUpAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Cette adresse email n'est pas autorisée à créer un compte.",
+      error: "Le code d'inscription est invalide.",
     });
     expect(redirect).not.toHaveBeenCalled();
   });

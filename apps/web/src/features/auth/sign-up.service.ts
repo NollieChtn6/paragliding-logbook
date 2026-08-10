@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { isSignUpAllowed, SignUpNotAllowedError } from "@/lib/signup-allowlist";
+import { isSignUpInviteCodeValid, SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { signUpSchema } from "@/lib/validations/sign-up";
 
 // auth.api.signUpEmail reste l'unique responsable de la création du compte
@@ -12,10 +12,11 @@ import { signUpSchema } from "@/lib/validations/sign-up";
 export async function signUp(rawInput: unknown): Promise<void> {
   const input = signUpSchema.parse(rawInput);
 
-  // Liste blanche (lib/signup-allowlist.ts) vérifiée avant Better Auth : pas
-  // besoin de solliciter la création du compte pour rejeter une inscription
-  // hors périmètre.
-  if (!isSignUpAllowed(input.email)) {
+  // Code d'inscription (lib/signup-invite-code.ts) revérifié ici pour de bon
+  // — c'est la frontière de sécurité réelle, l'étape dédiée de
+  // sign-up-form.tsx n'est qu'un confort d'UI (feedback immédiat) et ne
+  // protège rien à elle seule.
+  if (!isSignUpInviteCodeValid(input.inviteCode)) {
     throw new SignUpNotAllowedError();
   }
 

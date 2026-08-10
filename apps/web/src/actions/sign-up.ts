@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { signUp } from "@/features/auth";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
-import { SignUpNotAllowedError } from "@/lib/signup-allowlist";
+import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { withToast } from "@/lib/toast-redirect";
 
 export type SignUpActionState =
