@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
 
 type ActivityListItem = {
   id: string;
@@ -29,6 +30,10 @@ type ActivitiesFilterProps = {
 };
 
 const FILTER_TYPES: ActivityCardType[] = ["FLIGHT", "TRAINING_CAMP", "GROUND_HANDLING"];
+
+// Évite un défilement qui s'allonge indéfiniment avec l'historique : une
+// page de 20 tient largement sur un écran, mobile compris.
+const PAGE_SIZE = 20;
 
 const FILTER_LABELS: Record<ActivityCardType, string> = {
   FLIGHT: "Vols",
@@ -55,6 +60,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
   const [selectedTypes, setSelectedTypes] = useState<Set<ActivityCardType>>(new Set());
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [page, setPage] = useState(1);
 
   const hasActiveFilters = selectedTypes.size > 0 || dateFrom !== "" || dateTo !== "";
 
@@ -76,6 +82,12 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
     [activities, selectedTypes, dateFrom, dateTo],
   );
 
+  const pageCount = Math.max(1, Math.ceil(filteredActivities.length / PAGE_SIZE));
+  const paginatedActivities = filteredActivities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  // Revient à la première page à chaque changement de filtre (plutôt qu'un
+  // useEffect séparé) : une page 3 qui n'existe plus une fois le filtre
+  // appliqué serait déroutante.
   function toggleType(type: ActivityCardType, checked: boolean) {
     setSelectedTypes((current) => {
       const next = new Set(current);
@@ -86,12 +98,29 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
       }
       return next;
     });
+    setPage(1);
+  }
+
+  function setAllTypes() {
+    setSelectedTypes(new Set());
+    setPage(1);
+  }
+
+  function handleDateFromChange(value: string) {
+    setDateFrom(value);
+    setPage(1);
+  }
+
+  function handleDateToChange(value: string) {
+    setDateTo(value);
+    setPage(1);
   }
 
   function resetFilters() {
     setSelectedTypes(new Set());
     setDateFrom("");
     setDateTo("");
+    setPage(1);
   }
 
   const triggerLabel =
@@ -119,7 +148,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
           <DropdownMenuContent>
             <DropdownMenuCheckboxItem
               checked={selectedTypes.size === 0}
-              onCheckedChange={() => setSelectedTypes(new Set())}
+              onCheckedChange={setAllTypes}
             >
               Tout
             </DropdownMenuCheckboxItem>
@@ -147,7 +176,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
             type="date"
             value={dateFrom}
             max={dateTo || undefined}
-            onChange={(event) => setDateFrom(event.target.value)}
+            onChange={(event) => handleDateFromChange(event.target.value)}
             className="w-auto"
           />
         </div>
@@ -160,7 +189,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
             type="date"
             value={dateTo}
             min={dateFrom || undefined}
-            onChange={(event) => setDateTo(event.target.value)}
+            onChange={(event) => handleDateToChange(event.target.value)}
             className="w-auto"
           />
         </div>
@@ -182,18 +211,52 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
           }
         />
       ) : (
-        <div className="flex flex-col gap-2">
-          {filteredActivities.map((activity) => (
-            <ActivityCard
-              key={activity.id}
-              href={`/activities/${activity.id}`}
-              type={activity.type}
-              title={activity.title}
-              location={activity.location}
-              dateInfo={activity.dateInfo}
-            />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-2">
+            {paginatedActivities.map((activity) => (
+              <ActivityCard
+                key={activity.id}
+                href={`/activities/${activity.id}`}
+                type={activity.type}
+                title={activity.title}
+                location={activity.location}
+                dateInfo={activity.dateInfo}
+              />
+            ))}
+          </div>
+
+          {pageCount > 1 && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage((current) => current - 1)}
+                  >
+                    Précédent
+                  </Button>
+                </PaginationItem>
+                <PaginationItem>
+                  <p className="px-2 text-sm text-muted-foreground">
+                    Page {page} sur {pageCount}
+                  </p>
+                </PaginationItem>
+                <PaginationItem>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={page === pageCount}
+                    onClick={() => setPage((current) => current + 1)}
+                  >
+                    Suivant
+                  </Button>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
     </div>
   );
