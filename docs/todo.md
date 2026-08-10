@@ -161,7 +161,7 @@ Fonctionnalités :
 - [x] Afficher les vols associés à un stage sur `/activities/[id]`, quand il y en a
 - [x] Modifier un stage — `/activities/[id]/edit`, service `updateTrainingCamp` (`src/features/training-camps/`), vérification de propriété systématique
 - [x] Supprimer un stage — même bouton/service générique `deleteActivity` que les autres types ; les vols/séances éventuellement rattachés au stage sont conservés mais dissociés (`trainingCampId` mis à `null`, contrainte `ON DELETE SET NULL`), pas supprimés — avertissement affiché dans la confirmation si le stage a des enfants
-- [ ] Rattacher un vol existant à un stage depuis l'interface
+- [x] Rattacher un vol existant à un stage depuis l'interface — déjà possible via `/activities/[id]/edit` : `FlightForm` affiche le sélecteur "Stage associé" aussi bien à la modification qu'à la création, et `updateFlight` (`src/features/flights/`) accepte de changer/retirer `trainingCampId` (vérifié via un test d'intégration existant et manuellement)
 
 ---
 
