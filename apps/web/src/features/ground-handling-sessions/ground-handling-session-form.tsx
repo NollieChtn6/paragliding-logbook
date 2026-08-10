@@ -18,6 +18,7 @@ import { toast } from "@/components/ui/toast";
 import { getFieldErrors } from "@/lib/form-validation";
 import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 import { cn } from "@/lib/utils";
+import { SiteCombobox, type SiteOption } from "./site-combobox";
 
 type TrainingCampOption = {
   id: string;
@@ -33,7 +34,6 @@ type GroundHandlingSessionFormDefaultValues = {
   // Porte aussi l'heure (voir toTimeInputValue ci-dessous) : pas de champ
   // "time" séparé ici, un seul Date sert à préremplir les deux <Input>.
   date?: Date;
-  siteId?: string;
   trainingCampId?: string;
   durationMin?: number;
   exercises?: string;
@@ -42,13 +42,16 @@ type GroundHandlingSessionFormDefaultValues = {
 };
 
 type GroundHandlingSessionFormProps = {
-  sites: { id: string; name: string }[];
   trainingCamps?: TrainingCampOption[];
   action: (
     prevState: GroundHandlingSessionFormActionState | null,
     formData: FormData,
   ) => Promise<GroundHandlingSessionFormActionState>;
   defaultValues?: GroundHandlingSessionFormDefaultValues;
+  // Site déjà sélectionné en mode édition, distinct de defaultValues (comme
+  // defaultTakeoffPoint/defaultLandingPoint sur FlightForm) : SiteCombobox
+  // ne reçoit jamais la liste complète des sites, seulement celui-ci.
+  defaultSite?: SiteOption;
   submitLabel?: string;
   // Mode assistant en 3 étapes : voir flight-form.tsx pour le détail.
   wizardStep?: 2 | 3;
@@ -85,10 +88,10 @@ function toTimeInputValue(date: Date): string {
 // defaultValues varient selon l'appelant. Les actions redirigent en cas de
 // succès, pas d'état "succès" à afficher ici.
 export function GroundHandlingSessionForm({
-  sites,
   trainingCamps = [],
   action,
   defaultValues,
+  defaultSite,
   submitLabel = "Créer la séance",
   wizardStep,
   onWizardBack,
@@ -98,7 +101,6 @@ export function GroundHandlingSessionForm({
   const formRef = useRef<HTMLFormElement>(null);
   // Select contrôlé : voir flight-form.tsx pour la justification (bouton
   // croix de réinitialisation).
-  const [siteId, setSiteId] = useState(defaultValues?.siteId ?? "");
   const [trainingCampId, setTrainingCampId] = useState(defaultValues?.trainingCampId ?? "");
   // Erreurs de validation affichées en ligne sous chaque champ : voir
   // flight-form.tsx pour la justification (toasts réservés à la
@@ -190,38 +192,7 @@ export function GroundHandlingSessionForm({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="siteId">Site</Label>
-          <div className="flex items-center gap-1.5">
-            <Select
-              name="siteId"
-              value={siteId}
-              onValueChange={(value) => setSiteId(value ?? "")}
-              required
-            >
-              <SelectTrigger
-                id="siteId"
-                className="w-full flex-1"
-                aria-invalid={!!fieldErrors.siteId}
-              >
-                <SelectValue placeholder="Choisir un site">
-                  {(value: string | null) =>
-                    sites.find((site) => site.id === value)?.name ?? "Choisir un site"
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {sites.map((site) => (
-                  <SelectItem key={site.id} value={site.id}>
-                    {site.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {siteId && <SelectClearButton onClear={() => setSiteId("")} label="Effacer le site" />}
-          </div>
-          {fieldErrors.siteId && <p className="text-sm text-destructive">{fieldErrors.siteId}</p>}
-        </div>
+        <SiteCombobox name="siteId" defaultSite={defaultSite} error={fieldErrors.siteId} />
 
         {trainingCamps.length > 0 && (
           <div className="flex flex-col gap-2">
