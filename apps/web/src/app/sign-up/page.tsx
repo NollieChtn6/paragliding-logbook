@@ -1,4 +1,5 @@
 import { ThemeToggle } from "@/components/theme-toggle";
+import { VersionBadge } from "@/components/version-badge";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
 import { SignUpForm } from "./sign-up-form";
 
@@ -33,6 +34,8 @@ export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">
         </div>
         <SignUpForm redirectTo={redirectTo} />
       </div>
+
+      <VersionBadge className="absolute bottom-4" />
     </div>
   );
 }

@@ -41,3 +41,23 @@ Inconvénients :
 
 - une "Release PR" en attente sur `main` tant qu'elle n'est pas mergée (bruit visuel supplémentaire dans la liste des PR, habituel avec release-please) ;
 - dépendance à une action GitHub tierce (`googleapis/release-please-action`), pas un outil interne.
+
+## Mises à jour post-implémentation
+
+### `GITHUB_TOKEN` ne déclenche pas d'autres workflows
+
+Constaté à l'usage : les deux premières Release PR (#64, #66) n'ont jamais fait tourner `Quality checks` (status check obligatoire pour merger) — GitHub bloque volontairement qu'un push/une PR créés par le `GITHUB_TOKEN` par défaut d'un workflow en déclenchent un autre (protection anti-boucle infinie). `release.yml` utilise donc un Personal Access Token (`secrets.RELEASE_PLEASE_TOKEN`, fine-grained, scopé à ce repo, `Contents`/`Pull requests: Read and write`) à la place — les Release PR se comportent alors comme des PR humaines.
+
+### `develop` ne reçoit jamais le bump de version tout seul
+
+`release-please` ne modifie que `main` (là où il tourne). `develop` ne reçoit jamais `package.json`/`CHANGELOG.md`/`.release-please-manifest.json` automatiquement : sans action, il faut une resynchronisation manuelle (merge `main → develop`) après chaque release, exactement le genre d'étape manuelle oubliable que ce système devait éviter.
+
+Ajout d'un second job (`sync-develop`) dans `release.yml`, déclenché uniquement quand `release-please` vient de publier une release (`needs.release-please.outputs.release_created`). Il merge `main` dans `develop` et ouvre/auto-merge une PR — avec le même PAT, pour que cette PR aussi déclenche `Quality checks` normalement. `--merge` (jamais squash/rebase) : un squash romprait l'ascendance partagée entre `develop` et `main`, recréant le problème que ce job existe pour éviter — voir plus haut, ce lien s'est cassé au moins deux fois avant ce correctif (PR #57/#59, puis #65) suite à des Release PR ou promotions `develop → main` mergées en squash.
+
+Note technique : en mode manifest (`packages: {...}` dans `.release-please-config.json`, même avec un seul package), les outputs de `release-please-action` sont préfixés par le chemin du package (`apps/web--release_created`, pas `release_created` à plat) — vérifié dans la documentation de l'action avant implémentation, cette confusion est une source d'échec silencieux courante (la condition `if` ne serait simplement jamais vraie).
+
+Dépendances externes à ce correctif, à vérifier si `sync-develop` ne se déclenche pas comme attendu :
+
+- le secret `RELEASE_PLEASE_TOKEN` doit exister sur le repo (fine-grained PAT, `Contents`/`Pull requests: Read and write`, scopé à ce repo) ;
+- "Allow auto-merge" doit être activé (Settings → General → Pull Requests) — `gh pr merge --auto` s'appuie dessus ;
+- la règle "Require linear history" doit rester désactivée sur `develop` (sinon `--merge` échoue, seuls squash/rebase seraient permis, ce qui recasserait l'ascendance partagée).
