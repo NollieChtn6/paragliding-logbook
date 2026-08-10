@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
+import { EnvironmentBanner } from "@/components/environment-banner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastListener } from "@/components/toast-listener";
 import { Toaster } from "@/components/ui/toast";
@@ -36,6 +37,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${fontSans.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col">
+        {/* Hors de ThemeProvider/Toaster : ne dépend d'aucun état client,
+        doit rester visible même si l'un de ces providers échoue. */}
+        <EnvironmentBanner />
         <ThemeProvider>
           <Toaster>
             <Suspense fallback={null}>
