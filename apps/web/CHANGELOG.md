@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.5.0...paragliding-logbook-v1.6.0) (2026-08-10)
+
+
+### Features
+
+* **activities:** accordéon replié pour vols/séances d'un stage ([5e1dec2](https://github.com/NollieChtn6/paragliding-logbook/commit/5e1dec26de31955bbb3339eb0521f8ab0ff8914d))
+* ergonomie détail d'activité + mise en page compte ([437ac0b](https://github.com/NollieChtn6/paragliding-logbook/commit/437ac0bf6cc8d21831edcd22e58746291a347db3))
+* **settings:** formulaires profil/sécurité côte à côte sur desktop ([97e5747](https://github.com/NollieChtn6/paragliding-logbook/commit/97e5747d9e2c4a1a11ec7ade62a182c81a9dacad))
+
+
+### Bug Fixes
+
+* **web:** supprimer le faux positif d'hydratation sur &lt;body&gt; ([aa9a05b](https://github.com/NollieChtn6/paragliding-logbook/commit/aa9a05b3c77826556ae049be5ab1e82b6b063fe9))
+
 ## [1.5.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.4.0...paragliding-logbook-v1.5.0) (2026-08-10)
 
 
