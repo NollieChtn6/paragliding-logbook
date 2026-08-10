@@ -29,37 +29,42 @@ export default async function Home() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard icon={Plane} label="Vols" value={stats.flightCount} />
-        <StatCard
-          icon={Hourglass}
-          label="Temps de vol cumulé"
-          value={formatDurationMinutes(stats.totalFlightMinutes)}
-        />
-        <StatCard
-          icon={Clock3}
-          label="Temps moyen par vol"
-          value={stats.averageFlightMinutes === null ? "—" : `${stats.averageFlightMinutes} min`}
-        />
-        <StatCard
-          icon={Wind}
-          label="Séances de gonflage"
-          value={stats.groundHandlingSessionCount}
-          tone="accent"
-        />
-        <StatCard
-          icon={Hourglass}
-          label="Temps de gonflage cumulé"
-          value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
-          tone="accent"
-        />
-        <StatCard
-          icon={GraduationCap}
-          label="Formations suivies"
-          value={stats.trainingCampCount}
-          tone="accent"
-        />
-      </div>
+      {/* Masquée tant qu'il n'y a aucune activité (audit UX, item U4) :
+      une grille de 6 stats à zéro/tirets avant la moindre saisie n'apporte
+      rien, l'EmptyState ci-dessous suffit à guider un nouvel utilisateur. */}
+      {stats.totalActivityCount > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard icon={Plane} label="Vols" value={stats.flightCount} />
+          <StatCard
+            icon={Hourglass}
+            label="Temps de vol cumulé"
+            value={formatDurationMinutes(stats.totalFlightMinutes)}
+          />
+          <StatCard
+            icon={Clock3}
+            label="Temps moyen par vol"
+            value={stats.averageFlightMinutes === null ? "—" : `${stats.averageFlightMinutes} min`}
+          />
+          <StatCard
+            icon={Wind}
+            label="Séances de gonflage"
+            value={stats.groundHandlingSessionCount}
+            tone="accent"
+          />
+          <StatCard
+            icon={Hourglass}
+            label="Temps de gonflage cumulé"
+            value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
+            tone="accent"
+          />
+          <StatCard
+            icon={GraduationCap}
+            label="Formations suivies"
+            value={stats.trainingCampCount}
+            tone="accent"
+          />
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">

@@ -10,8 +10,14 @@ const prisma = new PrismaClient({ adapter });
 // donc pas d'autre moyen d'accéder à /admin en local sans ce seed. Mot de
 // passe à changer après la première connexion (page Compte > changer le mot
 // de passe) — voir docs/admin.md.
-const ADMIN_EMAIL = "admin@thermik.com";
-const ADMIN_PASSWORD = "password1234";
+//
+// Pas de valeur par défaut en dur : ce script tourne aussi en production
+// (voir docs/todo.md > Déploiement), et un identifiant/mot de passe prévisibles
+// dans un repo public équivaudraient à une porte dérobée admin. ADMIN_PASSWORD
+// doit être défini dans .env pour obtenir un compte admin localement ; en son
+// absence, ensureAdminUser est simplement sauté (voir main()).
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@thermik.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 // Tables de référence (ActivityType/SitePointType/FlightType) : pas de label
 // ici, le libellé affiché vit côté application
@@ -323,8 +329,8 @@ async function ensureSchool(client: PrismaClient, school: SchoolSeed) {
 // Idempotent : le mot de passe est re-hashé et remis à jour à chaque run,
 // comme l'était l'ancien compte de développement avant la migration vers
 // Better Auth.
-async function ensureAdminUser(client: PrismaClient) {
-  const passwordHash = await hashPassword(ADMIN_PASSWORD);
+async function ensureAdminUser(client: PrismaClient, adminPassword: string) {
+  const passwordHash = await hashPassword(adminPassword);
 
   const user = await client.user.upsert({
     where: { email: ADMIN_EMAIL },
@@ -395,7 +401,13 @@ async function main() {
     await ensureSchool(prisma, school);
   }
 
-  await ensureAdminUser(prisma);
+  if (ADMIN_PASSWORD) {
+    await ensureAdminUser(prisma, ADMIN_PASSWORD);
+  } else {
+    console.warn(
+      "ADMIN_PASSWORD non défini : compte admin non seedé (voir prisma/seed.ts et docs/admin.md).",
+    );
+  }
 }
 
 main()

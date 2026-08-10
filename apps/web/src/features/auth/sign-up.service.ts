@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { isSignUpInviteCodeValid, SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { signUpSchema } from "@/lib/validations/sign-up";
 
 // auth.api.signUpEmail reste l'unique responsable de la création du compte
@@ -10,6 +11,14 @@ import { signUpSchema } from "@/lib/validations/sign-up";
 // connexion manuelle supplémentaire à faire ici pour la connexion automatique.
 export async function signUp(rawInput: unknown): Promise<void> {
   const input = signUpSchema.parse(rawInput);
+
+  // Code d'inscription (lib/signup-invite-code.ts) revérifié ici pour de bon
+  // — c'est la frontière de sécurité réelle, l'étape dédiée de
+  // sign-up-form.tsx n'est qu'un confort d'UI (feedback immédiat) et ne
+  // protège rien à elle seule.
+  if (!isSignUpInviteCodeValid(input.inviteCode)) {
+    throw new SignUpNotAllowedError();
+  }
 
   await auth.api.signUpEmail({
     body: {

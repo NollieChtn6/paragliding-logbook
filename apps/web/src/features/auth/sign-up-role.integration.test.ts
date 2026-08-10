@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { signUp } from "./sign-up.service";
 
@@ -7,6 +7,14 @@ import { signUp } from "./sign-up.service";
 // jamais choisi par l'utilisateur").
 const createdEmails: string[] = [];
 
+// Ce test ne porte pas sur le code d'inscription (lib/signup-invite-code.ts) :
+// neutralise SIGNUP_INVITE_CODE pour rester indépendant du .env local de la
+// machine qui exécute les tests (une variable réellement configurée en
+// local ferait échouer signUp ici sans rapport avec ce qui est testé).
+beforeEach(() => {
+  vi.stubEnv("SIGNUP_INVITE_CODE", "");
+});
+
 afterEach(async () => {
   const users = await prisma.user.findMany({ where: { email: { in: createdEmails } } });
   const userIds = users.map((user) => user.id);
@@ -14,6 +22,7 @@ afterEach(async () => {
   await prisma.account.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   createdEmails.length = 0;
+  vi.unstubAllEnvs();
 });
 
 function uniqueEmail(): string {

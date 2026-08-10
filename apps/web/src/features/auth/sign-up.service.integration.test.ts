@@ -1,6 +1,7 @@
 import { APIError } from "better-auth/api";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { signUp } from "./sign-up.service";
 
 // Emails créés par les tests, nettoyés après chaque test (pas de beforeAll
@@ -14,6 +15,14 @@ function uniqueEmail(): string {
   return email;
 }
 
+// Neutralise SIGNUP_INVITE_CODE par défaut : les tests qui ne portent pas
+// dessus doivent rester indépendants du .env local de la machine qui
+// exécute les tests, les deux tests dédiés au code (plus bas) le
+// redéfinissent explicitement.
+beforeEach(() => {
+  vi.stubEnv("SIGNUP_INVITE_CODE", "");
+});
+
 afterEach(async () => {
   const users = await prisma.user.findMany({ where: { email: { in: createdEmails } } });
   const userIds = users.map((user) => user.id);
@@ -21,6 +30,7 @@ afterEach(async () => {
   await prisma.account.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   createdEmails.length = 0;
+  vi.unstubAllEnvs();
 });
 
 describe("signUp (integration)", () => {
@@ -71,5 +81,37 @@ describe("signUp (integration)", () => {
         confirmPassword: "another-password-12",
       }),
     ).rejects.toThrow(APIError);
+  });
+
+  it("rejects sign-up with a wrong invite code, without creating a user", async () => {
+    const email = uniqueEmail();
+    vi.stubEnv("SIGNUP_INVITE_CODE", "482913");
+
+    await expect(
+      signUp({
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+        inviteCode: "111111",
+      }),
+    ).rejects.toThrow(SignUpNotAllowedError);
+
+    await expect(prisma.user.findUnique({ where: { email } })).resolves.toBeNull();
+  });
+
+  it("allows sign-up with the correct invite code", async () => {
+    const email = uniqueEmail();
+    vi.stubEnv("SIGNUP_INVITE_CODE", "482913");
+
+    await signUp({
+      name: "Jane Doe",
+      email,
+      password: "a-strong-password-12",
+      confirmPassword: "a-strong-password-12",
+      inviteCode: "482913",
+    });
+
+    await expect(prisma.user.findUnique({ where: { email } })).resolves.not.toBeNull();
   });
 });

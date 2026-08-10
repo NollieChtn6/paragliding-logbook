@@ -3,7 +3,7 @@ import { getActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { getActivitySummary, listActivities } from "@/features/activities";
+import { getActivityEventDate, getActivitySummary, listActivities } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
 import { ActivitiesFilter } from "./activities-filter";
 
@@ -49,6 +49,7 @@ export default async function ActivitiesPage() {
               title: summary.title,
               location: summary.location,
               dateInfo: summary.dateInfo,
+              date: getActivityEventDate(activity),
             };
           })}
         />
