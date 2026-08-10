@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.3.0...paragliding-logbook-v1.4.0) (2026-08-10)
+
+
+### Features
+
+* **web:** add loading states, home link, and training camp details ([#72](https://github.com/NollieChtn6/paragliding-logbook/issues/72)) ([62d6be1](https://github.com/NollieChtn6/paragliding-logbook/commit/62d6be12c1e808a6a623d2c625d6949ce81f2a06))
+
 ## [1.3.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.2.0...paragliding-logbook-v1.3.0) (2026-08-10)
 
 
