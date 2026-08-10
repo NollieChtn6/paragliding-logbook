@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.4.0...paragliding-logbook-v1.5.0) (2026-08-10)
+
+
+### Features
+
+* **activities:** fixed title/filters, scrollable list, always-on pagination ([#81](https://github.com/NollieChtn6/paragliding-logbook/issues/81)) ([35153bf](https://github.com/NollieChtn6/paragliding-logbook/commit/35153bf6587c5b29d6a64f0c10de93d1d4d812f7))
+* **web:** add ambient green glow to the authenticated interface ([#82](https://github.com/NollieChtn6/paragliding-logbook/issues/82)) ([df1ce28](https://github.com/NollieChtn6/paragliding-logbook/commit/df1ce289c6111e28d84b059859b6be0a4486c284))
+
+
+### Bug Fixes
+
+* security/UX audit fixes (Palier 0-3, hors récupération mdp) ([#76](https://github.com/NollieChtn6/paragliding-logbook/issues/76)) ([014490c](https://github.com/NollieChtn6/paragliding-logbook/commit/014490c071bdf91a9b50232969b970da472bce50))
+* **web:** contain scroll to &lt;main&gt; on desktop, not the whole shell ([#79](https://github.com/NollieChtn6/paragliding-logbook/issues/79)) ([82c59d8](https://github.com/NollieChtn6/paragliding-logbook/commit/82c59d8626e042f844e5754b5a80e928fe6307a4))
+* **web:** enlarge the ambient arc glow ([#83](https://github.com/NollieChtn6/paragliding-logbook/issues/83)) ([8f21626](https://github.com/NollieChtn6/paragliding-logbook/commit/8f2162686c980882d370c61bd3dc8a666e6a3a9e))
+* **web:** scope dashboard scroll to the activity list + add pagination ([#80](https://github.com/NollieChtn6/paragliding-logbook/issues/80)) ([664f474](https://github.com/NollieChtn6/paragliding-logbook/commit/664f47499099775121a3aafd214de4970461d24d))
+
 ## [1.4.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.3.0...paragliding-logbook-v1.4.0) (2026-08-10)
 
 
