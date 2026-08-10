@@ -1,6 +1,7 @@
 import { APIError } from "better-auth/api";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { SignUpNotAllowedError } from "@/lib/signup-allowlist";
 import { signUp } from "./sign-up.service";
 
 // Emails créés par les tests, nettoyés après chaque test (pas de beforeAll
@@ -21,6 +22,7 @@ afterEach(async () => {
   await prisma.account.deleteMany({ where: { userId: { in: userIds } } });
   await prisma.user.deleteMany({ where: { id: { in: userIds } } });
   createdEmails.length = 0;
+  vi.unstubAllEnvs();
 });
 
 describe("signUp (integration)", () => {
@@ -71,5 +73,35 @@ describe("signUp (integration)", () => {
         confirmPassword: "another-password-12",
       }),
     ).rejects.toThrow(APIError);
+  });
+
+  it("rejects sign-up with an email absent from SIGNUP_ALLOWED_EMAILS, without creating a user", async () => {
+    const email = uniqueEmail();
+    vi.stubEnv("SIGNUP_ALLOWED_EMAILS", "someone-else@paragliding-logbook.local");
+
+    await expect(
+      signUp({
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+      }),
+    ).rejects.toThrow(SignUpNotAllowedError);
+
+    await expect(prisma.user.findUnique({ where: { email } })).resolves.toBeNull();
+  });
+
+  it("allows sign-up with an email present in SIGNUP_ALLOWED_EMAILS", async () => {
+    const email = uniqueEmail();
+    vi.stubEnv("SIGNUP_ALLOWED_EMAILS", `other@paragliding-logbook.local,${email}`);
+
+    await signUp({
+      name: "Jane Doe",
+      email,
+      password: "a-strong-password-12",
+      confirmPassword: "a-strong-password-12",
+    });
+
+    await expect(prisma.user.findUnique({ where: { email } })).resolves.not.toBeNull();
   });
 });

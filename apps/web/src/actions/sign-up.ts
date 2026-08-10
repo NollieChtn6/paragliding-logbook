@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { signUp } from "@/features/auth";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
+import { SignUpNotAllowedError } from "@/lib/signup-allowlist";
 import { withToast } from "@/lib/toast-redirect";
 
 export type SignUpActionState =
@@ -27,6 +28,9 @@ export async function signUpAction(
   } catch (error) {
     if (error instanceof ZodError) {
       return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+    }
+    if (error instanceof SignUpNotAllowedError) {
+      return { success: false, error: error.message };
     }
     if (error instanceof APIError) {
       // Code posé par auth.api.signUpEmail quand l'email existe déjà (voir

@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { isSignUpAllowed, SignUpNotAllowedError } from "@/lib/signup-allowlist";
 import { signUpSchema } from "@/lib/validations/sign-up";
 
 // auth.api.signUpEmail reste l'unique responsable de la création du compte
@@ -10,6 +11,13 @@ import { signUpSchema } from "@/lib/validations/sign-up";
 // connexion manuelle supplémentaire à faire ici pour la connexion automatique.
 export async function signUp(rawInput: unknown): Promise<void> {
   const input = signUpSchema.parse(rawInput);
+
+  // Liste blanche (lib/signup-allowlist.ts) vérifiée avant Better Auth : pas
+  // besoin de solliciter la création du compte pour rejeter une inscription
+  // hors périmètre.
+  if (!isSignUpAllowed(input.email)) {
+    throw new SignUpNotAllowedError();
+  }
 
   await auth.api.signUpEmail({
     body: {
