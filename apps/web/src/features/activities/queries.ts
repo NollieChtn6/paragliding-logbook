@@ -16,7 +16,11 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
       takeoffPoint: SITE_POINT_INCLUDE,
       landingPoint: SITE_POINT_INCLUDE,
       flightType: true,
-      trainingCamp: { include: { trainingCampType: true } },
+      // school en plus de trainingCampType : un utilisateur peut avoir
+      // plusieurs stages du même type (ex. plusieurs "Perfectionnement") —
+      // le badge "Stage associé" doit permettre de distinguer duquel il
+      // s'agit (voir TrainingCampBadge, activities/[id]/page.tsx).
+      trainingCamp: { include: { trainingCampType: true, school: true } },
     },
   },
   trainingCamp: {
@@ -31,7 +35,7 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
     },
   },
   groundHandlingSession: {
-    include: { site: true, trainingCamp: { include: { trainingCampType: true } } },
+    include: { site: true, trainingCamp: { include: { trainingCampType: true, school: true } } },
   },
 } satisfies Prisma.ActivityInclude;
 

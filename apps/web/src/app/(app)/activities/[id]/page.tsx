@@ -67,17 +67,32 @@ function countStageDays(startDate: Date, endDate: Date): number {
 // Petit badge cliquable vers le stage associé (Vol/Gonflage) : même
 // composant pour les deux, activityId du TrainingCamp toujours déjà chargé
 // (scalaire, ACTIVITY_WITH_DETAILS_INCLUDE), pas de requête supplémentaire.
+// École + dates en plus du type : un utilisateur peut avoir plusieurs
+// stages du même type (ex. plusieurs "Perfectionnement"), le type seul ne
+// suffit pas à distinguer duquel il s'agit.
 function TrainingCampBadge({
   trainingCamp,
 }: {
-  trainingCamp: { activityId: string; trainingCampType: { code: string } };
+  trainingCamp: {
+    activityId: string;
+    trainingCampType: { code: string };
+    school: { name: string };
+    startDate: Date;
+    endDate: Date;
+  };
 }) {
   return (
     <Link
       href={`/activities/${trainingCamp.activityId}`}
-      className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-sm text-foreground shadow-sm transition-colors hover:bg-accent/5"
+      className="inline-flex w-fit flex-col gap-0.5 rounded-2xl border border-border bg-card px-3 py-1.5 text-sm text-foreground shadow-sm transition-colors hover:bg-accent/5"
     >
-      Stage associé : {formatTrainingCampType(trainingCamp.trainingCampType)}
+      <span className="font-medium">
+        Stage associé : {formatTrainingCampType(trainingCamp.trainingCampType)}
+      </span>
+      <span className="text-muted-foreground">
+        {trainingCamp.school.name} · {formatDate(trainingCamp.startDate)} →{" "}
+        {formatDate(trainingCamp.endDate)}
+      </span>
     </Link>
   );
 }
