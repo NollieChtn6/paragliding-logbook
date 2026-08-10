@@ -12,6 +12,12 @@
 // phase avec l'UI dédiée (voir sign-up/sign-up-form.tsx).
 export const SIGNUP_INVITE_CODE_LENGTH = 6;
 
+// La comparaison est stricte (===) : une valeur collée avec des caractères
+// en trop (ex. les guillemets de l'exemple .env.example, qui ne font pas
+// partie de la valeur dans l'UI Vercel — contrairement à un vrai fichier
+// .env, parsé par dotenv) active la protection sans qu'aucun code ne puisse
+// jamais matcher. Piège déjà rencontré en Preview ; en cas de doute,
+// `vercel env pull` révèle la valeur brute réellement stockée.
 function configuredCode(): string | null {
   const raw = process.env.SIGNUP_INVITE_CODE;
   return raw?.trim() ? raw.trim() : null;
