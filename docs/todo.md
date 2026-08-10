@@ -36,6 +36,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Remplacer le boilerplate Next.js par un shell applicatif minimal
 - [x] Préparer une interface mobile-first
 - [x] Toasts de succès (connexion, création, modification, suppression) et d'erreur sur tous les formulaires — `components/ui/toast.tsx` (`@base-ui/react/toast`), `components/toast-listener.tsx` + `lib/toast-redirect.ts` pour afficher un toast après une redirection serveur
+- [x] États de chargement — `loading.tsx` (Suspense implicite de Next.js) sur `(app)`, `admin` et `settings`, `components/page-loader.tsx` partagé
 
 #### Base de données
 
@@ -112,7 +113,6 @@ Volontairement hors périmètre de la première version de `/admin` (docs/admin.
 
 ### Interface & qualité (reste à faire)
 
-- [ ] États de chargement (indicateurs/skeletons sur les pages qui en ont besoin)
 - [ ] Vérification systématique du rendu sur Firefox/Safari/Chromium
 - [ ] Tests d'intégration bout-en-bout des Server Actions (au-delà des services déjà testés en intégration)
 - [ ] Continuer à augmenter la couverture de tests sur les cas limites

@@ -26,10 +26,13 @@ export function AppShell({ children }: AppShellProps) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
-          <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
+          >
             <span aria-hidden>🪂</span>
             THERMIK
-          </span>
+          </Link>
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <Button
