@@ -20,7 +20,12 @@ export default async function Home() {
   const { stats, recentActivities } = await getDashboardData(user.id);
 
   return (
-    <div className="flex flex-col gap-6">
+    // md:h-full/overflow-hidden : sur desktop, seule la liste d'activités
+    // récentes (plus bas, md:overflow-y-auto) doit défiler — pas le header
+    // ni les stats. <main> (AppShell) reste le filet de sécurité générique
+    // pour les autres pages, mais ne défile jamais réellement ici puisque ce
+    // conteneur absorbe toute la hauteur disponible lui-même.
+    <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
       <PageHeader
         title={getGreeting(user.name)}
         description="Votre progression en un coup d'œil"
@@ -66,7 +71,7 @@ export default async function Home() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium tracking-tight text-foreground">
             Activités récentes
@@ -90,7 +95,7 @@ export default async function Home() {
             }
           />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:overflow-y-auto">
             {recentActivities.map((activity) => {
               const summary = getActivitySummary(activity);
               return (
