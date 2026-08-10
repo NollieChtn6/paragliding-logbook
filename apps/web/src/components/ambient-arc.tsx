@@ -15,9 +15,9 @@ export function AmbientArc() {
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
       style={{
         background: [
-          "radial-gradient(ellipse 42vw 46vh at 28% 128%, rgb(21 128 61 / 45%) 0%, rgb(21 128 61 / 18%) 45%, transparent 78%)",
-          "radial-gradient(ellipse 50vw 36vh at 68% 134%, rgb(21 128 61 / 38%) 0%, rgb(21 128 61 / 14%) 45%, transparent 75%)",
-          "radial-gradient(ellipse 150vw 55vh at 50% 128%, rgb(21 128 61 / 26%) 0%, rgb(21 128 61 / 8%) 45%, transparent 80%)",
+          "radial-gradient(ellipse 56vw 60vh at 26% 122%, rgb(21 128 61 / 45%) 0%, rgb(21 128 61 / 18%) 45%, transparent 78%)",
+          "radial-gradient(ellipse 66vw 48vh at 70% 128%, rgb(21 128 61 / 38%) 0%, rgb(21 128 61 / 14%) 45%, transparent 75%)",
+          "radial-gradient(ellipse 190vw 72vh at 50% 122%, rgb(21 128 61 / 26%) 0%, rgb(21 128 61 / 8%) 45%, transparent 80%)",
         ].join(", "),
       }}
     />
