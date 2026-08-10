@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { signUp } from "@/features/auth";
+import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { withToast } from "@/lib/toast-redirect";
 import { signUpAction } from "./sign-up";
 
@@ -98,6 +99,18 @@ describe("signUpAction", () => {
       error: "Cette adresse email est déjà utilisée. Vous pouvez vous connecter.",
       emailAlreadyUsed: true,
     });
+  });
+
+  it("maps a SignUpNotAllowedError from signUp to its message", async () => {
+    vi.mocked(signUp).mockRejectedValue(new SignUpNotAllowedError());
+
+    const result = await signUpAction(null, new FormData());
+
+    expect(result).toEqual({
+      success: false,
+      error: "Le code d'inscription est invalide.",
+    });
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("maps any other APIError to a generic message, without leaking the cause", async () => {

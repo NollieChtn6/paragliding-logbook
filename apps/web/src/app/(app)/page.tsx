@@ -20,7 +20,12 @@ export default async function Home() {
   const { stats, recentActivities } = await getDashboardData(user.id);
 
   return (
-    <div className="flex flex-col gap-6">
+    // md:h-full/overflow-hidden : sur desktop, seule la liste d'activités
+    // récentes (plus bas, md:overflow-y-auto) doit défiler — pas le header
+    // ni les stats. <main> (AppShell) reste le filet de sécurité générique
+    // pour les autres pages, mais ne défile jamais réellement ici puisque ce
+    // conteneur absorbe toute la hauteur disponible lui-même.
+    <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
       <PageHeader
         title={getGreeting(user.name)}
         description="Votre progression en un coup d'œil"
@@ -29,39 +34,44 @@ export default async function Home() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard icon={Plane} label="Vols" value={stats.flightCount} />
-        <StatCard
-          icon={Hourglass}
-          label="Temps de vol cumulé"
-          value={formatDurationMinutes(stats.totalFlightMinutes)}
-        />
-        <StatCard
-          icon={Clock3}
-          label="Temps moyen par vol"
-          value={stats.averageFlightMinutes === null ? "—" : `${stats.averageFlightMinutes} min`}
-        />
-        <StatCard
-          icon={Wind}
-          label="Séances de gonflage"
-          value={stats.groundHandlingSessionCount}
-          tone="accent"
-        />
-        <StatCard
-          icon={Hourglass}
-          label="Temps de gonflage cumulé"
-          value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
-          tone="accent"
-        />
-        <StatCard
-          icon={GraduationCap}
-          label="Formations suivies"
-          value={stats.trainingCampCount}
-          tone="accent"
-        />
-      </div>
+      {/* Masquée tant qu'il n'y a aucune activité (audit UX, item U4) :
+      une grille de 6 stats à zéro/tirets avant la moindre saisie n'apporte
+      rien, l'EmptyState ci-dessous suffit à guider un nouvel utilisateur. */}
+      {stats.totalActivityCount > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard icon={Plane} label="Vols" value={stats.flightCount} />
+          <StatCard
+            icon={Hourglass}
+            label="Temps de vol cumulé"
+            value={formatDurationMinutes(stats.totalFlightMinutes)}
+          />
+          <StatCard
+            icon={Clock3}
+            label="Temps moyen par vol"
+            value={stats.averageFlightMinutes === null ? "—" : `${stats.averageFlightMinutes} min`}
+          />
+          <StatCard
+            icon={Wind}
+            label="Séances de gonflage"
+            value={stats.groundHandlingSessionCount}
+            tone="accent"
+          />
+          <StatCard
+            icon={Hourglass}
+            label="Temps de gonflage cumulé"
+            value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
+            tone="accent"
+          />
+          <StatCard
+            icon={GraduationCap}
+            label="Formations suivies"
+            value={stats.trainingCampCount}
+            tone="accent"
+          />
+        </div>
+      )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium tracking-tight text-foreground">
             Activités récentes
@@ -85,7 +95,7 @@ export default async function Home() {
             }
           />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:overflow-y-auto">
             {recentActivities.map((activity) => {
               const summary = getActivitySummary(activity);
               return (

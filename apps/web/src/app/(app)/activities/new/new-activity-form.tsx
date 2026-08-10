@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 
 type NewActivityFormProps = {
   activityTypes: { code: string }[];
-  sites: { id: string; name: string }[];
   flightTypes: { id: string; code: string }[];
   trainingCampTypes: { id: string; code: string }[];
   schools: { id: string; name: string }[];
@@ -67,7 +66,6 @@ function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
 // formulaire, donc jamais perdre une valeur déjà saisie.
 export function NewActivityForm({
   activityTypes,
-  sites,
   flightTypes,
   trainingCampTypes,
   schools,
@@ -183,7 +181,6 @@ export function NewActivityForm({
       {selectedCode === "GROUND_HANDLING" && (
         <div hidden={step === 1} className="duration-300 animate-in fade-in-0">
           <GroundHandlingSessionForm
-            sites={sites}
             trainingCamps={trainingCamps}
             action={createGroundHandlingSessionAction}
             wizardStep={wizardStep}

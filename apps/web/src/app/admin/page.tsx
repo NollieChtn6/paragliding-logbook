@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
 
       <div className="flex flex-col gap-2">
         <h2 className="text-lg font-medium tracking-tight text-foreground">Gestion</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
             href="/admin/sites"
             className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
@@ -40,6 +40,13 @@ export default async function AdminDashboardPage() {
             <p className="text-sm text-muted-foreground">
               Lieux de pratique, décollages et atterrissages.
             </p>
+          </Link>
+          <Link
+            href="/admin/site-points"
+            className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
+          >
+            <p className="font-medium text-foreground">Points de site</p>
+            <p className="text-sm text-muted-foreground">Points de décollage et d'atterrissage.</p>
           </Link>
           <Link
             href="/admin/schools"

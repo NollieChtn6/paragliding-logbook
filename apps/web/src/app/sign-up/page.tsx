@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VersionBadge } from "@/components/version-badge";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
+import { isSignUpInviteCodeRequired } from "@/lib/signup-invite-code";
 import { SignUpForm } from "./sign-up-form";
 
 export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">) {
@@ -11,6 +12,10 @@ export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">
     typeof redirectToParam === "string" ? redirectToParam : null,
     "/activities",
   );
+  // Décidé côté serveur (lib/signup-invite-code.ts) : SignUpForm ne doit
+  // afficher l'étape "code" que si SIGNUP_INVITE_CODE est réellement
+  // configuré, sinon l'inscription reste directe comme avant.
+  const inviteCodeRequired = isSignUpInviteCodeRequired();
 
   return (
     <div className="relative flex min-h-svh w-full flex-col items-center justify-center px-4 py-8">
@@ -35,7 +40,7 @@ export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">
             Créer un compte pour commencer <br />à suivre votre progression.
           </p>
         </div>
-        <SignUpForm redirectTo={redirectTo} />
+        <SignUpForm redirectTo={redirectTo} inviteCodeRequired={inviteCodeRequired} />
       </div>
 
       <VersionBadge className="absolute bottom-4" />

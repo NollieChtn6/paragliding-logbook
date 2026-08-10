@@ -106,10 +106,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
   }
 
   if (activity.groundHandlingSession) {
-    const [sites, trainingCamps] = await Promise.all([
-      prisma.site.findMany({ select: { id: true, name: true } }),
-      listTrainingCamps(user.id),
-    ]);
+    const trainingCamps = await listTrainingCamps(user.id);
 
     return (
       <div className="flex flex-col gap-6">
@@ -124,12 +121,11 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
           }
         />
         <GroundHandlingSessionForm
-          sites={sites}
           trainingCamps={trainingCamps}
+          defaultSite={activity.groundHandlingSession.site}
           action={updateGroundHandlingSessionAction.bind(null, activity.id)}
           defaultValues={{
             date: activity.groundHandlingSession.date,
-            siteId: activity.groundHandlingSession.siteId,
             trainingCampId: activity.groundHandlingSession.trainingCampId ?? undefined,
             durationMin: activity.groundHandlingSession.durationMin,
             exercises: activity.groundHandlingSession.exercises,

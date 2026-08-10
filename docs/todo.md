@@ -74,6 +74,9 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] `User.passwordHash` retiré : le hash Argon2 vit uniquement sur `Account.password` (Better Auth)
 - [x] Changement de mot de passe `/settings/security` — service `changePassword` (`src/features/account/`), utilise `auth.api.changePassword` de Better Auth (vérification/hash Argon2 déjà branchés), révoque les autres sessions à chaque changement, testé en intégration contre une vraie base
 - [x] Inscription publique `/sign-up` (email + mot de passe) — service `signUp` (`src/features/auth/`), utilise `auth.api.signUpEmail` de Better Auth, connexion automatique après inscription, `redirectTo` transmis entre `/sign-in` et `/sign-up`, comptes de développement retirés du seed (`prisma/seed.ts`)
+- [x] Rate limiting sur l'authentification — `rateLimit.customRules` (`src/lib/auth.ts`) cible `/sign-in/email` et `/sign-up/email` (5 req/min), actif en production comme le reste du rate limiter Better Auth
+- [x] Protection anti-abus de l'inscription — code d'inscription partagé (`SIGNUP_INVITE_CODE`, `src/lib/signup-invite-code.ts`), saisi sur une étape dédiée de `/sign-up` (InputOTP) avant le formulaire, revérifié côté serveur ; mesure temporaire en attendant un renforcement plus complet (voir email ci-dessous)
+- [x] Gestion du profil utilisateur (modifier son nom) — `/settings/security`, service `updateProfile` (`src/features/account/`), utilise `auth.api.updateUser` de Better Auth ; email non modifiable pour l'instant (lié à la vérification d'adresse email, toujours backlog)
 
 #### Administration
 
@@ -93,9 +96,6 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 - [ ] Réinitialisation de mot de passe
 - [ ] Vérification d'adresse email
-- [ ] Gestion du profil utilisateur (modifier son nom, etc.)
-- [ ] Rate limiting sur l'authentification
-- [ ] Protection anti-abus de l'inscription
 - [ ] OAuth (éventuel)
 - [ ] MFA (éventuel)
 
@@ -161,7 +161,7 @@ Fonctionnalités :
 - [x] Afficher les vols associés à un stage sur `/activities/[id]`, quand il y en a
 - [x] Modifier un stage — `/activities/[id]/edit`, service `updateTrainingCamp` (`src/features/training-camps/`), vérification de propriété systématique
 - [x] Supprimer un stage — même bouton/service générique `deleteActivity` que les autres types ; les vols/séances éventuellement rattachés au stage sont conservés mais dissociés (`trainingCampId` mis à `null`, contrainte `ON DELETE SET NULL`), pas supprimés — avertissement affiché dans la confirmation si le stage a des enfants
-- [ ] Rattacher un vol existant à un stage depuis l'interface
+- [x] Rattacher un vol existant à un stage depuis l'interface — déjà possible via `/activities/[id]/edit` : `FlightForm` affiche le sélecteur "Stage associé" aussi bien à la modification qu'à la création, et `updateFlight` (`src/features/flights/`) accepte de changer/retirer `trainingCampId` (vérifié via un test d'intégration existant et manuellement)
 
 ---
 

@@ -63,7 +63,11 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
         {isPending ? "Connexion..." : "Se connecter"}
       </Button>
 
-      {state?.success === false && <p className="text-destructive">{state.error}</p>}
+      {state?.success === false && (
+        <p role="alert" className="text-destructive">
+          {state.error}
+        </p>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         Pas encore de compte ?{" "}

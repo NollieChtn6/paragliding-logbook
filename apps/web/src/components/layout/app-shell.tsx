@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
+import { AmbientArc } from "@/components/ambient-arc";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -21,10 +22,18 @@ type AppShellProps = {
 // mobile.
 export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="flex min-h-svh">
+    // md:h-svh + md:overflow-hidden : sur desktop, la coquille (sidebar
+    // comprise) reste calée sur la hauteur de l'écran, seul <main> défile
+    // (md:overflow-y-auto ci-dessous) — sans ça, DesktopSidebar défilait
+    // avec le reste dès qu'une page (ex. liste d'activités) dépassait la
+    // hauteur d'écran. Comportement mobile inchangé (page entière
+    // défilante, normal en single-column) : min-h-svh sans cap en dessous
+    // de md.
+    <div className="flex min-h-svh md:h-svh md:overflow-hidden">
+      <AmbientArc />
       <DesktopSidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
           <Link
             href="/"
@@ -51,7 +60,9 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-3xl flex-1 p-4 pb-24 md:p-6">{children}</main>
+        <main className="mx-auto w-full max-w-3xl flex-1 p-4 pb-24 md:overflow-y-auto md:p-6">
+          {children}
+        </main>
       </div>
 
       <MobileBottomNav />
