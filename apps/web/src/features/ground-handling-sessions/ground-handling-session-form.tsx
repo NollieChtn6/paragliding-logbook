@@ -338,7 +338,11 @@ export function GroundHandlingSessionForm({
         </Button>
       )}
 
-      {state?.success === false && <p className="text-destructive">{state.error}</p>}
+      {state?.success === false && (
+        <p role="alert" className="text-destructive">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 }
