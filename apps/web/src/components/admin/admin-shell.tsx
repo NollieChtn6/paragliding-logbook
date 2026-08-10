@@ -7,6 +7,7 @@ import type * as React from "react";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { ADMIN_NAV_ITEMS, isAdminNavItemActive } from "./admin-nav-items";
 
@@ -77,6 +78,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           />
           <SignOutButton />
         </div>
+        <VersionBadge className="mt-2 text-center" />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
