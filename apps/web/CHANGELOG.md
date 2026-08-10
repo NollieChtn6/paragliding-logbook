@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.2.0...paragliding-logbook-v1.3.0) (2026-08-10)
+
+
+### Features
+
+* **release:** auto-sync develop after release, add version to auth pages ([#68](https://github.com/NollieChtn6/paragliding-logbook/issues/68)) ([af343cb](https://github.com/NollieChtn6/paragliding-logbook/commit/af343cbf126e89a1c0808cdd8847d6b260380c88))
+
 ## [1.2.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.1.0...paragliding-logbook-v1.2.0) (2026-08-10)
 
 
