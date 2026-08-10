@@ -1,9 +1,11 @@
 "use client";
 
 import { ListFilter } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ActivityCard, type ActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -49,11 +51,18 @@ function toDayString(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-// N'appelée que si activities.length > 0 (page.tsx garde son EmptyState
-// "aucune activité" pour le cas vraiment vide, distinct du cas "filtre sans
-// résultat" géré ici) : filtrage entièrement client, la liste complète est
-// déjà chargée par listActivities, pas besoin d'aller-retour serveur pour
-// un simple filtre.
+// N'appelée que si activities.length > 0 (page.tsx garde son propre
+// EmptyState "aucune activité" pour le cas vraiment vide, distinct du cas
+// "filtre sans résultat" géré ici) : filtrage entièrement client, la liste
+// complète est déjà chargée par listActivities, pas besoin d'aller-retour
+// serveur pour un simple filtre.
+//
+// Titre, sous-titre (nombre d'activités) et filtres vivent ici plutôt que
+// dans page.tsx (Server Component) : le sous-titre doit refléter le compte
+// filtré, et les trois doivent rester fixes pendant que seule la liste
+// défile — md:h-full/overflow-hidden sur le conteneur racine, md:flex-1/
+// min-h-0 sur la zone de liste, md:overflow-y-auto sur la liste elle-même
+// (même principe que le dashboard, app/(app)/page.tsx).
 export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
   // Ensemble vide = "Tout" (aucun filtre actif) : évite d'avoir à cocher les
   // 3 types en permanence pour représenter "tout afficher".
@@ -131,11 +140,53 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
         : `${selectedTypes.size} types sélectionnés`;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">
-          {filteredActivities.length} activité{filteredActivities.length > 1 ? "s" : ""}
-        </p>
+    <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
+      <PageHeader
+        title="Activités"
+        description={`${filteredActivities.length} activité${filteredActivities.length > 1 ? "s" : ""}`}
+        actions={
+          <Button
+            nativeButton={false}
+            render={<Link href="/activities/new">Nouvelle activité</Link>}
+          />
+        }
+      />
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="activities-date-from" className="text-xs text-muted-foreground">
+              Du
+            </Label>
+            <Input
+              id="activities-date-from"
+              type="date"
+              value={dateFrom}
+              max={dateTo || undefined}
+              onChange={(event) => handleDateFromChange(event.target.value)}
+              className="w-auto"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="activities-date-to" className="text-xs text-muted-foreground">
+              Au
+            </Label>
+            <Input
+              id="activities-date-to"
+              type="date"
+              value={dateTo}
+              min={dateFrom || undefined}
+              onChange={(event) => handleDateToChange(event.target.value)}
+              className="w-auto"
+            />
+          </div>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={resetFilters}>
+              Réinitialiser
+            </Button>
+          )}
+        </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -166,53 +217,19 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
         </DropdownMenu>
       </div>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="activities-date-from" className="text-xs text-muted-foreground">
-            Du
-          </Label>
-          <Input
-            id="activities-date-from"
-            type="date"
-            value={dateFrom}
-            max={dateTo || undefined}
-            onChange={(event) => handleDateFromChange(event.target.value)}
-            className="w-auto"
+      <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
+        {filteredActivities.length === 0 ? (
+          <EmptyState
+            title="Aucune activité ne correspond à ce filtre"
+            description="Essayez d'autres critères, ou réinitialisez les filtres."
+            action={
+              <Button variant="outline" onClick={resetFilters}>
+                Réinitialiser les filtres
+              </Button>
+            }
           />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="activities-date-to" className="text-xs text-muted-foreground">
-            Au
-          </Label>
-          <Input
-            id="activities-date-to"
-            type="date"
-            value={dateTo}
-            min={dateFrom || undefined}
-            onChange={(event) => handleDateToChange(event.target.value)}
-            className="w-auto"
-          />
-        </div>
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={resetFilters}>
-            Réinitialiser
-          </Button>
-        )}
-      </div>
-
-      {filteredActivities.length === 0 ? (
-        <EmptyState
-          title="Aucune activité ne correspond à ce filtre"
-          description="Essayez d'autres critères, ou réinitialisez les filtres."
-          action={
-            <Button variant="outline" onClick={resetFilters}>
-              Réinitialiser les filtres
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          <div className="flex flex-col gap-2">
+        ) : (
+          <div className="flex flex-col gap-2 md:overflow-y-auto">
             {paginatedActivities.map((activity) => (
               <ActivityCard
                 key={activity.id}
@@ -224,39 +241,42 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
               />
             ))}
           </div>
+        )}
+      </div>
 
-          {pageCount > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage((current) => current - 1)}
-                  >
-                    Précédent
-                  </Button>
-                </PaginationItem>
-                <PaginationItem>
-                  <p className="px-2 text-sm text-muted-foreground">
-                    Page {page} sur {pageCount}
-                  </p>
-                </PaginationItem>
-                <PaginationItem>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={page === pageCount}
-                    onClick={() => setPage((current) => current + 1)}
-                  >
-                    Suivant
-                  </Button>
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
-        </>
+      {/* Toujours affichée dès qu'il y a au moins un résultat, même sur une
+      seule page (demande explicite) : Précédent/Suivant désactivés selon
+      la position plutôt que le bloc masqué entièrement. */}
+      {filteredActivities.length > 0 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => setPage((current) => current - 1)}
+              >
+                Précédent
+              </Button>
+            </PaginationItem>
+            <PaginationItem>
+              <p className="px-2 text-sm text-muted-foreground">
+                Page {page} sur {pageCount}
+              </p>
+            </PaginationItem>
+            <PaginationItem>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={page === pageCount}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                Suivant
+              </Button>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
     </div>
   );

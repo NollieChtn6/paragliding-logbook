@@ -15,19 +15,19 @@ export default async function ActivitiesPage() {
   const user = await requireCurrentUser();
   const activities = await listActivities(user.id);
 
-  return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Activités"
-        actions={
-          <Button
-            nativeButton={false}
-            render={<Link href="/activities/new">Nouvelle activité</Link>}
-          />
-        }
-      />
-
-      {activities.length === 0 ? (
+  if (activities.length === 0) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title="Activités"
+          description="0 activité"
+          actions={
+            <Button
+              nativeButton={false}
+              render={<Link href="/activities/new">Nouvelle activité</Link>}
+            />
+          }
+        />
         <EmptyState
           title="Aucune activité enregistrée pour l'instant"
           description="Vos vols, stages et séances de gonflage apparaîtront ici."
@@ -39,21 +39,27 @@ export default async function ActivitiesPage() {
             />
           }
         />
-      ) : (
-        <ActivitiesFilter
-          activities={activities.map((activity) => {
-            const summary = getActivitySummary(activity);
-            return {
-              id: activity.id,
-              type: getActivityCardType(activity),
-              title: summary.title,
-              location: summary.location,
-              dateInfo: summary.dateInfo,
-              date: getActivityEventDate(activity),
-            };
-          })}
-        />
-      )}
-    </div>
+      </div>
+    );
+  }
+
+  // Titre + sous-titre (nombre d'activités) déplacés dans ActivitiesFilter :
+  // le compte doit refléter le filtre actif, pas le total brut, et doit
+  // rester fixe (ne pas défiler) avec les filtres eux-mêmes — les trois
+  // vivent donc dans le même composant client.
+  return (
+    <ActivitiesFilter
+      activities={activities.map((activity) => {
+        const summary = getActivitySummary(activity);
+        return {
+          id: activity.id,
+          type: getActivityCardType(activity),
+          title: summary.title,
+          location: summary.location,
+          dateInfo: summary.dateInfo,
+          date: getActivityEventDate(activity),
+        };
+      })}
+    />
   );
 }
