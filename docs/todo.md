@@ -74,6 +74,9 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] `User.passwordHash` retiré : le hash Argon2 vit uniquement sur `Account.password` (Better Auth)
 - [x] Changement de mot de passe `/settings/security` — service `changePassword` (`src/features/account/`), utilise `auth.api.changePassword` de Better Auth (vérification/hash Argon2 déjà branchés), révoque les autres sessions à chaque changement, testé en intégration contre une vraie base
 - [x] Inscription publique `/sign-up` (email + mot de passe) — service `signUp` (`src/features/auth/`), utilise `auth.api.signUpEmail` de Better Auth, connexion automatique après inscription, `redirectTo` transmis entre `/sign-in` et `/sign-up`, comptes de développement retirés du seed (`prisma/seed.ts`)
+- [x] Rate limiting sur l'authentification — `rateLimit.customRules` (`src/lib/auth.ts`) cible `/sign-in/email` et `/sign-up/email` (5 req/min), actif en production comme le reste du rate limiter Better Auth
+- [x] Protection anti-abus de l'inscription — code d'inscription partagé (`SIGNUP_INVITE_CODE`, `src/lib/signup-invite-code.ts`), saisi sur une étape dédiée de `/sign-up` (InputOTP) avant le formulaire, revérifié côté serveur ; mesure temporaire en attendant un renforcement plus complet (voir email ci-dessous)
+- [x] Gestion du profil utilisateur (modifier son nom) — `/settings/security`, service `updateProfile` (`src/features/account/`), utilise `auth.api.updateUser` de Better Auth ; email non modifiable pour l'instant (lié à la vérification d'adresse email, toujours backlog)
 
 #### Administration
 
@@ -93,9 +96,6 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 - [ ] Réinitialisation de mot de passe
 - [ ] Vérification d'adresse email
-- [ ] Gestion du profil utilisateur (modifier son nom, etc.)
-- [ ] Rate limiting sur l'authentification
-- [ ] Protection anti-abus de l'inscription
 - [ ] OAuth (éventuel)
 - [ ] MFA (éventuel)
 
