@@ -3,6 +3,7 @@ import Link from "next/link";
 import type * as React from "react";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { VersionBadge } from "@/components/version-badge";
 import { requireCurrentUser } from "@/lib/current-user";
 
 // /settings (ex. /settings/security) doit rester accessible aux deux rôles
@@ -10,6 +11,9 @@ import { requireCurrentUser } from "@/lib/current-user";
 // de sa redirection ADMIN → /admin (app/(app)/layout.tsx). Chrome minimal
 // dédié plutôt que AppShell/AdminShell : pas de seconde identité visuelle,
 // juste de quoi revenir (vers / ou /admin selon le rôle) et se déconnecter.
+// VersionBadge en pied : ce layout n'a pas de sidebar (contrairement à
+// AppShell/AdminShell, où elle vit déjà), seul endroit où elle apparaîtrait
+// sinon quand on consulte /settings.
 export default async function SettingsLayout({ children }: { children: React.ReactNode }) {
   const user = await requireCurrentUser();
   const backHref = user.role === "ADMIN" ? "/admin" : "/";
@@ -31,6 +35,10 @@ export default async function SettingsLayout({ children }: { children: React.Rea
       </header>
 
       <main className="mx-auto w-full max-w-3xl flex-1 p-4 md:p-6">{children}</main>
+
+      <footer className="p-4 text-center">
+        <VersionBadge />
+      </footer>
     </div>
   );
 }

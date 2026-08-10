@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
@@ -71,6 +72,7 @@ export function DesktopSidebar() {
         />
         <SignOutButton />
       </div>
+      <VersionBadge className="mt-2 text-center" />
     </aside>
   );
 }
