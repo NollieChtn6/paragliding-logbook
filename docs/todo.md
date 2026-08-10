@@ -251,6 +251,7 @@ Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques
 - [ ] Vérifier le parcours inscription → connexion → activités en production
 - [ ] Mettre en place une stratégie de sauvegarde Neon
 - [ ] Documenter la procédure de déploiement
+- [x] Versionnage sémantique automatisé (`release-please`), tags Git synchronisés avec les déploiements, version affichée dans l'interface (ADR 006, `docs/decisions/006-versioning.md`)
 
 ---
 

@@ -48,6 +48,10 @@ pnpm prisma:seed
 - **Husky** + **lint-staged** : vérifications automatiques avant chaque commit
 - **GitHub Actions** (`.github/workflows/ci.yml`) : install, lint, typecheck, test sur chaque push/PR vers `main` et `develop` (les tests d'intégration ne font volontairement pas partie de la CI pour l'instant, ils nécessitent une base PostgreSQL)
 
+## Versionnage
+
+SemVer automatisé via [release-please](https://github.com/googleapis/release-please) (`.github/workflows/release.yml`) : chaque merge sur `main` met à jour une "Release PR" (bump `apps/web/package.json` + `apps/web/CHANGELOG.md` à partir des Conventional Commits) ; la merger crée le tag Git `vX.Y.Z` et la GitHub Release correspondants. Détail du choix : [ADR 006](./docs/decisions/006-versioning.md). Version affichée dans l'interface (`components/version-badge.tsx`), SHA du commit déployé en complément (survol, desktop).
+
 ## Structure
 
 Monorepo pnpm workspaces (`apps/*`, `packages/*`) :
