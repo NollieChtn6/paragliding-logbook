@@ -12,19 +12,19 @@ import {
 import { buildMapMarkers } from "@/features/map";
 import { AdminMapLoader } from "@/features/map/admin-map-loader";
 import { listSchools } from "@/features/schools";
-import { listSitePoints } from "@/features/site-points";
+import { listSites } from "@/features/sites";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminMapPage() {
-  const [sitePoints, schools] = await Promise.all([listSitePoints(), listSchools()]);
-  const markers = buildMapMarkers(sitePoints, schools);
+  const [sites, schools] = await Promise.all([listSites(), listSchools()]);
+  const markers = buildMapMarkers(sites, schools);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Carte"
-        description="Sites, points et écoles du référentiel"
+        description="Spots, sites et écoles du référentiel"
         actions={
           <DropdownMenu>
             {/* buttonVariants() directement sur le trigger plutôt que
@@ -38,8 +38,8 @@ export default async function AdminMapPage() {
               Nouveau
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem render={<Link href="/admin/spots/new">Spot</Link>} />
               <DropdownMenuItem render={<Link href="/admin/sites/new">Site</Link>} />
-              <DropdownMenuItem render={<Link href="/admin/site-points/new">Point</Link>} />
               <DropdownMenuItem render={<Link href="/admin/schools/new">École</Link>} />
             </DropdownMenuContent>
           </DropdownMenu>
@@ -49,7 +49,7 @@ export default async function AdminMapPage() {
       {markers.length === 0 ? (
         <EmptyState
           title="Aucun lieu géolocalisé"
-          description="Les points de site sont toujours géolocalisés ; les écoles apparaissent une fois leur adresse renseignée via la recherche BAN."
+          description="Les sites sont toujours géolocalisés ; les écoles apparaissent une fois leur adresse renseignée via la recherche BAN."
         />
       ) : (
         <AdminMapLoader markers={markers} />

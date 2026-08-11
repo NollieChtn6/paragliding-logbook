@@ -27,8 +27,8 @@ type AdminDeleteButtonProps = {
 };
 
 // Même pattern que delete-activity-button.tsx (AlertDialog de confirmation +
-// useActionState), généralisé pour les trois ressources admin (sites,
-// points, écoles) : docs/admin.md > Suppression exige une confirmation, et
+// useActionState), généralisé pour les trois ressources admin (spots,
+// sites, écoles) : docs/admin.md > Suppression exige une confirmation, et
 // le message d'erreur (ex. "encore utilisé") doit remonter clairement plutôt
 // qu'une suppression en cascade silencieuse. Déclencheur compact (icône
 // seule) : pensé pour une ligne de tableau, à la différence du bouton

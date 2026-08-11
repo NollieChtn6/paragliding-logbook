@@ -30,7 +30,7 @@ export const groundHandlingSchema = z
     // Obligatoire (comme date) : permet d'ordonner plusieurs séances le
     // même jour, même raisonnement que flightSchema.
     time: z.string().regex(timeRegex, "L'heure de la séance est invalide."),
-    siteId: z.string().uuid("Le site sélectionné est invalide."),
+    spotId: z.string().uuid("Le spot sélectionné est invalide."),
     trainingCampId: optionalUuid,
     durationMin: z.coerce
       .number("La durée doit être un nombre de minutes.")

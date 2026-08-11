@@ -18,7 +18,7 @@ import { toast } from "@/components/ui/toast";
 import { getFieldErrors } from "@/lib/form-validation";
 import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 import { cn } from "@/lib/utils";
-import { SitePointCombobox, type SitePointOption } from "./site-point-combobox";
+import { SiteCombobox, type SiteOption } from "./site-combobox";
 
 type TrainingCampOption = {
   id: string;
@@ -51,8 +51,8 @@ type FlightFormProps = {
     formData: FormData,
   ) => Promise<FlightFormActionState>;
   defaultValues?: FlightFormDefaultValues;
-  defaultTakeoffPoint?: SitePointOption;
-  defaultLandingPoint?: SitePointOption;
+  defaultTakeoffPoint?: SiteOption;
+  defaultLandingPoint?: SiteOption;
   submitLabel?: string;
   // Mode assistant en 3 étapes (utilisé par /activities/new,
   // new-activity-form.tsx) : absent = comportement historique inchangé, un
@@ -224,21 +224,21 @@ export function FlightForm({
           </div>
         </div>
 
-        <SitePointCombobox
+        <SiteCombobox
           type="TAKEOFF"
           name="takeoffPointId"
           label="Décollage"
           placeholder="Rechercher un décollage..."
-          defaultPoint={defaultTakeoffPoint}
+          defaultSite={defaultTakeoffPoint}
           error={fieldErrors.takeoffPointId}
         />
 
-        <SitePointCombobox
+        <SiteCombobox
           type="LANDING"
           name="landingPointId"
           label="Atterrissage"
           placeholder="Rechercher un atterrissage..."
-          defaultPoint={defaultLandingPoint}
+          defaultSite={defaultLandingPoint}
           error={fieldErrors.landingPointId}
         />
 

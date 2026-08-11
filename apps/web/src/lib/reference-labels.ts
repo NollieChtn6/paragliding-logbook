@@ -1,8 +1,8 @@
-// Libellés affichés pour les tables de référence (ActivityType, SitePointType,
+// Libellés affichés pour les tables de référence (ActivityType, SiteType,
 // FlightType) — voir docs/decisions/003-reference-table-codes.md. Ces tables
 // ne stockent que des `code` stables : ce sont des catégories techniques
-// traduisibles, à distinguer des données métier éditoriales (Site.name,
-// SitePoint.label, School.name) qui restent en base.
+// traduisibles, à distinguer des données métier éditoriales (Spot.name,
+// Site.label, School.name) qui restent en base.
 //
 // Un seul fichier, ~15 entrées au total : à éclater par domaine si le volume
 // grossit vraiment. Un Record plat (pas encore de vraie i18n, une seule
@@ -17,7 +17,7 @@ export const ACTIVITY_TYPE_LABELS: Record<string, string> = {
   GROUND_HANDLING: "Gonflage",
 };
 
-export const SITE_POINT_TYPE_LABELS: Record<string, string> = {
+export const SITE_TYPE_LABELS: Record<string, string> = {
   TAKEOFF: "Décollage",
   LANDING: "Atterrissage",
 };

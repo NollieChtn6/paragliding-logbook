@@ -30,13 +30,13 @@ describe("updateSiteAction", () => {
   it("calls updateSite with the site id and submitted data, and redirects on success", async () => {
     vi.mocked(updateSite).mockResolvedValue({} as never);
     const formData = new FormData();
-    formData.set("name", "Site modifié");
+    formData.set("label", "Site modifié");
 
     await updateSiteAction(SITE_ID, null, formData);
 
     expect(updateSite).toHaveBeenCalledWith(
       SITE_ID,
-      expect.objectContaining({ name: "Site modifié" }),
+      expect.objectContaining({ label: "Site modifié" }),
     );
     expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", "Site modifié."));
   });

@@ -6,11 +6,11 @@ import { createFlight } from "./create-flight.service";
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
 let otherUserId: string;
-let siteId: string;
-let otherSiteId: string;
+let spotId: string;
+let otherSpotId: string;
 let takeoffPointId: string;
 let landingPointId: string;
-let otherSiteTakeoffPointId: string;
+let otherSpotTakeoffPointId: string;
 let flightTypeId: string;
 let trainingCampTypeId: string;
 let schoolId: string;
@@ -42,8 +42,8 @@ beforeAll(async () => {
           name: "Other User",
         },
       }),
-      prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-      prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+      prisma.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+      prisma.siteType.findUniqueOrThrow({ where: { code: "LANDING" } }),
       prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
       prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
     ]);
@@ -52,39 +52,39 @@ beforeAll(async () => {
   flightTypeId = flightType.id;
   trainingCampTypeId = trainingCampType.id;
 
-  const [site, otherSite] = await Promise.all([
-    prisma.site.create({ data: { name: `Integration Test Site ${suffix}` } }),
-    prisma.site.create({ data: { name: `Integration Test Other Site ${suffix}` } }),
+  const [spot, otherSpot] = await Promise.all([
+    prisma.spot.create({ data: { name: `Integration Test Spot ${suffix}` } }),
+    prisma.spot.create({ data: { name: `Integration Test Other Spot ${suffix}` } }),
   ]);
-  siteId = site.id;
-  otherSiteId = otherSite.id;
+  spotId = spot.id;
+  otherSpotId = otherSpot.id;
 
-  const [takeoffPoint, landingPoint, otherSiteTakeoffPoint] = await Promise.all([
-    prisma.sitePoint.create({
+  const [takeoffPoint, landingPoint, otherSpotTakeoffPoint] = await Promise.all([
+    prisma.site.create({
       data: {
         label: "Takeoff",
-        siteId,
-        sitePointTypeId: takeoffType.id,
+        spotId,
+        siteTypeId: takeoffType.id,
         latitude: 45.9,
         longitude: 6.9,
         altitudeM: 1200,
       },
     }),
-    prisma.sitePoint.create({
+    prisma.site.create({
       data: {
         label: "Landing",
-        siteId,
-        sitePointTypeId: landingType.id,
+        spotId,
+        siteTypeId: landingType.id,
         latitude: 45.8,
         longitude: 6.8,
         altitudeM: 450,
       },
     }),
-    prisma.sitePoint.create({
+    prisma.site.create({
       data: {
-        label: "Other Site Takeoff",
-        siteId: otherSiteId,
-        sitePointTypeId: takeoffType.id,
+        label: "Other Spot Takeoff",
+        spotId: otherSpotId,
+        siteTypeId: takeoffType.id,
         latitude: 46.0,
         longitude: 7.0,
         altitudeM: 1800,
@@ -93,7 +93,7 @@ beforeAll(async () => {
   ]);
   takeoffPointId = takeoffPoint.id;
   landingPointId = landingPoint.id;
-  otherSiteTakeoffPointId = otherSiteTakeoffPoint.id;
+  otherSpotTakeoffPointId = otherSpotTakeoffPoint.id;
 
   const school = await prisma.school.create({
     data: { name: `Integration Test School ${suffix}` },
@@ -125,8 +125,8 @@ afterAll(async () => {
     where: { activity: { userId: { in: [userId, otherUserId] } } },
   });
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
-  await prisma.sitePoint.deleteMany({ where: { siteId: { in: [siteId, otherSiteId] } } });
-  await prisma.site.deleteMany({ where: { id: { in: [siteId, otherSiteId] } } });
+  await prisma.site.deleteMany({ where: { spotId: { in: [spotId, otherSpotId] } } });
+  await prisma.spot.deleteMany({ where: { id: { in: [spotId, otherSpotId] } } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -174,14 +174,14 @@ describe("createFlight (integration)", () => {
     });
   });
 
-  it("accepts a takeoff point and a landing point belonging to two different sites", async () => {
+  it("accepts a takeoff point and a landing point belonging to two different spots", async () => {
     const flight = await createFlight(userId, {
       ...validFlightInput,
-      takeoffPointId: otherSiteTakeoffPointId,
+      takeoffPointId: otherSpotTakeoffPointId,
       landingPointId,
       flightTypeId,
     });
-    expect(flight.takeoffPointId).toBe(otherSiteTakeoffPointId);
+    expect(flight.takeoffPointId).toBe(otherSpotTakeoffPointId);
     expect(flight.landingPointId).toBe(landingPointId);
   });
 

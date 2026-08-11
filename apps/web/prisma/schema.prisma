@@ -93,7 +93,7 @@ model Verification {
 /// Valeurs initiales prévues (docs/database-design.md) : FLIGHT, TRAINING_CAMP, GROUND_HANDLING.
 /// Pas de label : catégorie technique traduisible, le libellé affiché vit
 /// côté application (docs/decisions/003-reference-table-codes.md), pas en
-/// base — à distinguer d'une donnée métier éditoriale comme Site.name.
+/// base — à distinguer d'une donnée métier éditoriale comme Spot.name.
 model ActivityType {
   id   String @id @default(uuid()) @db.Uuid
   code String @unique
@@ -120,18 +120,20 @@ model Activity {
   @@index([userId])
 }
 
-/// Lieu de pratique général. Donnée de référence partagée (pas de userId) :
-/// lieu du monde réel, pas une donnée privée à un utilisateur. latitude/
-/// longitude restent une localisation approximative du lieu ; les coordonnées
-/// précises d'un point donné vivent sur SitePoint. Pas de notion de "point
-/// principal" : un Site peut avoir plusieurs points de décollage et
-/// plusieurs points d'atterrissage, aucun n'est privilégié (ADR 005,
+/// Lieu de pratique général (spot). Donnée de référence partagée (pas de
+/// userId) : lieu du monde réel, pas une donnée privée à un utilisateur.
+/// latitude/longitude restent une localisation approximative du lieu ; les
+/// coordonnées précises d'un site donné vivent sur Site. Pas de notion de
+/// "site principal" : un Spot peut avoir plusieurs sites de décollage et
+/// plusieurs sites d'atterrissage, aucun n'est privilégié (ADR 005,
 /// docs/decisions/005-flight-takeoff-landing-points.md — retrait de
-/// primaryTakeoffPointId/primaryLandingPointId, voir aussi ADR 002).
+/// primaryTakeoffPointId/primaryLandingPointId, voir aussi ADR 002 ;
+/// vocabulaire Site/SitePoint historique de ces deux ADR conservé tel quel,
+/// voir ADR 007, docs/decisions/007-site-spot-terminology-rename.md).
 /// Référentiel éditorial destiné à une future gestion applicative (ADR 004,
 /// docs/decisions/004-editable-referentials.md) : countryCode est un code
 /// ISO 3166-1 alpha-2 (FR, CH, IT, ES...), pas du texte libre.
-model Site {
+model Spot {
   id          String   @id @default(uuid()) @db.Uuid
   name        String
   region      String?
@@ -141,22 +143,23 @@ model Site {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  points                 SitePoint[]             @relation("SitePoints")
+  sites                  Site[]
   groundHandlingSessions GroundHandlingSession[]
 }
 
-/// Référentiel des types de point (table, pas un enum : extensible sans
-/// migration, même principe qu'ActivityType). Valeurs initiales (peuplées par
-/// le seed) : TAKEOFF, LANDING. Pas de label, même raison qu'ActivityType.
-model SitePointType {
+/// Référentiel des types de site (décollage/atterrissage — table, pas un
+/// enum : extensible sans migration, même principe qu'ActivityType).
+/// Valeurs initiales (peuplées par le seed) : TAKEOFF, LANDING. Pas de
+/// label, même raison qu'ActivityType.
+model SiteType {
   id   String @id @default(uuid()) @db.Uuid
   code String @unique
 
-  points SitePoint[]
+  sites Site[]
 }
 
 /// Référentiel des types de vol (table, pas un enum Prisma : extensible sans
-/// migration, même principe qu'ActivityType/SitePointType — remplace l'ancien
+/// migration, même principe qu'ActivityType/SiteType — remplace l'ancien
 /// enum FlightType, docs/decisions/003-reference-table-codes.md). Pas de
 /// label. Valeurs initiales (peuplées par le seed) : LOCAL, CROSS_COUNTRY,
 /// SOARING, THERMAL, TRAINING, OTHER.
@@ -167,37 +170,38 @@ model FlightType {
   flights Flight[]
 }
 
-/// Point physique appartenant à un Site (décollage, atterrissage...). Un Site
-/// peut avoir plusieurs points d'un même SitePointType, aucun n'est "principal"
-/// (ADR 005, docs/decisions/005-flight-takeoff-landing-points.md). latitude/
-/// longitude/altitudeM non nullables : un point représente un lieu physique
-/// précis (utilisation future dans une carte). orientationDeg nullable :
-/// pertinent pour un décollage, pas nécessairement pour un atterrissage.
-/// Un Flight référence directement son SitePoint de décollage (doit être de
-/// type TAKEOFF) et d'atterrissage (doit être de type LANDING) — contrainte
-/// vérifiée côté applicatif, pas exprimable nativement en Prisma/Postgres.
-model SitePoint {
-  id              String @id @default(uuid()) @db.Uuid
-  label           String
-  siteId          String @db.Uuid
-  sitePointTypeId String @db.Uuid
-  latitude        Float
-  longitude       Float
-  altitudeM       Int
-  orientationDeg  Int?
+/// Site physique précis appartenant à un Spot (décollage, atterrissage...).
+/// Un Spot peut avoir plusieurs sites d'un même SiteType, aucun n'est
+/// "principal" (ADR 005, docs/decisions/005-flight-takeoff-landing-points.md).
+/// latitude/longitude/altitudeM non nullables : un site représente un lieu
+/// physique précis (utilisation future dans une carte). orientationDeg
+/// nullable : pertinent pour un décollage, pas nécessairement pour un
+/// atterrissage. Un Flight référence directement son Site de décollage (doit
+/// être de type TAKEOFF) et d'atterrissage (doit être de type LANDING) —
+/// contrainte vérifiée côté applicatif, pas exprimable nativement en
+/// Prisma/Postgres.
+model Site {
+  id             String @id @default(uuid()) @db.Uuid
+  label          String
+  spotId         String @db.Uuid
+  siteTypeId     String @db.Uuid
+  latitude       Float
+  longitude      Float
+  altitudeM      Int
+  orientationDeg Int?
 
-  site          Site          @relation("SitePoints", fields: [siteId], references: [id])
-  sitePointType SitePointType @relation(fields: [sitePointTypeId], references: [id])
+  spot     Spot     @relation(fields: [spotId], references: [id])
+  siteType SiteType @relation(fields: [siteTypeId], references: [id])
 
   flightsAsTakeoff Flight[] @relation("FlightTakeoffPoint")
   flightsAsLanding Flight[] @relation("FlightLandingPoint")
 
-  @@index([siteId])
-  @@index([sitePointTypeId])
+  @@index([spotId])
+  @@index([siteTypeId])
 }
 
 /// École fédérale de parapente. Donnée de référence partagée (pas de userId),
-/// au même titre que Site. Référentiel éditorial destiné à une future gestion
+/// au même titre que Spot. Référentiel éditorial destiné à une future gestion
 /// applicative (ADR 004, docs/decisions/004-editable-referentials.md) :
 /// countryCode est un code ISO 3166-1 alpha-2 (FR, CH, IT, ES...), pas du
 /// texte libre — adresse structurée (address/postalCode/city/countryCode)
@@ -222,10 +226,10 @@ model School {
 /// ADR 005, docs/decisions/005-flight-takeoff-landing-points.md).
 /// observations/improvementPoints obligatoires (règle métier
 /// docs/domain-model.md : encourager le suivi de progression). takeoffPoint
-/// (doit être un SitePoint de type TAKEOFF) et landingPoint (type LANDING,
-/// contrainte vérifiée côté applicatif) peuvent appartenir à des Sites
+/// (doit être un Site de type TAKEOFF) et landingPoint (type LANDING,
+/// contrainte vérifiée côté applicatif) peuvent appartenir à des Spots
 /// différents (ex. vol de cross qui atterrit sur le décollage d'un autre
-/// site) : aucune contrainte ne les lie au même Site, et aucune règle ne
+/// spot) : aucune contrainte ne les lie au même Spot, et aucune règle ne
 /// compare plus leurs altitudes (l'arrivée peut être plus haute que le
 /// départ). takeoffAltitudeM/landingAltitudeM retirés : redondants avec
 /// takeoffPoint.altitudeM/landingPoint.altitudeM. flightTypeId remplace
@@ -244,8 +248,8 @@ model Flight {
 
   activity     Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
   trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
-  takeoffPoint SitePoint     @relation("FlightTakeoffPoint", fields: [takeoffPointId], references: [id])
-  landingPoint SitePoint     @relation("FlightLandingPoint", fields: [landingPointId], references: [id])
+  takeoffPoint Site          @relation("FlightTakeoffPoint", fields: [takeoffPointId], references: [id])
+  landingPoint Site          @relation("FlightLandingPoint", fields: [landingPointId], references: [id])
   flightType   FlightType    @relation(fields: [flightTypeId], references: [id])
 
   @@index([trainingCampId])
@@ -281,7 +285,7 @@ model TrainingCamp {
 }
 
 /// Référentiel des types de stage (table, pas un enum : extensible sans
-/// migration, même principe qu'ActivityType/SitePointType/FlightType,
+/// migration, même principe qu'ActivityType/SiteType/FlightType,
 /// docs/decisions/003-reference-table-codes.md). Remplace l'ancien champ
 /// TrainingCamp.campType (texte libre). Porte createdAt/updatedAt à la
 /// différence des autres tables de référence ci-dessus (demande explicite,
@@ -302,7 +306,7 @@ model TrainingCampType {
 model GroundHandlingSession {
   id             String   @id @default(uuid()) @db.Uuid
   activityId     String   @unique @db.Uuid
-  siteId         String   @db.Uuid
+  spotId         String   @db.Uuid
   trainingCampId String?  @db.Uuid
   date           DateTime
   durationMin    Int
@@ -311,9 +315,9 @@ model GroundHandlingSession {
   feeling        String?
 
   activity     Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  site         Site          @relation(fields: [siteId], references: [id])
+  spot         Spot          @relation(fields: [spotId], references: [id])
   trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
 
-  @@index([siteId])
+  @@index([spotId])
   @@index([trainingCampId])
 }

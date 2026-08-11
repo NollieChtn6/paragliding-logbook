@@ -2,19 +2,19 @@ import { describe, expect, it } from "vitest";
 import { buildMapMarkers } from "./build-map-markers";
 
 describe("buildMapMarkers", () => {
-  it("maps a takeoff site point to a TAKEOFF marker with details and related links", () => {
+  it("maps a takeoff site to a TAKEOFF marker with details and related links", () => {
     const markers = buildMapMarkers(
       [
         {
-          id: "point-1",
+          id: "site-1",
           label: "Décollage",
           latitude: 45.3,
           longitude: 5.9,
           altitudeM: 900,
           orientationDeg: 180,
-          siteId: "site-1",
-          site: { name: "Saint-Hilaire-du-Touvet" },
-          sitePointType: { code: "TAKEOFF" },
+          spotId: "spot-1",
+          spot: { name: "Saint-Hilaire-du-Touvet" },
+          siteType: { code: "TAKEOFF" },
         },
       ],
       [],
@@ -22,36 +22,36 @@ describe("buildMapMarkers", () => {
 
     expect(markers).toEqual([
       {
-        id: "site-point-point-1",
+        id: "site-site-1",
         kind: "TAKEOFF",
         label: "Décollage",
         latitude: 45.3,
         longitude: 5.9,
-        editHref: "/admin/site-points/point-1/edit",
+        editHref: "/admin/sites/site-1/edit",
         details: [
-          { label: "Site", value: "Saint-Hilaire-du-Touvet" },
+          { label: "Spot", value: "Saint-Hilaire-du-Touvet" },
           { label: "Altitude", value: "900 m" },
           { label: "Orientation", value: "180°" },
         ],
-        relatedLinks: [{ label: "Modifier le site", href: "/admin/sites/site-1/edit" }],
-        siblingPoints: [],
+        relatedLinks: [{ label: "Modifier le spot", href: "/admin/spots/spot-1/edit" }],
+        siblingSites: [],
       },
     ]);
   });
 
-  it("maps a landing site point to a LANDING marker", () => {
+  it("maps a landing site to a LANDING marker", () => {
     const markers = buildMapMarkers(
       [
         {
-          id: "point-2",
+          id: "site-2",
           label: "Atterrissage",
           latitude: 45.3,
           longitude: 5.9,
           altitudeM: 300,
           orientationDeg: null,
-          siteId: "site-1",
-          site: { name: "Saint-Hilaire-du-Touvet" },
-          sitePointType: { code: "LANDING" },
+          spotId: "spot-1",
+          spot: { name: "Saint-Hilaire-du-Touvet" },
+          siteType: { code: "LANDING" },
         },
       ],
       [],
@@ -61,49 +61,49 @@ describe("buildMapMarkers", () => {
     expect(markers[0]?.details).toContainEqual({ label: "Orientation", value: "—" });
   });
 
-  it("lists the other points of the same site as siblingPoints", () => {
+  it("lists the other sites of the same spot as siblingSites", () => {
     const markers = buildMapMarkers(
       [
         {
-          id: "point-takeoff",
+          id: "site-takeoff",
           label: "Décollage",
           latitude: 45.3,
           longitude: 5.9,
           altitudeM: 900,
           orientationDeg: null,
-          siteId: "site-1",
-          site: { name: "Saint-Hilaire-du-Touvet" },
-          sitePointType: { code: "TAKEOFF" },
+          spotId: "spot-1",
+          spot: { name: "Saint-Hilaire-du-Touvet" },
+          siteType: { code: "TAKEOFF" },
         },
         {
-          id: "point-landing",
+          id: "site-landing",
           label: "Atterrissage",
           latitude: 45.31,
           longitude: 5.91,
           altitudeM: 300,
           orientationDeg: null,
-          siteId: "site-1",
-          site: { name: "Saint-Hilaire-du-Touvet" },
-          sitePointType: { code: "LANDING" },
+          spotId: "spot-1",
+          spot: { name: "Saint-Hilaire-du-Touvet" },
+          siteType: { code: "LANDING" },
         },
         {
-          id: "point-other-site",
+          id: "site-other-spot",
           label: "Décollage ailleurs",
           latitude: 46.1,
           longitude: 6.2,
           altitudeM: 800,
           orientationDeg: null,
-          siteId: "site-2",
-          site: { name: "Autre site" },
-          sitePointType: { code: "TAKEOFF" },
+          spotId: "spot-2",
+          spot: { name: "Autre spot" },
+          siteType: { code: "TAKEOFF" },
         },
       ],
       [],
     );
 
-    const takeoffMarker = markers.find((marker) => marker.id === "site-point-point-takeoff");
-    expect(takeoffMarker?.siblingPoints).toEqual([
-      { id: "site-point-point-landing", label: "Atterrissage", kind: "LANDING" },
+    const takeoffMarker = markers.find((marker) => marker.id === "site-site-takeoff");
+    expect(takeoffMarker?.siblingSites).toEqual([
+      { id: "site-site-landing", label: "Atterrissage", kind: "LANDING" },
     ]);
   });
 
@@ -123,7 +123,7 @@ describe("buildMapMarkers", () => {
         editHref: "/admin/schools/school-1/edit",
         details: [{ label: "Ville", value: "Annecy" }],
         relatedLinks: [],
-        siblingPoints: [],
+        siblingSites: [],
       },
     ]);
   });

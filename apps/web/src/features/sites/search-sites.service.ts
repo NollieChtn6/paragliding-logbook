@@ -3,21 +3,23 @@ import { siteSearchSchema } from "@/lib/validations/site-search";
 
 const MAX_RESULTS = 20;
 
-// Recherche serveur plutôt que la liste complète chargée d'avance (même
-// principe que search-site-points.service.ts, audit UX item F4) : le
-// formulaire de séance de gonflage utilisait jusqu'ici un <Select> avec
-// tous les sites, incohérent avec le combobox déjà utilisé pour les points
-// de site en formulaire de vol, et amené à devenir peu maniable à mesure
-// que le référentiel grandit. Distincte de listSites (features/sites/,
-// utilisée par /admin/sites) : pas de _count.points, pas de pagination
-// admin, juste un top MAX_RESULTS pour un champ de recherche.
+// Recherche serveur plutôt que de charger tous les Site côté client (le
+// nombre de sites est amené à grandir, docs/decisions/005-flight-takeoff-landing-points.md) :
+// filtre par type (TAKEOFF/LANDING) et par nom, spot parent inclus pour que
+// l'utilisateur distingue deux sites de même libellé sur des spots
+// différents. Requête vide (query === "") : renvoie quand même les premiers
+// résultats plutôt qu'une liste vide, pour ne pas laisser le champ de
+// recherche vide à l'ouverture.
 export async function searchSites(rawInput: unknown) {
   const input = siteSearchSchema.parse(rawInput);
 
   return prisma.site.findMany({
-    where: { name: { contains: input.query, mode: "insensitive" } },
-    select: { id: true, name: true, region: true },
-    orderBy: { name: "asc" },
+    where: {
+      siteType: { code: input.type },
+      label: { contains: input.query, mode: "insensitive" },
+    },
+    include: { spot: true, siteType: true },
+    orderBy: { label: "asc" },
     take: MAX_RESULTS,
   });
 }

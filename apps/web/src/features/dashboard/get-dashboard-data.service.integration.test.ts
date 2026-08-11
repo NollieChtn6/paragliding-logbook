@@ -4,7 +4,7 @@ import { getDashboardData } from "./get-dashboard-data.service";
 
 let userId: string;
 let otherUserId: string;
-let siteId: string;
+let spotId: string;
 let pointId: string;
 let schoolId: string;
 let trainingCampTypeId: string;
@@ -16,7 +16,7 @@ beforeAll(async () => {
   const [
     user,
     otherUser,
-    site,
+    spot,
     school,
     flightActivityType,
     groundHandlingType,
@@ -37,26 +37,26 @@ beforeAll(async () => {
         name: "Other User",
       },
     }),
-    prisma.site.create({ data: { name: `Dashboard Test Site ${suffix}` } }),
+    prisma.spot.create({ data: { name: `Dashboard Test Spot ${suffix}` } }),
     prisma.school.create({ data: { name: `Dashboard Test School ${suffix}` } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "GROUND_HANDLING" } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "TRAINING_CAMP" } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
     prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
     prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
-  siteId = site.id;
+  spotId = spot.id;
   schoolId = school.id;
   trainingCampTypeId = progressionTrainingCampType.id;
 
-  const point = await prisma.sitePoint.create({
+  const point = await prisma.site.create({
     data: {
       label: "Point de test",
-      siteId,
-      sitePointTypeId: takeoffType.id,
+      spotId,
+      siteTypeId: takeoffType.id,
       latitude: 45.9,
       longitude: 6.9,
       altitudeM: 1200,
@@ -102,7 +102,7 @@ beforeAll(async () => {
     await prisma.groundHandlingSession.create({
       data: {
         activityId: activity.id,
-        siteId,
+        spotId,
         date: new Date(date),
         durationMin,
         exercises: "Contrôle au sol",
@@ -150,8 +150,8 @@ afterAll(async () => {
   await prisma.groundHandlingSession.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.trainingCamp.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.activity.deleteMany({ where: { id: { in: activityIds } } });
-  await prisma.sitePoint.deleteMany({ where: { siteId } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.site.deleteMany({ where: { spotId } });
+  await prisma.spot.delete({ where: { id: spotId } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();

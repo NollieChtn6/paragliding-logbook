@@ -172,7 +172,7 @@ export function AdminMap({ markers }: AdminMapProps) {
     setFilterChangeCount((count) => count + 1);
   }
 
-  // Cherche dans `markers` (pas `visibleMarkers`) : un point sibling reste
+  // Cherche dans `markers` (pas `visibleMarkers`) : un site sibling reste
   // sélectionnable depuis le volet même si son type est actuellement
   // masqué par le filtre — seul son marqueur sur la carte disparaît, pas
   // sa fiche.
@@ -267,12 +267,12 @@ export function AdminMap({ markers }: AdminMapProps) {
               </dl>
             )}
 
-            {selectedMarker && selectedMarker.siblingPoints.length > 0 && (
+            {selectedMarker && selectedMarker.siblingSites.length > 0 && (
               <div className="flex flex-col gap-1.5 border-t border-border pt-4">
                 <span className="text-xs font-medium text-muted-foreground uppercase">
-                  Autres points de ce site
+                  Autres sites du même spot
                 </span>
-                {selectedMarker.siblingPoints.map((sibling) => {
+                {selectedMarker.siblingSites.map((sibling) => {
                   const SiblingIcon = MARKER_ICON_COMPONENTS[sibling.kind];
                   return (
                     <button

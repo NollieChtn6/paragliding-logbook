@@ -122,7 +122,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
         />
         <GroundHandlingSessionForm
           trainingCamps={trainingCamps}
-          defaultSite={activity.groundHandlingSession.site}
+          defaultSpot={activity.groundHandlingSession.spot}
           action={updateGroundHandlingSessionAction.bind(null, activity.id)}
           defaultValues={{
             date: activity.groundHandlingSession.date,

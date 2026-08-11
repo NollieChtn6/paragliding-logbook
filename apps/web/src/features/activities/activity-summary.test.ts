@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { getActivitySummary } from "./activity-summary";
 import type { ActivityWithDetails } from "./queries";
 
-const site = {
-  id: "site-1",
-  name: "Site de test",
+const spot = {
+  id: "spot-1",
+  name: "Spot de test",
   region: null,
   countryCode: null,
   latitude: null,
@@ -13,10 +13,10 @@ const site = {
   updatedAt: new Date("2025-01-01"),
 };
 
-const otherSite = {
-  ...site,
-  id: "site-2",
-  name: "Autre site",
+const otherSpot = {
+  ...spot,
+  id: "spot-2",
+  name: "Autre spot",
 };
 
 const takeoffType = { id: "spt-takeoff", code: "TAKEOFF" };
@@ -32,29 +32,29 @@ const trainingCampType = {
 };
 
 const takeoffPoint = {
-  id: "point-1",
+  id: "site-1",
   label: "Décollage principal",
-  siteId: site.id,
-  sitePointTypeId: takeoffType.id,
+  spotId: spot.id,
+  siteTypeId: takeoffType.id,
   latitude: 45.9,
   longitude: 6.9,
   altitudeM: 1200,
   orientationDeg: null,
-  site,
-  sitePointType: takeoffType,
+  spot,
+  siteType: takeoffType,
 };
 
 const landingPoint = {
-  id: "point-2",
+  id: "site-2",
   label: "Atterrissage principal",
-  siteId: site.id,
-  sitePointTypeId: landingType.id,
+  spotId: spot.id,
+  siteTypeId: landingType.id,
   latitude: 45.8,
   longitude: 6.8,
   altitudeM: 450,
   orientationDeg: null,
-  site,
-  sitePointType: landingType,
+  spot,
+  siteType: landingType,
 };
 
 const school = {
@@ -83,7 +83,7 @@ const baseActivity = {
 };
 
 describe("getActivitySummary", () => {
-  it("summarizes a Flight taking off and landing at the same site", () => {
+  it("summarizes a Flight taking off and landing at the same spot", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
       activityType: { id: "at-1", code: "FLIGHT" },
@@ -107,12 +107,12 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Vol",
-      location: "Site de test",
+      location: "Spot de test",
       dateInfo: "15/06/2025 à 09:15",
     });
   });
 
-  it("summarizes a Flight taking off and landing at different sites", () => {
+  it("summarizes a Flight taking off and landing at different spots", () => {
     const activity: ActivityWithDetails = {
       ...baseActivity,
       activityType: { id: "at-1", code: "FLIGHT" },
@@ -128,7 +128,7 @@ describe("getActivitySummary", () => {
         observations: "RAS",
         improvementPoints: "RAS",
         takeoffPoint,
-        landingPoint: { ...landingPoint, site: otherSite },
+        landingPoint: { ...landingPoint, spot: otherSpot },
         flightType: crossCountryFlightType,
         trainingCamp: null,
       },
@@ -136,7 +136,7 @@ describe("getActivitySummary", () => {
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Vol",
-      location: "Site de test → Autre site",
+      location: "Spot de test → Autre spot",
       dateInfo: "15/06/2025 à 13:45",
     });
   });
@@ -176,21 +176,21 @@ describe("getActivitySummary", () => {
       groundHandlingSession: {
         id: "ghs-1",
         activityId: "activity-1",
-        siteId: site.id,
+        spotId: spot.id,
         trainingCampId: null,
         date: new Date("2025-03-10T18:00:00.000Z"),
         durationMin: 45,
         exercises: "Contrôle au sol",
         difficulties: null,
         feeling: null,
-        site,
+        spot,
         trainingCamp: null,
       },
     };
 
     expect(getActivitySummary(activity)).toEqual({
       title: "Gonflage",
-      location: "Site de test",
+      location: "Spot de test",
       dateInfo: "10/03/2025 à 18:00",
     });
   });

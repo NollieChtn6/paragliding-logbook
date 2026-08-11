@@ -8,8 +8,6 @@ import { withToast } from "@/lib/toast-redirect";
 
 export type DeleteSiteActionState = { success: true } | { success: false; error: string };
 
-// Signature à 3 arguments : siteId pré-lié via .bind(null, siteId), même
-// convention que deleteActivityAction (actions/delete-activity.ts).
 export async function deleteSiteAction(
   siteId: string,
   _previousState: DeleteSiteActionState | null,

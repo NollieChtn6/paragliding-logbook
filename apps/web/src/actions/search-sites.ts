@@ -4,11 +4,16 @@ import { searchSites } from "@/features/sites";
 import { requireCurrentUser } from "@/lib/current-user";
 
 // Appelée directement comme fonction async depuis un composant client (pas
-// via <form action>), même principe que searchSitePointsAction
-// (actions/search-site-points.ts) : une recherche est une lecture, débouncée
-// côté client, requireCurrentUser() par cohérence avec le reste des Server
-// Actions même si Site est un référentiel partagé non sensible (ADR 004).
-export async function searchSitesAction(query: string) {
+// via <form action>) : une recherche est une lecture, pas une mutation —
+// pas de useActionState/FormData ici, juste un appel imperatif à chaque
+// frappe (débouncé côté client, voir features/flights/site-combobox.tsx).
+//
+// requireCurrentUser() par cohérence avec le reste des Server Actions (voir
+// CLAUDE.md > Conventions de sécurité) même si la donnée renvoyée est un
+// référentiel partagé non sensible (ADR 004) : une Server Action exposée
+// sans vérification de session est une porte ouverte pour toute future
+// évolution qui copierait ce fichier comme modèle.
+export async function searchSitesAction(query: string, type: "TAKEOFF" | "LANDING") {
   await requireCurrentUser();
-  return searchSites({ query });
+  return searchSites({ query, type });
 }

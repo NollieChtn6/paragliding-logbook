@@ -1,43 +1,100 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { createSite } from "./create-site.service";
 
-const createdIds: string[] = [];
+let spotId: string;
+let takeoffTypeId: string;
+let landingTypeId: string;
+const createdSiteIds: string[] = [];
 
-afterEach(async () => {
-  await prisma.site.deleteMany({ where: { id: { in: createdIds } } });
-  createdIds.length = 0;
+beforeAll(async () => {
+  const suffix = crypto.randomUUID();
+  const [spot, takeoffType, landingType] = await Promise.all([
+    prisma.spot.create({ data: { name: `Create Site Test Spot ${suffix}` } }),
+    prisma.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.siteType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+  ]);
+  spotId = spot.id;
+  takeoffTypeId = takeoffType.id;
+  landingTypeId = landingType.id;
+});
+
+afterAll(async () => {
+  await prisma.site.deleteMany({ where: { id: { in: createdSiteIds } } });
+  await prisma.spot.deleteMany({ where: { id: spotId } });
+  await prisma.$disconnect();
 });
 
 describe("createSite (integration)", () => {
-  it("creates a site with the submitted data", async () => {
-    const suffix = crypto.randomUUID();
+  it("creates a takeoff site associated with the spot", async () => {
     const site = await createSite({
-      name: `Integration Test Site ${suffix}`,
-      region: "Auvergne-Rhône-Alpes",
-      countryCode: "fr",
+      label: "Décollage test",
+      spotId,
+      siteTypeId: takeoffTypeId,
       latitude: "45.3",
       longitude: "5.9",
+      altitudeM: "900",
+      orientationDeg: "90",
     });
-    createdIds.push(site.id);
+    createdSiteIds.push(site.id);
 
-    expect(site.name).toBe(`Integration Test Site ${suffix}`);
-    expect(site.region).toBe("Auvergne-Rhône-Alpes");
-    expect(site.countryCode).toBe("FR");
-    expect(site.latitude).toBe(45.3);
-    expect(site.longitude).toBe(5.9);
+    expect(site.spotId).toBe(spotId);
+    expect(site.siteTypeId).toBe(takeoffTypeId);
+    expect(site.altitudeM).toBe(900);
+    expect(site.orientationDeg).toBe(90);
   });
 
-  it("creates a site with only a name", async () => {
-    const suffix = crypto.randomUUID();
-    const site = await createSite({ name: `Integration Test Site ${suffix}` });
-    createdIds.push(site.id);
+  it("creates a landing site without an orientation", async () => {
+    const site = await createSite({
+      label: "Atterrissage test",
+      spotId,
+      siteTypeId: landingTypeId,
+      latitude: "45.3",
+      longitude: "5.9",
+      altitudeM: "300",
+    });
+    createdSiteIds.push(site.id);
 
-    expect(site.region).toBeNull();
-    expect(site.countryCode).toBeNull();
+    expect(site.siteTypeId).toBe(landingTypeId);
+    expect(site.orientationDeg).toBeNull();
   });
 
-  it("fails with invalid data", async () => {
-    await expect(createSite({ name: "" })).rejects.toThrow();
+  it("fails when the spot does not exist", async () => {
+    await expect(
+      createSite({
+        label: "Site orphelin",
+        spotId: crypto.randomUUID(),
+        siteTypeId: takeoffTypeId,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the site type does not exist", async () => {
+    await expect(
+      createSite({
+        label: "Site orphelin",
+        spotId,
+        siteTypeId: crypto.randomUUID(),
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("fails with invalid coordinates", async () => {
+    await expect(
+      createSite({
+        label: "Site invalide",
+        spotId,
+        siteTypeId: takeoffTypeId,
+        latitude: "200",
+        longitude: "5.9",
+        altitudeM: "900",
+      }),
+    ).rejects.toThrow();
   });
 });

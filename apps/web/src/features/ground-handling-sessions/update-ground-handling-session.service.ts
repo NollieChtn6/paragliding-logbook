@@ -52,7 +52,7 @@ export async function updateGroundHandlingSession(
     return tx.groundHandlingSession.update({
       where: { activityId },
       data: {
-        siteId: input.siteId,
+        spotId: input.spotId,
         // ?? null (pas juste input.trainingCampId) : contrairement à create,
         // un update Prisma ignore les champs undefined au lieu de les
         // effacer — nécessaire pour permettre de retirer le stage associé.
