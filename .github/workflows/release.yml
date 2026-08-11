@@ -46,7 +46,11 @@ jobs:
   # merger, voir ci.yml) tourne sur cette PR. --auto attend que Quality
   # checks passe avant de merger réellement (nécessite "Allow auto-merge"
   # activé sur le repo, Settings > General — déjà utilisé par sync-develop
-  # ci-dessous).
+  # ci-dessous). Pas de `actions/checkout` ici (contrairement à
+  # sync-develop) : `gh pr merge` n'a besoin d'aucun fichier du dépôt, juste
+  # de savoir quel repo cibler — GH_REPO le lui donne explicitement (sans
+  # ça, "fatal: not a git repository", constaté au premier run réel de ce
+  # job, #97).
   auto-merge-release-pr:
     needs: release-please
     if: needs.release-please.outputs.prs_created == 'true'
@@ -55,6 +59,7 @@ jobs:
       - name: Enable auto-merge for the release PR
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           PR_JSON: ${{ needs.release-please.outputs.pr }}
         run: |
           pr_number=$(echo "$PR_JSON" | jq -r '.number // empty')
@@ -62,7 +67,7 @@ jobs:
             echo "No PR number found in release-please output (PR_JSON='$PR_JSON'), skipping auto-merge."
             exit 0
           fi
-          gh pr merge "$pr_number" --merge --auto
+          gh pr merge "$pr_number" --merge --auto --repo "$GH_REPO"
 
   # Après le merge de la Release PR sur main (donc uniquement quand une
   # release vient réellement d'être publiée), main avance de package.json/
@@ -108,4 +113,16 @@ jobs:
             --title "chore: sync develop with main after release" \
             --body "Synchronisation automatique après une release (voir docs/decisions/006-versioning.md)." \
             || echo "PR already exists for this branch, continuing"
-          gh pr merge "$branch" --merge --auto
+
+          # GitHub met parfois quelques secondes à calculer la mergeabilité
+          # d'une PR fraîchement créée : sur cette fenêtre, activer
+          # auto-merge échoue avec "Pull request is in unstable status"
+          # (constaté au premier run réel de ce job, #98) alors que la PR
+          # elle-même est valide. Quelques tentatives espacées suffisent.
+          for attempt in 1 2 3 4 5; do
+            if gh pr merge "$branch" --merge --auto; then
+              break
+            fi
+            echo "gh pr merge --auto failed (attempt $attempt/5), retrying in 10s..."
+            sleep 10
+          done
