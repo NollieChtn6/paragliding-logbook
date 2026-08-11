@@ -3,44 +3,83 @@ import { prisma } from "@/lib/prisma";
 import { createSite } from "./create-site.service";
 import { updateSite } from "./update-site.service";
 
+let spotId: string;
+let otherSpotId: string;
+let takeoffTypeId: string;
+let landingTypeId: string;
 let siteId: string;
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
-  const site = await createSite({ name: `Update Site Test ${suffix}`, countryCode: "FR" });
+  const [spot, otherSpot, takeoffType, landingType] = await Promise.all([
+    prisma.spot.create({ data: { name: `Update Site Test Spot ${suffix}` } }),
+    prisma.spot.create({ data: { name: `Update Site Test Other Spot ${suffix}` } }),
+    prisma.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.siteType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+  ]);
+  spotId = spot.id;
+  otherSpotId = otherSpot.id;
+  takeoffTypeId = takeoffType.id;
+  landingTypeId = landingType.id;
+
+  const site = await createSite({
+    label: "Site initial",
+    spotId,
+    siteTypeId: takeoffTypeId,
+    latitude: "45.3",
+    longitude: "5.9",
+    altitudeM: "900",
+    orientationDeg: "90",
+  });
   siteId = site.id;
 });
 
 afterAll(async () => {
   await prisma.site.deleteMany({ where: { id: siteId } });
+  await prisma.spot.deleteMany({ where: { id: { in: [spotId, otherSpotId] } } });
   await prisma.$disconnect();
 });
 
 describe("updateSite (integration)", () => {
-  it("updates the site with the submitted data", async () => {
+  it("updates the site, including re-associating it with another spot and type", async () => {
     const updated = await updateSite(siteId, {
-      name: "Updated Site Name",
-      region: "Nouvelle région",
-      countryCode: "CH",
+      label: "Site modifié",
+      spotId: otherSpotId,
+      siteTypeId: landingTypeId,
+      latitude: "45.5",
+      longitude: "6.1",
+      altitudeM: "300",
     });
 
-    expect(updated.name).toBe("Updated Site Name");
-    expect(updated.region).toBe("Nouvelle région");
-    expect(updated.countryCode).toBe("CH");
+    expect(updated.label).toBe("Site modifié");
+    expect(updated.spotId).toBe(otherSpotId);
+    expect(updated.siteTypeId).toBe(landingTypeId);
+    expect(updated.orientationDeg).toBeNull();
   });
 
-  it("clears an optional field when it is omitted from the input", async () => {
-    const updated = await updateSite(siteId, { name: "Updated Site Name" });
-
-    expect(updated.region).toBeNull();
-    expect(updated.countryCode).toBeNull();
+  it("fails when the target spot does not exist", async () => {
+    await expect(
+      updateSite(siteId, {
+        label: "Site modifié",
+        spotId: crypto.randomUUID(),
+        siteTypeId: takeoffTypeId,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      }),
+    ).rejects.toThrow();
   });
 
   it("fails with invalid data", async () => {
-    await expect(updateSite(siteId, { name: "" })).rejects.toThrow();
-  });
-
-  it("fails when the site does not exist", async () => {
-    await expect(updateSite(crypto.randomUUID(), { name: "Anything" })).rejects.toThrow();
+    await expect(
+      updateSite(siteId, {
+        label: "",
+        spotId,
+        siteTypeId: takeoffTypeId,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      }),
+    ).rejects.toThrow();
   });
 });

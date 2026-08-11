@@ -8,7 +8,7 @@ import { updateGroundHandlingSession } from "./update-ground-handling-session.se
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
 let otherUserId: string;
-let siteId: string;
+let spotId: string;
 let schoolId: string;
 let trainingCampTypeId: string;
 let trainingCampId: string;
@@ -26,7 +26,7 @@ const validGroundHandlingInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school, trainingCampType] = await Promise.all([
+  const [user, otherUser, spot, school, trainingCampType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `update-ghs-${suffix}@paragliding-logbook.local`,
@@ -39,13 +39,13 @@ beforeAll(async () => {
         name: "Other User",
       },
     }),
-    prisma.site.create({ data: { name: `Update Ground Handling Test Site ${suffix}` } }),
+    prisma.spot.create({ data: { name: `Update Ground Handling Test Spot ${suffix}` } }),
     prisma.school.create({ data: { name: `Update Ground Handling Test School ${suffix}` } }),
     prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
-  siteId = site.id;
+  spotId = spot.id;
   schoolId = school.id;
   trainingCampTypeId = trainingCampType.id;
 
@@ -67,7 +67,7 @@ beforeAll(async () => {
 
   const groundHandlingSession = await createGroundHandlingSession(userId, {
     ...validGroundHandlingInput,
-    siteId,
+    spotId,
   });
   groundHandlingSessionId = groundHandlingSession.id;
   activityId = groundHandlingSession.activityId;
@@ -81,7 +81,7 @@ afterAll(async () => {
     where: { activity: { userId: { in: [userId, otherUserId] } } },
   });
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.spot.delete({ where: { id: spotId } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -91,7 +91,7 @@ describe("updateGroundHandlingSession (integration)", () => {
   it("updates the GroundHandlingSession with the submitted data", async () => {
     const updated = await updateGroundHandlingSession(userId, activityId, {
       ...validGroundHandlingInput,
-      siteId,
+      spotId,
       durationMin: "45",
       difficulties: "Vent de travers.",
       feeling: "Progrès sur la gestion des surventes.",
@@ -106,14 +106,14 @@ describe("updateGroundHandlingSession (integration)", () => {
   it("clears an optional field when it is omitted from the input", async () => {
     await updateGroundHandlingSession(userId, activityId, {
       ...validGroundHandlingInput,
-      siteId,
+      spotId,
       trainingCampId,
       date: "2025-01-12",
     });
 
     const withoutCamp = await updateGroundHandlingSession(userId, activityId, {
       ...validGroundHandlingInput,
-      siteId,
+      spotId,
     });
 
     expect(withoutCamp.trainingCampId).toBeNull();
@@ -125,7 +125,7 @@ describe("updateGroundHandlingSession (integration)", () => {
     await expect(
       updateGroundHandlingSession(userId, activityId, {
         ...validGroundHandlingInput,
-        siteId,
+        spotId,
         durationMin: "-10",
       }),
     ).rejects.toThrow();
@@ -135,14 +135,14 @@ describe("updateGroundHandlingSession (integration)", () => {
     await expect(
       updateGroundHandlingSession(userId, crypto.randomUUID(), {
         ...validGroundHandlingInput,
-        siteId,
+        spotId,
       }),
     ).rejects.toThrow(ActivityNotFoundError);
   });
 
   it("throws ActivityNotFoundError when the activity belongs to another user", async () => {
     await expect(
-      updateGroundHandlingSession(otherUserId, activityId, { ...validGroundHandlingInput, siteId }),
+      updateGroundHandlingSession(otherUserId, activityId, { ...validGroundHandlingInput, spotId }),
     ).rejects.toThrow(ActivityNotFoundError);
   });
 
@@ -152,7 +152,7 @@ describe("updateGroundHandlingSession (integration)", () => {
       await expect(
         updateGroundHandlingSession(userId, activityId, {
           ...validGroundHandlingInput,
-          siteId,
+          spotId,
           trainingCampId,
           date: "2025-01-25",
         }),
@@ -163,7 +163,7 @@ describe("updateGroundHandlingSession (integration)", () => {
       await expect(
         updateGroundHandlingSession(userId, activityId, {
           ...validGroundHandlingInput,
-          siteId,
+          spotId,
           trainingCampId: otherUserTrainingCampId,
           date: "2025-01-12",
         }),

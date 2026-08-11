@@ -149,7 +149,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
   // "Gonflage", déjà affiché par PageHeader.
   const heroTitle = activity.flight
     ? formatFlightLocation(activity.flight)
-    : (activity.trainingCamp?.school.name ?? activity.groundHandlingSession?.site.name ?? title);
+    : (activity.trainingCamp?.school.name ?? activity.groundHandlingSession?.spot.name ?? title);
   const heroSubtitle = activity.flight
     ? `${formatDate(activity.flight.date)} à ${formatTime(activity.flight.date)}`
     : activity.trainingCamp
@@ -261,7 +261,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                 <ArrowUpRight className="size-4 flex-none text-primary" aria-hidden />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium uppercase text-foreground">
-                    {activity.flight.takeoffPoint.site.name}
+                    {activity.flight.takeoffPoint.spot.name}
                   </p>
                   <p className="truncate text-sm text-muted-foreground">
                     {activity.flight.takeoffPoint.label} · {activity.flight.takeoffPoint.altitudeM}{" "}
@@ -273,7 +273,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                 <ArrowDownLeft className="size-4 flex-none text-accent" aria-hidden />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium uppercase text-foreground">
-                    {activity.flight.landingPoint.site.name}
+                    {activity.flight.landingPoint.spot.name}
                   </p>
                   <p className="truncate text-sm text-muted-foreground">
                     {activity.flight.landingPoint.label} · {activity.flight.landingPoint.altitudeM}{" "}
@@ -379,7 +379,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                           >
                             <span className="flex min-w-0 flex-col gap-0.5">
                               <span className="font-medium text-foreground">
-                                {groundHandlingSession.site.name}
+                                {groundHandlingSession.spot.name}
                               </span>
                               <span className="text-sm text-muted-foreground">
                                 {formatDate(groundHandlingSession.date)} à{" "}

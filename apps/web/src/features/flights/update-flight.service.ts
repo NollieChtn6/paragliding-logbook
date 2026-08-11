@@ -16,19 +16,19 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       throw new ActivityNotFoundError();
     }
 
-    // SitePoint est une donnée de référence partagée (comme Site) : simple
+    // Site est une donnée de référence partagée (comme Spot) : simple
     // vérification d'existence, pas de contrôle de propriété. Le type du
-    // point est vérifié en plus de son existence
+    // site est vérifié en plus de son existence
     // (docs/decisions/005-flight-takeoff-landing-points.md) : takeoffPointId
-    // doit référencer un point TAKEOFF, landingPointId un point LANDING.
+    // doit référencer un site TAKEOFF, landingPointId un site LANDING.
     const [takeoffPoint, landingPoint] = await Promise.all([
-      tx.sitePoint.findUnique({
+      tx.site.findUnique({
         where: { id: input.takeoffPointId },
-        include: { sitePointType: true },
+        include: { siteType: true },
       }),
-      tx.sitePoint.findUnique({
+      tx.site.findUnique({
         where: { id: input.landingPointId },
-        include: { sitePointType: true },
+        include: { siteType: true },
       }),
     ]);
     if (!takeoffPoint) {
@@ -39,7 +39,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       };
       throw new ZodError([issue]);
     }
-    if (takeoffPoint.sitePointType.code !== "TAKEOFF") {
+    if (takeoffPoint.siteType.code !== "TAKEOFF") {
       const issue: ZodIssue = {
         code: "custom",
         path: ["takeoffPointId"],
@@ -55,7 +55,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       };
       throw new ZodError([issue]);
     }
-    if (landingPoint.sitePointType.code !== "LANDING") {
+    if (landingPoint.siteType.code !== "LANDING") {
       const issue: ZodIssue = {
         code: "custom",
         path: ["landingPointId"],
@@ -65,7 +65,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
     }
 
     // FlightType est une donnée de référence partagée, même traitement que
-    // SitePoint ci-dessus (docs/decisions/003-reference-table-codes.md).
+    // Site ci-dessus (docs/decisions/003-reference-table-codes.md).
     const flightType = await tx.flightType.findUnique({ where: { id: input.flightTypeId } });
     if (!flightType) {
       const issue: ZodIssue = {

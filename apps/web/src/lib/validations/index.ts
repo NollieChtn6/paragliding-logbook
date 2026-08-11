@@ -5,5 +5,5 @@ export * from "./ground-handling";
 export * from "./school";
 export * from "./sign-up";
 export * from "./site";
-export * from "./site-point";
+export * from "./spot";
 export * from "./training-camp";

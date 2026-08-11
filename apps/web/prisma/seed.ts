@@ -19,12 +19,12 @@ const prisma = new PrismaClient({ adapter });
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@thermik.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-// Tables de référence (ActivityType/SitePointType/FlightType) : pas de label
+// Tables de référence (ActivityType/SiteType/FlightType) : pas de label
 // ici, le libellé affiché vit côté application
 // (src/lib/reference-labels.ts, docs/decisions/003-reference-table-codes.md).
 const activityTypes = [{ code: "FLIGHT" }, { code: "TRAINING_CAMP" }, { code: "GROUND_HANDLING" }];
 
-const sitePointTypes = [{ code: "TAKEOFF" }, { code: "LANDING" }];
+const siteTypes = [{ code: "TAKEOFF" }, { code: "LANDING" }];
 
 // Remplace l'ancien enum Prisma FlightType (ADR 003). CROSS renommé en
 // CROSS_COUNTRY, plus explicite (docs/decisions/003-reference-table-codes.md).
@@ -65,7 +65,7 @@ const ORIENTATION_S = 180;
 const ORIENTATION_SO = 225;
 const ORIENTATION_NO = 315;
 
-type SitePointSeed = {
+type SiteSeed = {
   label: string;
   typeCode: "TAKEOFF" | "LANDING";
   latitude: number;
@@ -74,23 +74,23 @@ type SitePointSeed = {
   orientationDeg: number | null;
 };
 
-type SiteSeed = {
+type SpotSeed = {
   name: string;
   region: string;
   countryCode: string;
-  points: SitePointSeed[];
+  sites: SiteSeed[];
 };
 
-// Sites de vol réels (données référentielles, pas de donnée personnelle) —
-// chaque site peut avoir plusieurs points de décollage et un point
-// d'atterrissage, aucun n'est "principal" (ADR 005 : la notion de point
+// Spots de vol réels (données référentielles, pas de donnée personnelle) —
+// chaque spot peut avoir plusieurs sites de décollage et un site
+// d'atterrissage, aucun n'est "principal" (ADR 005 : la notion de site
 // principal est abandonnée).
-const SITES: SiteSeed[] = [
+const SPOTS: SpotSeed[] = [
   {
     name: "Saint-Hilaire-du-Touvet",
     region: "Auvergne-Rhône-Alpes",
     countryCode: "FR",
-    points: [
+    sites: [
       {
         label: "SAINT HILAIRE DU TOUVET - CHALET MOQUETTE",
         typeCode: "TAKEOFF",
@@ -129,7 +129,7 @@ const SITES: SiteSeed[] = [
     name: "Montlambert",
     region: "Auvergne-Rhône-Alpes",
     countryCode: "FR",
-    points: [
+    sites: [
       {
         label: "MONTLAMBERT",
         typeCode: "TAKEOFF",
@@ -152,7 +152,7 @@ const SITES: SiteSeed[] = [
     name: "Chamoux - Montendry",
     region: "Auvergne-Rhône-Alpes",
     countryCode: "FR",
-    points: [
+    sites: [
       {
         label: "DÉCOLLAGE DES PIEDS TENDRES",
         typeCode: "TAKEOFF",
@@ -175,7 +175,7 @@ const SITES: SiteSeed[] = [
     name: "Col de la Forclaz - Montmin",
     region: "Auvergne-Rhône-Alpes",
     countryCode: "FR",
-    points: [
+    sites: [
       {
         label: "COL DE LA FORCLAZ - MONTMIN",
         typeCode: "TAKEOFF",
@@ -198,7 +198,7 @@ const SITES: SiteSeed[] = [
     name: "Planfait - Perroix",
     region: "Auvergne-Rhône-Alpes",
     countryCode: "FR",
-    points: [
+    sites: [
       {
         label: "PLANFAIT",
         typeCode: "TAKEOFF",
@@ -255,61 +255,61 @@ const SCHOOLS: SchoolSeed[] = [
   },
 ];
 
-// Un site doit avoir des points de décollage et d'atterrissage pour que le
+// Un spot doit avoir des sites de décollage et d'atterrissage pour que le
 // flux de création de vol soit utilisable (Flight référence directement des
-// SitePoint typés, plus un Site). Idempotent : ne crée que les points
-// absents (recherche par site + libellé + type, pas de contrainte unique en
-// base). Le type doit faire partie de la clé de recherche : plusieurs sites
-// (ex. Montlambert) ont un décollage et un atterrissage qui partagent le même
-// libellé — une recherche par site + libellé seul retomberait sur le
+// Site typés, plus un Spot). Idempotent : ne crée que les sites absents
+// (recherche par spot + libellé + type, pas de contrainte unique en base).
+// Le type doit faire partie de la clé de recherche : plusieurs spots (ex.
+// Montlambert) ont un décollage et un atterrissage qui partagent le même
+// libellé — une recherche par spot + libellé seul retomberait sur le
 // décollage déjà créé et sauterait à tort la création de l'atterrissage.
-async function ensureSitePoints(client: PrismaClient, siteId: string, points: SitePointSeed[]) {
-  const sitePointTypesByCode = new Map(
+async function ensureSites(client: PrismaClient, spotId: string, sites: SiteSeed[]) {
+  const siteTypesByCode = new Map(
     (
       await Promise.all([
-        client.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-        client.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+        client.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+        client.siteType.findUniqueOrThrow({ where: { code: "LANDING" } }),
       ])
-    ).map((sitePointType) => [sitePointType.code, sitePointType]),
+    ).map((siteType) => [siteType.code, siteType]),
   );
 
-  for (const point of points) {
-    const sitePointType = sitePointTypesByCode.get(point.typeCode);
-    if (!sitePointType) {
-      throw new Error(`SitePointType inconnu : ${point.typeCode}`);
+  for (const site of sites) {
+    const siteType = siteTypesByCode.get(site.typeCode);
+    if (!siteType) {
+      throw new Error(`SiteType inconnu : ${site.typeCode}`);
     }
 
-    const existing = await client.sitePoint.findFirst({
-      where: { siteId, label: point.label, sitePointTypeId: sitePointType.id },
+    const existing = await client.site.findFirst({
+      where: { spotId, label: site.label, siteTypeId: siteType.id },
     });
     if (existing) {
       continue;
     }
 
-    await client.sitePoint.create({
+    await client.site.create({
       data: {
-        label: point.label,
-        siteId,
-        sitePointTypeId: sitePointType.id,
-        latitude: point.latitude,
-        longitude: point.longitude,
-        altitudeM: point.altitudeM,
-        orientationDeg: point.orientationDeg,
+        label: site.label,
+        spotId,
+        siteTypeId: siteType.id,
+        latitude: site.latitude,
+        longitude: site.longitude,
+        altitudeM: site.altitudeM,
+        orientationDeg: site.orientationDeg,
       },
     });
   }
 }
 
-// Site.name n'est pas une contrainte unique en base (upsert impossible) :
+// Spot.name n'est pas une contrainte unique en base (upsert impossible) :
 // vérification manuelle pour rester idempotent, comme pour School plus bas.
-async function ensureSite(client: PrismaClient, site: SiteSeed) {
-  let record = await client.site.findFirst({ where: { name: site.name } });
+async function ensureSpot(client: PrismaClient, spot: SpotSeed) {
+  let record = await client.spot.findFirst({ where: { name: spot.name } });
   if (!record) {
-    record = await client.site.create({
-      data: { name: site.name, region: site.region, countryCode: site.countryCode },
+    record = await client.spot.create({
+      data: { name: spot.name, region: spot.region, countryCode: spot.countryCode },
     });
   }
-  await ensureSitePoints(client, record.id, site.points);
+  await ensureSites(client, record.id, spot.sites);
   return record;
 }
 
@@ -364,11 +364,11 @@ async function main() {
     });
   }
 
-  for (const sitePointType of sitePointTypes) {
-    await prisma.sitePointType.upsert({
-      where: { code: sitePointType.code },
+  for (const siteType of siteTypes) {
+    await prisma.siteType.upsert({
+      where: { code: siteType.code },
       update: {},
-      create: sitePointType,
+      create: siteType,
     });
   }
 
@@ -388,13 +388,13 @@ async function main() {
     });
   }
 
-  // Site.name et School.name ne sont pas des contraintes uniques en base
+  // Spot.name et School.name ne sont pas des contraintes uniques en base
   // (upsert impossible) : vérification manuelle pour rester idempotent (voir
-  // ensureSite/ensureSchool). Les comptes utilisateurs "normaux" restent
+  // ensureSpot/ensureSchool). Les comptes utilisateurs "normaux" restent
   // créés via /sign-up ; seul le compte admin (ci-dessous) est seedé, faute
   // d'autre moyen d'obtenir un compte ADMIN en local (voir docs/admin.md).
-  for (const site of SITES) {
-    await ensureSite(prisma, site);
+  for (const spot of SPOTS) {
+    await ensureSpot(prisma, spot);
   }
 
   for (const school of SCHOOLS) {

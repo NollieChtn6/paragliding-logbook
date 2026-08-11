@@ -161,14 +161,14 @@ Les activités doivent permettre :
 Informations obligatoires :
 
 - date
-- point de départ (site + altitude dérivés du point choisi)
-- point d'arrivée (site + altitude dérivés du point choisi — peut appartenir à un site différent du départ, ex. vol de cross)
+- point de décollage (spot + altitude dérivés du site choisi)
+- point d'atterrissage (spot + altitude dérivés du site choisi — peut appartenir à un spot différent du décollage, ex. vol de cross)
 - durée
 - type de vol
 - observations
 - points d'amélioration
 
-Un site peut avoir plusieurs points (décollage, atterrissage), avec coordonnées GPS et altitude. Aucune contrainte ne compare les altitudes de départ et d'arrivée.
+Un spot peut avoir plusieurs sites (décollage, atterrissage), avec coordonnées GPS et altitude. Aucune contrainte ne compare les altitudes de départ et d'arrivée.
 
 Type de vol :
 
@@ -209,7 +209,7 @@ Un stage peut contenir plusieurs vols.
 Informations :
 
 - date
-- site
+- spot
 - durée
 - exercices travaillés
 

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { ActivityWithDetails } from "@/features/activities";
 import { getDashboardStats } from "./dashboard-stats";
 
-const site = {
-  id: "site-1",
-  name: "Site de test",
+const spot = {
+  id: "spot-1",
+  name: "Spot de test",
   region: null,
   countryCode: null,
   latitude: null,
@@ -17,16 +17,16 @@ const takeoffType = { id: "spt-takeoff", code: "TAKEOFF" };
 const localFlightType = { id: "ft-local", code: "LOCAL" };
 
 const point = {
-  id: "point-1",
+  id: "site-1",
   label: "Point de test",
-  siteId: site.id,
-  sitePointTypeId: takeoffType.id,
+  spotId: spot.id,
+  siteTypeId: takeoffType.id,
   latitude: 45.9,
   longitude: 6.9,
   altitudeM: 1200,
   orientationDeg: null,
-  site,
-  sitePointType: takeoffType,
+  spot,
+  siteType: takeoffType,
 };
 
 const baseActivity = {
@@ -71,14 +71,14 @@ function groundHandlingActivity(id: string, durationMin: number): ActivityWithDe
     groundHandlingSession: {
       id: `ghs-${id}`,
       activityId: id,
-      siteId: site.id,
+      spotId: spot.id,
       trainingCampId: null,
       date: new Date("2025-03-10"),
       durationMin,
       exercises: "Contrôle au sol",
       difficulties: null,
       feeling: null,
-      site,
+      spot,
       trainingCamp: null,
     },
   };

@@ -158,9 +158,9 @@ function ComboboxLabel({ className, ...props }: ComboboxPrimitive.GroupLabel.Pro
   return (
     <ComboboxPrimitive.GroupLabel
       data-slot="combobox-label"
-      // Regroupe les points par site (ex. site-point-combobox.tsx) : mis en
+      // Regroupe les sites par spot (ex. site-combobox.tsx) : mis en
       // avant (couleur, taille, graisse) par rapport aux ComboboxItem
-      // (text-sm par défaut) pour bien distinguer le site des points de
+      // (text-sm par défaut) pour bien distinguer le spot des sites de
       // décollage/atterrissage qu'il contient.
       className={cn("px-2 py-1.5 text-sm font-semibold text-primary", className)}
       {...props}

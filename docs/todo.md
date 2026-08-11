@@ -44,7 +44,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Configurer Prisma
 - [x] Créer le premier schéma de données
 - [x] Créer les migrations initiales
-- [x] Ajouter les données de référence techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) — seedées, pas de CRUD applicatif (voir Administration)
+- [x] Ajouter les données de référence techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SiteType`) — seedées, pas de CRUD applicatif (voir Administration)
 
 #### Validation et couche métier
 
@@ -82,11 +82,11 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 
 - [x] Rôle utilisateur — `User.role` (`UserRole` : `USER`/`ADMIN`, défaut `USER`), attribué uniquement en base (pas d'interface pour l'instant), jamais choisi par l'utilisateur (non exposé à Better Auth, testé)
 - [x] Autorisation serveur — `requireAdmin()` (`src/lib/current-user.ts`), utilisateur non admin ramené à `/`, non authentifié redirigé vers `/sign-in` ; revérifiée dans chaque Server Action admin, pas seulement dans le layout de `/admin`
-- [x] Espace `/admin` (`src/app/admin/`) — tableau de bord (compteurs sites/points/écoles), navigation dédiée (desktop : colonne latérale ; mobile : onglets défilants), lien "Administration" affiché uniquement aux admins dans la navigation principale
-- [x] Gestion des sites `/admin/sites` — liste, recherche, création, modification, suppression (`src/features/sites/`), suppression bloquée si des points ou séances de gonflage y sont encore rattachés
-- [x] Gestion des points de site `/admin/site-points` — liste filtrable (recherche, site, type), création, modification, suppression (`src/features/site-points/`), type sélectionné depuis le référentiel `SitePointType` (pas de texte libre), suppression bloquée si un vol y est encore rattaché
+- [x] Espace `/admin` (`src/app/admin/`) — tableau de bord (compteurs spots/sites/écoles), navigation dédiée (desktop : colonne latérale ; mobile : onglets défilants), lien "Administration" affiché uniquement aux admins dans la navigation principale
+- [x] Gestion des spots `/admin/spots` — liste, recherche, création, modification, suppression (`src/features/spots/`), suppression bloquée si des sites ou séances de gonflage y sont encore rattachés
+- [x] Gestion des sites `/admin/sites` — liste filtrable (recherche, spot, type), création, modification, suppression (`src/features/sites/`), type sélectionné depuis le référentiel `SiteType` (pas de texte libre), suppression bloquée si un vol y est encore rattaché
 - [x] Gestion des écoles `/admin/schools` — liste, recherche, création, modification, suppression (`src/features/schools/`), suppression bloquée si des stages y sont encore rattachés
-- [x] Référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) non gérables depuis l'interface admin — restent seedés/migrés, volontairement hors périmètre de cette première version
+- [x] Référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SiteType`) non gérables depuis l'interface admin — restent seedés/migrés, volontairement hors périmètre de cette première version
 
 ---
 
@@ -106,10 +106,10 @@ Volontairement hors périmètre de la première version de `/admin` (docs/admin.
 - [ ] Gestion des utilisateurs par un admin (liste, changement de rôle depuis l'interface)
 - [ ] Désactivation d'un compte
 - [ ] Suppression d'un compte
-- [ ] Permissions plus fines que `USER`/`ADMIN` (ex. `canManageSites()`, `canManageSchools()`) — à introduire seulement si un vrai besoin apparaît
+- [ ] Permissions plus fines que `USER`/`ADMIN` (ex. `canManageSpots()`, `canManageSchools()`) — à introduire seulement si un vrai besoin apparaît
 - [ ] Archivage plutôt que suppression pour les référentiels encore référencés
 - [ ] Journal d'audit des modifications administratives
-- [ ] CRUD admin sur les référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SitePointType`) — restent gérés par les seeds/migrations pour l'instant
+- [ ] CRUD admin sur les référentiels techniques (`ActivityType`, `FlightType`, `TrainingCampType`, `SiteType`) — restent gérés par les seeds/migrations pour l'instant
 
 ### Interface & qualité (reste à faire)
 
@@ -124,8 +124,8 @@ Volontairement hors périmètre de la première version de `/admin` (docs/admin.
 Informations obligatoires (validées côté Zod) :
 
 - [x] Date
-- [x] Point de départ (site + altitude dérivés du `SitePoint` choisi)
-- [x] Point d'arrivée (site + altitude dérivés du `SitePoint` choisi, potentiellement un site différent)
+- [x] Point de départ (spot + altitude dérivés du `Site` choisi)
+- [x] Point d'arrivée (spot + altitude dérivés du `Site` choisi, potentiellement un spot différent)
 - [x] Durée
 - [x] Type de vol
 - [x] Observations
@@ -136,7 +136,7 @@ Fonctionnalités :
 - [x] Ajouter un vol — `/activities/new` (flux officiel, assistant en 3 étapes) et `/flights/new` (route de test historique, même formulaire partagé mais affiché en une seule étape), routes protégées (connexion requise)
 - [x] Modifier un vol — `/activities/[id]/edit`, service `updateFlight` (`src/features/flights/`), même règle métier "date dans l'intervalle du stage" qu'à la création, vérification de propriété systématique
 - [x] Supprimer un vol — bouton "Supprimer" + confirmation sur `/activities/[id]`, service générique `deleteActivity` (`src/features/activities/`, commun aux trois types d'activité)
-- [x] Modèle Site/SitePoint/SitePointType — un vol référence un point de départ et un point d'arrivée (`SitePoint`), plutôt qu'un site unique avec des altitudes dupliquées ; plus de règle comparant les altitudes de décollage/atterrissage (départ et arrivée peuvent appartenir à des sites différents, ex. cross)
+- [x] Modèle Spot/Site/SiteType — un vol référence un point de départ et un point d'arrivée (`Site`), plutôt qu'un spot unique avec des altitudes dupliquées ; plus de règle comparant les altitudes de décollage/atterrissage (départ et arrivée peuvent appartenir à des spots différents, ex. cross)
 - [x] Consulter l'historique des vols — `/activities` (liste) et `/activities/[id]` (détail)
 - [x] Associer un vol à un stage à la création — champ optionnel "Stage associé" dans `FlightForm` (limité aux stages de l'utilisateur courant, `listTrainingCamps`), règle métier "date du vol dans l'intervalle du stage" validée et testée dans `create-flight.service.ts`
 - [x] Heure du vol (en plus de la date) — permet d'ordonner plusieurs vols le même jour (`getActivityEventDate`), champ obligatoire combiné à la date en un seul `DateTime`, sans conversion de fuseau horaire
@@ -170,7 +170,7 @@ Fonctionnalités :
 Informations obligatoires (validées côté Zod) :
 
 - [x] Date
-- [x] Site
+- [x] Spot
 - [x] Durée (strictement positive)
 - [x] Exercices travaillés
 - [x] Difficultés rencontrées (optionnel)
@@ -212,13 +212,13 @@ Fonctionnalités :
 
 ### Sites de vol 🌍
 
-- [x] Modèle `Site`/`SitePoint`/`SitePointType` — un site peut avoir plusieurs points (décollage, atterrissage), chacun avec coordonnées GPS précises et altitude ; pas de "point principal" (ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`)
-- [x] `Site.countryCode`/`School` enrichi (adresse structurée, code pays ISO) — prépare `School`/`Site`/`SitePoint` à une future gestion applicative sans construire l'interface (ADR 004, `docs/decisions/004-editable-referentials.md`)
-- [x] `Flight.takeoffPointId`/`landingPointId` avec contrainte de type applicative + recherche de points par nom dans le formulaire de vol (ADR 005)
-- [x] Gestion des sites de vol — interface de création/modification d'un `Site` et de ses `SitePoint`, réservée aux administrateurs (`/admin/sites`, `/admin/site-points`, voir section Administration)
-- [x] Ajouter un site manuellement — `/admin/sites/new` (admin uniquement)
-- [ ] Ajouter progressivement les sites/points/écoles connus (saisie manuelle via `/admin`)
-- [ ] Prévoir une évolution vers des données externes (API), notamment le référentiel FFVL (sites, écoles) — étudier les données disponibles et une stratégie d'import avant toute implémentation
+- [x] Modèle `Spot`/`Site`/`SiteType` — un spot peut avoir plusieurs sites (décollage, atterrissage), chacun avec coordonnées GPS précises et altitude ; pas de "site principal" (ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md` ; renommage Site→Spot/SitePoint→Site voir ADR 007, `docs/decisions/007-site-spot-terminology-rename.md`)
+- [x] `Spot.countryCode`/`School` enrichi (adresse structurée, code pays ISO) — prépare `School`/`Spot`/`Site` à une future gestion applicative sans construire l'interface (ADR 004, `docs/decisions/004-editable-referentials.md`)
+- [x] `Flight.takeoffPointId`/`landingPointId` avec contrainte de type applicative + recherche de sites par nom dans le formulaire de vol (ADR 005)
+- [x] Gestion des sites de vol — interface de création/modification d'un `Spot` et de ses `Site`, réservée aux administrateurs (`/admin/spots`, `/admin/sites`, voir section Administration)
+- [x] Ajouter un spot manuellement — `/admin/spots/new` (admin uniquement)
+- [ ] Ajouter progressivement les spots/sites/écoles connus (saisie manuelle via `/admin`)
+- [ ] Prévoir une évolution vers des données externes (API), notamment le référentiel FFVL (spots, écoles) — étudier les données disponibles et une stratégie d'import avant toute implémentation
 
 Informations prévues :
 
@@ -232,11 +232,11 @@ Informations prévues :
 Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques).
 
 - [ ] Progression dans le temps
-- [ ] Statistiques par site
+- [ ] Statistiques par spot
 - [ ] Statistiques par type d'activité
 - [ ] Records personnels
 - [ ] Analyse des vols
-- [ ] Comparaison de vols sur un même site
+- [ ] Comparaison de vols sur un même spot
 
 ---
 
@@ -261,7 +261,7 @@ Ces fonctionnalités sont volontairement hors MVP.
 
 - [ ] Import de traces GPS / fichiers IGC — étudier le format des traces Garmin et l'import GPX en premier, avant tout format plus exotique
 - [ ] Import automatique depuis une application Garmin dédiée (étudier faisabilité/accès aux données en amont)
-- [ ] Carte des sites visités (incluant décollages/atterrissages, tracé des vols)
+- [ ] Carte des spots visités (incluant décollages/atterrissages, tracé des vols)
 - [ ] Météo associée aux vols
 - [ ] Gestion du matériel
 - [ ] Photos associées aux activités

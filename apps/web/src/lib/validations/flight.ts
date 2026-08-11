@@ -21,10 +21,10 @@ const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 // - observations et points d'amélioration obligatoires (suivi de progression) ;
 // - la date du vol ne peut pas être dans le futur.
 // Pas de règle comparant les altitudes de décollage/atterrissage : depuis
-// l'évolution Site/SitePoint, takeoffPoint et landingPoint peuvent
-// appartenir à des sites différents (ex. cross qui atterrit sur le
-// décollage d'un autre site, potentiellement plus haut) — la contrainte
-// "décollage > atterrissage" n'a plus de sens.
+// l'évolution Spot/Site (ADR 005 ; ADR 007 pour le renommage), takeoffPoint
+// et landingPoint peuvent appartenir à des spots différents (ex. cross qui
+// atterrit sur le décollage d'un autre spot, potentiellement plus haut) —
+// la contrainte "décollage > atterrissage" n'a plus de sens.
 // trainingCampId : optionnel, exposé dans FlightForm ("Stage associé") — la
 // règle "date du vol dans l'intervalle du stage" est validée dans
 // create-flight.service.ts, pas ici (nécessite de lire le TrainingCamp en

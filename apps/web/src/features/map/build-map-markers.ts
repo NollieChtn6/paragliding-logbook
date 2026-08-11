@@ -13,23 +13,23 @@ export type MapMarker = {
   editHref: string;
   details: MapMarkerDetail[];
   relatedLinks: MapMarkerLink[];
-  // Autres points du même site (voir admin-map.tsx) : sélectionner un
-  // point sibling doit rouvrir le volet sur ce marqueur et recentrer la
+  // Autres sites du même spot (voir admin-map.tsx) : sélectionner un
+  // site sibling doit rouvrir le volet sur ce marqueur et recentrer la
   // carte dessus, pas naviguer vers une autre page — d'où une liste de
   // marqueurs sélectionnables plutôt qu'un simple lien href.
-  siblingPoints: MapMarkerSibling[];
+  siblingSites: MapMarkerSibling[];
 };
 
-type SitePointInput = {
+type SiteInput = {
   id: string;
   label: string;
   latitude: number;
   longitude: number;
   altitudeM: number;
   orientationDeg: number | null;
-  siteId: string;
-  site: { name: string };
-  sitePointType: { code: string };
+  spotId: string;
+  spot: { name: string };
+  siteType: { code: string };
 };
 
 type SchoolInput = {
@@ -40,46 +40,46 @@ type SchoolInput = {
   longitude: number | null;
 };
 
-function sitePointKind(point: { sitePointType: { code: string } }): MapMarkerKind {
-  return point.sitePointType.code === "TAKEOFF" ? "TAKEOFF" : "LANDING";
+function siteKind(site: { siteType: { code: string } }): MapMarkerKind {
+  return site.siteType.code === "TAKEOFF" ? "TAKEOFF" : "LANDING";
 }
 
-// Pas de marqueur "Site" séparé : Site.latitude/longitude ne sont pas
-// renseignés en pratique (voir prisma/seed.ts, SiteSeed n'a pas ce champ) —
-// seuls les SitePoint ont des coordonnées fiables (champ obligatoire en
-// base). L'école n'apparaît que si latitude/longitude sont renseignées
-// (issues d'une sélection BAN, voir features/schools/address-combobox.tsx) :
-// une école créée avant cette fonctionnalité n'a pas de coordonnées.
+// Pas de marqueur "Spot" séparé : Spot.latitude/longitude ne sont pas
+// renseignés en pratique (voir prisma/seed.ts, SpotSeed n'a pas ce champ) —
+// seuls les Site ont des coordonnées fiables (champ obligatoire en base).
+// L'école n'apparaît que si latitude/longitude sont renseignées (issues
+// d'une sélection BAN, voir features/schools/address-combobox.tsx) : une
+// école créée avant cette fonctionnalité n'a pas de coordonnées.
 //
-// relatedLinks reste volontairement limité au référentiel admin (site ↔ ses
-// points) : pas de lien vers les stages effectués dans une école, qui
+// relatedLinks reste volontairement limité au référentiel admin (spot ↔ ses
+// sites) : pas de lien vers les stages effectués dans une école, qui
 // appartiennent à un utilisateur précis (TrainingCamp.userId via Activity)
 // — le compte ADMIN n'est propriétaire d'aucun stage, et /activities/[id]
 // refuse déjà l'accès à qui n'en est pas propriétaire (décision explicite,
 // pas juste un oubli).
-export function buildMapMarkers(sitePoints: SitePointInput[], schools: SchoolInput[]): MapMarker[] {
-  const pointMarkers: MapMarker[] = sitePoints.map((point) => ({
-    id: `site-point-${point.id}`,
-    kind: sitePointKind(point),
-    label: point.label,
-    latitude: point.latitude,
-    longitude: point.longitude,
-    editHref: `/admin/site-points/${point.id}/edit`,
+export function buildMapMarkers(sites: SiteInput[], schools: SchoolInput[]): MapMarker[] {
+  const siteMarkers: MapMarker[] = sites.map((site) => ({
+    id: `site-${site.id}`,
+    kind: siteKind(site),
+    label: site.label,
+    latitude: site.latitude,
+    longitude: site.longitude,
+    editHref: `/admin/sites/${site.id}/edit`,
     details: [
-      { label: "Site", value: point.site.name },
-      { label: "Altitude", value: `${point.altitudeM} m` },
+      { label: "Spot", value: site.spot.name },
+      { label: "Altitude", value: `${site.altitudeM} m` },
       {
         label: "Orientation",
-        value: point.orientationDeg !== null ? `${point.orientationDeg}°` : "—",
+        value: site.orientationDeg !== null ? `${site.orientationDeg}°` : "—",
       },
     ],
-    relatedLinks: [{ label: "Modifier le site", href: `/admin/sites/${point.siteId}/edit` }],
-    siblingPoints: sitePoints
-      .filter((other) => other.siteId === point.siteId && other.id !== point.id)
+    relatedLinks: [{ label: "Modifier le spot", href: `/admin/spots/${site.spotId}/edit` }],
+    siblingSites: sites
+      .filter((other) => other.spotId === site.spotId && other.id !== site.id)
       .map((other) => ({
-        id: `site-point-${other.id}`,
+        id: `site-${other.id}`,
         label: other.label,
-        kind: sitePointKind(other),
+        kind: siteKind(other),
       })),
   }));
 
@@ -97,8 +97,8 @@ export function buildMapMarkers(sitePoints: SitePointInput[], schools: SchoolInp
       editHref: `/admin/schools/${school.id}/edit`,
       details: school.city ? [{ label: "Ville", value: school.city }] : [],
       relatedLinks: [],
-      siblingPoints: [],
+      siblingSites: [],
     }));
 
-  return [...pointMarkers, ...schoolMarkers];
+  return [...siteMarkers, ...schoolMarkers];
 }

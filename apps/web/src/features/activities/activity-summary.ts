@@ -2,7 +2,7 @@ import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 import type { ActivityWithDetails } from "./queries";
 
 // 3 lignes distinctes (ActivityCard, components/activity-card.tsx) plutôt
-// qu'un sous-titre combiné : spécialité, lieu (école pour un stage, site
+// qu'un sous-titre combiné : spécialité, lieu (école pour un stage, spot
 // pour un vol/gonflage), puis dates — la durée n'y figure plus, réservée au
 // détail de l'activité (/activities/[id]).
 export type ActivitySummary = {
@@ -23,17 +23,17 @@ function formatTime(date: Date): string {
   return date.toISOString().slice(11, 16);
 }
 
-// takeoffPoint et landingPoint peuvent appartenir à des sites différents
-// (ex. cross) : n'affiche qu'un seul nom quand c'est le même site, "A → B"
+// takeoffPoint et landingPoint peuvent appartenir à des spots différents
+// (ex. cross) : n'affiche qu'un seul nom quand c'est le même spot, "A → B"
 // sinon. Exportée : réutilisée telle quelle par /activities/[id] pour la
 // liste condensée "Vols associés" d'un stage.
 export function formatFlightLocation(flight: {
-  takeoffPoint: { site: { name: string } };
-  landingPoint: { site: { name: string } };
+  takeoffPoint: { spot: { name: string } };
+  landingPoint: { spot: { name: string } };
 }): string {
-  const takeoffSite = flight.takeoffPoint.site.name;
-  const landingSite = flight.landingPoint.site.name;
-  return takeoffSite === landingSite ? takeoffSite : `${takeoffSite} → ${landingSite}`;
+  const takeoffSpot = flight.takeoffPoint.spot.name;
+  const landingSpot = flight.landingPoint.spot.name;
+  return takeoffSpot === landingSpot ? takeoffSpot : `${takeoffSpot} → ${landingSpot}`;
 }
 
 // Résumé condensé affiché dans la liste /activities (le détail complet est
@@ -62,7 +62,7 @@ export function getActivitySummary(activity: ActivityWithDetails): ActivitySumma
     const { groundHandlingSession } = activity;
     return {
       title: "Gonflage",
-      location: groundHandlingSession.site.name,
+      location: groundHandlingSession.spot.name,
       dateInfo: `${formatDate(groundHandlingSession.date)} à ${formatTime(groundHandlingSession.date)}`,
     };
   }

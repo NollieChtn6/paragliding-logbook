@@ -4,14 +4,14 @@ import { listActivities } from "./list-activities.service";
 
 let userId: string;
 let otherUserId: string;
-let siteId: string;
+let spotId: string;
 let pointId: string;
 const activityIds: string[] = [];
 
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, activityType, takeoffType, flightType] = await Promise.all([
+  const [user, otherUser, spot, activityType, takeoffType, flightType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `list-activities-${suffix}@paragliding-logbook.local`,
@@ -24,20 +24,20 @@ beforeAll(async () => {
         name: "Other User",
       },
     }),
-    prisma.site.create({ data: { name: `List Activities Test Site ${suffix}` } }),
+    prisma.spot.create({ data: { name: `List Activities Test Spot ${suffix}` } }),
     prisma.activityType.findUniqueOrThrow({ where: { code: "FLIGHT" } }),
-    prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+    prisma.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
     prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
   ]);
   userId = user.id;
   otherUserId = otherUser.id;
-  siteId = site.id;
+  spotId = spot.id;
 
-  const point = await prisma.sitePoint.create({
+  const point = await prisma.site.create({
     data: {
       label: "Point de test",
-      siteId,
-      sitePointTypeId: takeoffType.id,
+      spotId,
+      siteTypeId: takeoffType.id,
       latitude: 45.9,
       longitude: 6.9,
       altitudeM: 1200,
@@ -101,8 +101,8 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.flight.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.activity.deleteMany({ where: { id: { in: activityIds } } });
-  await prisma.sitePoint.deleteMany({ where: { siteId } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.site.deleteMany({ where: { spotId } });
+  await prisma.spot.delete({ where: { id: spotId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
 });
@@ -117,12 +117,12 @@ describe("listActivities (integration)", () => {
     expect(activities.some((activity) => activity.userId === otherUserId)).toBe(false);
   });
 
-  it("includes the activityType and the Flight specialization with its takeoff Site", async () => {
+  it("includes the activityType and the Flight specialization with its takeoff Spot", async () => {
     const activities = await listActivities(userId);
 
     for (const activity of activities) {
       expect(activity.activityType.code).toBe("FLIGHT");
-      expect(activity.flight?.takeoffPoint.site.id).toBe(siteId);
+      expect(activity.flight?.takeoffPoint.spot.id).toBe(spotId);
     }
   });
 });
