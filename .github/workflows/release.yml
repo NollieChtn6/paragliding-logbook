@@ -14,8 +14,14 @@ jobs:
     outputs:
       # En mode manifest (packages: {...} dans .release-please-config.json,
       # même avec un seul package), les outputs sont préfixés par le chemin
-      # du package — pas de sortie "release_created" à plat.
+      # du package — pas de sortie "release_created"/"prs_created"/"pr" à
+      # plat. Fallback sur la version non préfixée par prudence (le nom
+      # exact des sorties path-prefixées n'est pas garanti pour prs_created/
+      # pr par la doc de l'action, seulement documenté pour
+      # release_created/tag_name/version).
       release_created: ${{ steps.release.outputs['apps/web--release_created'] }}
+      prs_created: ${{ steps.release.outputs['apps/web--prs_created'] || steps.release.outputs.prs_created }}
+      pr: ${{ steps.release.outputs['apps/web--pr'] || steps.release.outputs.pr }}
     steps:
       # token: RELEASE_PLEASE_TOKEN (PAT), pas le GITHUB_TOKEN par défaut —
       # un push/une PR créés avec GITHUB_TOKEN ne déclenchent aucun autre
@@ -30,6 +36,33 @@ jobs:
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+  # Merge automatique de la Release PR elle-même (demande explicite : "notre
+  # process doit permettre des releases automatiques lorsque l'on déploie un
+  # truc sur main"). Sans ce job, release-please ouvre/actualise la PR à
+  # chaque push sur main mais ne la merge jamais — quelqu'un devait le faire
+  # à la main à chaque fois (voir #89). token PAT (comme le job
+  # release-please) : nécessaire pour que "Quality checks" (obligatoire pour
+  # merger, voir ci.yml) tourne sur cette PR. --auto attend que Quality
+  # checks passe avant de merger réellement (nécessite "Allow auto-merge"
+  # activé sur le repo, Settings > General — déjà utilisé par sync-develop
+  # ci-dessous).
+  auto-merge-release-pr:
+    needs: release-please
+    if: needs.release-please.outputs.prs_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge for the release PR
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          PR_JSON: ${{ needs.release-please.outputs.pr }}
+        run: |
+          pr_number=$(echo "$PR_JSON" | jq -r '.number // empty')
+          if [ -z "$pr_number" ]; then
+            echo "No PR number found in release-please output (PR_JSON='$PR_JSON'), skipping auto-merge."
+            exit 0
+          fi
+          gh pr merge "$pr_number" --merge --auto
 
   # Après le merge de la Release PR sur main (donc uniquement quand une
   # release vient réellement d'être publiée), main avance de package.json/
