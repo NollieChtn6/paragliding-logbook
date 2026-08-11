@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.6.0...paragliding-logbook-v1.7.0) (2026-08-11)
+
+
+### Features
+
+* **admin:** ship the Site/Spot terminology rename to users ([e671f32](https://github.com/NollieChtn6/paragliding-logbook/commit/e671f32887ae579923135c2df9851da8137142bf))
+* **admin:** ship the Site/Spot terminology rename to users ([1c7130c](https://github.com/NollieChtn6/paragliding-logbook/commit/1c7130cfd31f22883aa065a5c226a002b7a395ae))
+
 ## [1.6.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.5.0...paragliding-logbook-v1.6.0) (2026-08-10)
 
 
