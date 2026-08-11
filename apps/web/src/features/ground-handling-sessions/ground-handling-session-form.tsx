@@ -18,7 +18,7 @@ import { toast } from "@/components/ui/toast";
 import { getFieldErrors } from "@/lib/form-validation";
 import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 import { cn } from "@/lib/utils";
-import { SiteCombobox, type SiteOption } from "./site-combobox";
+import { SpotCombobox, type SpotOption } from "./spot-combobox";
 
 type TrainingCampOption = {
   id: string;
@@ -48,10 +48,10 @@ type GroundHandlingSessionFormProps = {
     formData: FormData,
   ) => Promise<GroundHandlingSessionFormActionState>;
   defaultValues?: GroundHandlingSessionFormDefaultValues;
-  // Site déjà sélectionné en mode édition, distinct de defaultValues (comme
-  // defaultTakeoffPoint/defaultLandingPoint sur FlightForm) : SiteCombobox
-  // ne reçoit jamais la liste complète des sites, seulement celui-ci.
-  defaultSite?: SiteOption;
+  // Spot déjà sélectionné en mode édition, distinct de defaultValues (comme
+  // defaultTakeoffPoint/defaultLandingPoint sur FlightForm) : SpotCombobox
+  // ne reçoit jamais la liste complète des spots, seulement celui-ci.
+  defaultSpot?: SpotOption;
   submitLabel?: string;
   // Mode assistant en 3 étapes : voir flight-form.tsx pour le détail.
   wizardStep?: 2 | 3;
@@ -59,7 +59,7 @@ type GroundHandlingSessionFormProps = {
   onWizardNext?: () => void;
 };
 
-const WIZARD_STEP_2_REQUIRED_FIELDS = ["date", "time", "siteId", "durationMin"];
+const WIZARD_STEP_2_REQUIRED_FIELDS = ["date", "time", "spotId", "durationMin"];
 const WIZARD_STEP_3_REQUIRED_FIELDS = ["exercises"];
 
 function formatDate(date: Date): string {
@@ -91,7 +91,7 @@ export function GroundHandlingSessionForm({
   trainingCamps = [],
   action,
   defaultValues,
-  defaultSite,
+  defaultSpot,
   submitLabel = "Créer la séance",
   wizardStep,
   onWizardBack,
@@ -192,7 +192,7 @@ export function GroundHandlingSessionForm({
           </div>
         </div>
 
-        <SiteCombobox name="siteId" defaultSite={defaultSite} error={fieldErrors.siteId} />
+        <SpotCombobox name="spotId" defaultSpot={defaultSpot} error={fieldErrors.spotId} />
 
         {trainingCamps.length > 0 && (
           <div className="flex flex-col gap-2">

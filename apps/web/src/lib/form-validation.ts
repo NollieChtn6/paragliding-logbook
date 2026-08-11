@@ -4,7 +4,7 @@
 // générique — le toast reste réservé aux erreurs de soumission et au
 // succès. Vérifie `value` directement plutôt que de s'appuyer uniquement
 // sur `validity.valid`/`reportValidity()` : le champ réellement lié à
-// `name` pour SitePointCombobox (voir site-point-combobox.tsx) n'est pas
+// `name` pour SiteCombobox (voir site-combobox.tsx) n'est pas
 // forcément celui qui porte l'attribut `required` en interne.
 const REQUIRED_FIELD_ERROR = "Ce champ est obligatoire.";
 const INVALID_FIELD_ERROR = "Cette valeur n'est pas valide.";

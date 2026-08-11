@@ -59,7 +59,7 @@ export async function createGroundHandlingSession(userId: string, rawInput: unkn
     return tx.groundHandlingSession.create({
       data: {
         activityId: activity.id,
-        siteId: input.siteId,
+        spotId: input.spotId,
         trainingCampId: input.trainingCampId,
         date: input.date,
         durationMin: input.durationMin,

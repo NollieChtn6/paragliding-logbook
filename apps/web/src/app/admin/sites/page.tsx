@@ -1,11 +1,10 @@
-import { Pencil, Plus } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { deleteSiteAction } from "@/actions/delete-site";
 import { AdminDeleteButton } from "@/components/admin/admin-delete-button";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -15,18 +14,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listSites } from "@/features/sites";
+import { SitesFilters } from "@/features/sites/sites-filters";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-function formatLocation(site: { region: string | null; countryCode: string | null }): string {
-  if (site.region && site.countryCode) return `${site.region} · ${site.countryCode}`;
-  return site.region ?? site.countryCode ?? "—";
+function firstParam(value: string | string[] | undefined): string | undefined {
+  return typeof value === "string" && value !== "" ? value : undefined;
 }
 
 export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
   const searchParams = await props.searchParams;
-  const query = typeof searchParams.q === "string" ? searchParams.q : undefined;
-  const sites = await listSites(query);
+  const query = firstParam(searchParams.q);
+  const spotId = firstParam(searchParams.spotId);
+  const typeCodeParam = firstParam(searchParams.typeCode);
+  const typeCode =
+    typeCodeParam === "TAKEOFF" || typeCodeParam === "LANDING" ? typeCodeParam : undefined;
+
+  const [sites, spots] = await Promise.all([
+    listSites({ query, spotId, typeCode }),
+    prisma.spot.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
+
+  const hasFilters = Boolean(query || spotId || typeCode);
 
   return (
     <div className="flex flex-col gap-6">
@@ -45,18 +55,15 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
         }
       />
 
-      <form className="flex gap-2">
-        <Input name="q" defaultValue={query} placeholder="Rechercher un site..." />
-        <Button type="submit" variant="outline">
-          Rechercher
-        </Button>
-      </form>
+      <SitesFilters spots={spots} query={query} spotId={spotId} typeCode={typeCode} />
 
       {sites.length === 0 ? (
         <EmptyState
-          title={query ? "Aucun site ne correspond à cette recherche" : "Aucun site enregistré"}
+          title={hasFilters ? "Aucun site ne correspond à ces filtres" : "Aucun site enregistré"}
           description={
-            query ? "Essayez un autre terme de recherche." : "Créez le premier site de référence."
+            hasFilters
+              ? "Essayez d'autres critères de recherche."
+              : "Créez le premier site de décollage ou d'atterrissage."
           }
           action={
             <Button
@@ -72,46 +79,53 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
             <TableHeader>
               <TableRow>
                 <TableHead>Nom</TableHead>
-                <TableHead>Région / Pays</TableHead>
-                <TableHead>Points</TableHead>
+                <TableHead>Spot</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Altitude</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sites.map((site) => (
-                <TableRow key={site.id}>
-                  <TableCell>
-                    <Link
-                      href={`/admin/sites/${site.id}/edit`}
-                      className="font-medium text-foreground hover:underline"
-                    >
-                      {site.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{formatLocation(site)}</TableCell>
-                  <TableCell className="text-muted-foreground">{site._count.points}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        nativeButton={false}
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Modifier ${site.name}`}
-                        title={`Modifier ${site.name}`}
-                        render={
-                          <Link href={`/admin/sites/${site.id}/edit`}>
-                            <Pencil className="size-4" aria-hidden />
-                          </Link>
-                        }
-                      />
-                      <AdminDeleteButton
-                        action={deleteSiteAction.bind(null, site.id)}
-                        entityLabel={`le site « ${site.name} »`}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {sites.map((site) => {
+                const isTakeoff = site.siteType.code === "TAKEOFF";
+                const Icon = isTakeoff ? ArrowUpRight : ArrowDownLeft;
+                return (
+                  <TableRow key={site.id}>
+                    <TableCell>
+                      <Link
+                        href={`/admin/sites/${site.id}/edit`}
+                        className="font-medium text-foreground hover:underline"
+                      >
+                        {site.label}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{site.spot.name}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`inline-flex items-center gap-1 ${isTakeoff ? "text-primary" : "text-accent"}`}
+                      >
+                        <Icon className="size-4" aria-hidden />
+                        {isTakeoff ? "Décollage" : "Atterrissage"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{site.altitudeM} m</TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          nativeButton={false}
+                          variant="ghost"
+                          size="sm"
+                          render={<Link href={`/admin/sites/${site.id}/edit`}>Modifier</Link>}
+                        />
+                        <AdminDeleteButton
+                          action={deleteSiteAction.bind(null, site.id)}
+                          entityLabel={`le site « ${site.label} »`}
+                        />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

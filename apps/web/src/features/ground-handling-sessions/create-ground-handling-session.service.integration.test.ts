@@ -6,7 +6,7 @@ import { createGroundHandlingSession } from "./create-ground-handling-session.se
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
 let otherUserId: string;
-let siteId: string;
+let spotId: string;
 let schoolId: string;
 let trainingCampTypeId: string;
 let trainingCampId: string;
@@ -39,10 +39,10 @@ beforeAll(async () => {
   userId = user.id;
   otherUserId = otherUser.id;
 
-  const site = await prisma.site.create({
-    data: { name: `Integration Test Site ${suffix}` },
+  const spot = await prisma.spot.create({
+    data: { name: `Integration Test Spot ${suffix}` },
   });
-  siteId = site.id;
+  spotId = spot.id;
 
   const [school, trainingCampType] = await Promise.all([
     prisma.school.create({
@@ -78,7 +78,7 @@ afterAll(async () => {
     where: { activity: { userId: { in: [userId, otherUserId] } } },
   });
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.spot.delete({ where: { id: spotId } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -92,7 +92,7 @@ describe("createGroundHandlingSession (integration)", () => {
     beforeAll(async () => {
       const groundHandlingSession = await createGroundHandlingSession(userId, {
         ...validGroundHandlingInput,
-        siteId,
+        spotId,
       });
       groundHandlingSessionId = groundHandlingSession.id;
       activityId = groundHandlingSession.activityId;
@@ -111,7 +111,7 @@ describe("createGroundHandlingSession (integration)", () => {
       const groundHandlingSession = await prisma.groundHandlingSession.findUniqueOrThrow({
         where: { id: groundHandlingSessionId },
       });
-      expect(groundHandlingSession.siteId).toBe(siteId);
+      expect(groundHandlingSession.spotId).toBe(spotId);
       expect(groundHandlingSession.durationMin).toBe(30);
       expect(groundHandlingSession.exercises).toBe("Contrôle au sol, gestion des surventes.");
     });
@@ -129,7 +129,7 @@ describe("createGroundHandlingSession (integration)", () => {
     await expect(
       createGroundHandlingSession(userId, {
         ...validGroundHandlingInput,
-        siteId,
+        spotId,
         durationMin: "-10",
       }),
     ).rejects.toThrow();
@@ -141,7 +141,7 @@ describe("createGroundHandlingSession (integration)", () => {
     it("succeeds when the session date is within the training camp's interval", async () => {
       const groundHandlingSession = await createGroundHandlingSession(userId, {
         ...validGroundHandlingInput,
-        siteId,
+        spotId,
         trainingCampId,
         date: "2025-01-12",
       });
@@ -153,7 +153,7 @@ describe("createGroundHandlingSession (integration)", () => {
     it("succeeds for a late-evening session on the training camp's exact end date", async () => {
       const groundHandlingSession = await createGroundHandlingSession(userId, {
         ...validGroundHandlingInput,
-        siteId,
+        spotId,
         trainingCampId,
         date: "2025-01-20",
         time: "22:30",
@@ -165,7 +165,7 @@ describe("createGroundHandlingSession (integration)", () => {
       await expect(
         createGroundHandlingSession(userId, {
           ...validGroundHandlingInput,
-          siteId,
+          spotId,
           trainingCampId,
           date: "2025-01-05",
         }),
@@ -176,7 +176,7 @@ describe("createGroundHandlingSession (integration)", () => {
       await expect(
         createGroundHandlingSession(userId, {
           ...validGroundHandlingInput,
-          siteId,
+          spotId,
           trainingCampId,
           date: "2025-01-25",
         }),
@@ -187,7 +187,7 @@ describe("createGroundHandlingSession (integration)", () => {
       await expect(
         createGroundHandlingSession(userId, {
           ...validGroundHandlingInput,
-          siteId,
+          spotId,
           trainingCampId: otherUserTrainingCampId,
           date: "2025-01-12",
         }),

@@ -2,8 +2,8 @@ import type { Prisma } from "@prisma/client";
 
 // Réutilisé pour takeoffPoint/landingPoint, à deux niveaux (Flight direct
 // et TrainingCamp.flights) : évite de dupliquer le même include.
-const SITE_POINT_INCLUDE = { include: { site: true, sitePointType: true } } satisfies {
-  include: Prisma.SitePointInclude;
+const SITE_INCLUDE = { include: { spot: true, siteType: true } } satisfies {
+  include: Prisma.SiteInclude;
 };
 
 // Inclusion partagée entre listActivities et getActivityById : Activity n'a
@@ -13,8 +13,8 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
   activityType: true,
   flight: {
     include: {
-      takeoffPoint: SITE_POINT_INCLUDE,
-      landingPoint: SITE_POINT_INCLUDE,
+      takeoffPoint: SITE_INCLUDE,
+      landingPoint: SITE_INCLUDE,
       flightType: true,
       // school en plus de trainingCampType : un utilisateur peut avoir
       // plusieurs stages du même type (ex. plusieurs "Perfectionnement") —
@@ -28,14 +28,14 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
       school: true,
       trainingCampType: true,
       flights: {
-        include: { takeoffPoint: SITE_POINT_INCLUDE, landingPoint: SITE_POINT_INCLUDE },
+        include: { takeoffPoint: SITE_INCLUDE, landingPoint: SITE_INCLUDE },
         orderBy: { date: "asc" },
       },
-      groundHandlingSessions: { include: { site: true }, orderBy: { date: "asc" } },
+      groundHandlingSessions: { include: { spot: true }, orderBy: { date: "asc" } },
     },
   },
   groundHandlingSession: {
-    include: { site: true, trainingCamp: { include: { trainingCampType: true, school: true } } },
+    include: { spot: true, trainingCamp: { include: { trainingCampType: true, school: true } } },
   },
 } satisfies Prisma.ActivityInclude;
 

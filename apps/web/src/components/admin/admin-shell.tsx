@@ -29,7 +29,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     // Même correctif que AppShell (components/layout/app-shell.tsx) : sans
     // le cap md:h-svh/overflow-hidden, la sidebar défilait avec le contenu
-    // dès qu'une page (ex. liste des points de site) dépassait la hauteur
+    // dès qu'une page (ex. liste des sites) dépassait la hauteur
     // d'écran.
     <div className="flex min-h-svh md:h-svh md:overflow-hidden">
       <aside className="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 md:flex">

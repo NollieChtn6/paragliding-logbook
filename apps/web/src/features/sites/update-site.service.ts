@@ -1,19 +1,45 @@
+import { ZodError, type ZodIssue } from "zod";
 import { prisma } from "@/lib/prisma";
 import { siteSchema } from "@/lib/validations/site";
 
 export async function updateSite(siteId: string, rawInput: unknown) {
   const input = siteSchema.parse(rawInput);
-  return prisma.site.update({
-    where: { id: siteId },
-    // ?? null : un update Prisma ignore les champs undefined au lieu de les
-    // effacer, contrairement à create — nécessaire pour permettre de vider
-    // un champ optionnel (même principe qu'update-training-camp.service.ts).
-    data: {
-      name: input.name,
-      region: input.region ?? null,
-      countryCode: input.countryCode ?? null,
-      latitude: input.latitude ?? null,
-      longitude: input.longitude ?? null,
-    },
+
+  return prisma.$transaction(async (tx) => {
+    const [spot, siteType] = await Promise.all([
+      tx.spot.findUnique({ where: { id: input.spotId } }),
+      tx.siteType.findUnique({ where: { id: input.siteTypeId } }),
+    ]);
+    if (!spot) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["spotId"],
+        message: "Ce spot n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+    if (!siteType) {
+      const issue: ZodIssue = {
+        code: "custom",
+        path: ["siteTypeId"],
+        message: "Ce type de site n'existe pas.",
+      };
+      throw new ZodError([issue]);
+    }
+
+    return tx.site.update({
+      where: { id: siteId },
+      // orientationDeg ?? null : un update Prisma ignore les champs
+      // undefined au lieu de les effacer (même principe qu'update-spot.service.ts).
+      data: {
+        label: input.label,
+        spotId: input.spotId,
+        siteTypeId: input.siteTypeId,
+        latitude: input.latitude,
+        longitude: input.longitude,
+        altitudeM: input.altitudeM,
+        orientationDeg: input.orientationDeg ?? null,
+      },
+    });
   });
 }

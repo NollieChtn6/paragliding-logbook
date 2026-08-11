@@ -1,21 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
 
-// Relations directes de Site (schema.prisma) : points et
-// groundHandlingSessions. Bloquer la suppression si l'une des deux est non
-// vide protège transitivement les Flight (référencés via SitePoint, jamais
-// directement via Site) sans que ce service ait besoin de connaître Flight
-// — docs/admin.md > Suppression : jamais de cascade silencieuse.
+// Relations directes de Site (schema.prisma) : flightsAsTakeoff et
+// flightsAsLanding. Bloquer si l'une des deux est non vide (docs/admin.md >
+// Suppression, "supprimer un Site ne doit pas supprimer des Flight").
 export async function deleteSite(siteId: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    const [pointCount, sessionCount] = await Promise.all([
-      tx.sitePoint.count({ where: { siteId } }),
-      tx.groundHandlingSession.count({ where: { siteId } }),
+    const [takeoffCount, landingCount] = await Promise.all([
+      tx.flight.count({ where: { takeoffPointId: siteId } }),
+      tx.flight.count({ where: { landingPointId: siteId } }),
     ]);
 
-    if (pointCount > 0 || sessionCount > 0) {
+    if (takeoffCount > 0 || landingCount > 0) {
       throw new ReferenceDataInUseError(
-        "Ce site a encore des points ou des séances de gonflage associés : supprimez-les d'abord.",
+        "Ce site est encore utilisé par au moins un vol : il ne peut pas être supprimé.",
       );
     }
 

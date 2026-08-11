@@ -10,9 +10,9 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const [siteCount, pointCount, schoolCount] = await Promise.all([
+  const [spotCount, siteCount, schoolCount] = await Promise.all([
+    prisma.spot.count(),
     prisma.site.count(),
-    prisma.sitePoint.count(),
     prisma.school.count(),
   ]);
 
@@ -24,8 +24,8 @@ export default async function AdminDashboardPage() {
       />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard icon={MapPin} label="Sites" value={siteCount} />
-        <StatCard icon={Waypoints} label="Points de site" value={pointCount} />
+        <StatCard icon={MapPin} label="Spots" value={spotCount} />
+        <StatCard icon={Waypoints} label="Sites" value={siteCount} />
         <StatCard icon={School} label="Écoles" value={schoolCount} tone="accent" />
       </div>
 
@@ -33,20 +33,20 @@ export default async function AdminDashboardPage() {
         <h2 className="text-lg font-medium tracking-tight text-foreground">Gestion</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Link
-            href="/admin/sites"
+            href="/admin/spots"
             className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
           >
-            <p className="font-medium text-foreground">Sites</p>
+            <p className="font-medium text-foreground">Spots</p>
             <p className="text-sm text-muted-foreground">
               Lieux de pratique, décollages et atterrissages.
             </p>
           </Link>
           <Link
-            href="/admin/site-points"
+            href="/admin/sites"
             className="rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
           >
-            <p className="font-medium text-foreground">Points de site</p>
-            <p className="text-sm text-muted-foreground">Points de décollage et d'atterrissage.</p>
+            <p className="font-medium text-foreground">Sites</p>
+            <p className="text-sm text-muted-foreground">Sites de décollage et d'atterrissage.</p>
           </Link>
           <Link
             href="/admin/schools"

@@ -9,7 +9,7 @@ import { deleteActivity } from "./delete-activity.service";
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
 let otherUserId: string;
-let siteId: string;
+let spotId: string;
 let takeoffPointId: string;
 let landingPointId: string;
 let flightTypeId: string;
@@ -20,7 +20,7 @@ const activityIds: string[] = [];
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, site, school, takeoffType, landingType, flightType, trainingCampType] =
+  const [user, otherUser, spot, school, takeoffType, landingType, flightType, trainingCampType] =
     await Promise.all([
       prisma.user.create({
         data: {
@@ -34,36 +34,36 @@ beforeAll(async () => {
           name: "Other User",
         },
       }),
-      prisma.site.create({ data: { name: `Delete Activity Test Site ${suffix}` } }),
+      prisma.spot.create({ data: { name: `Delete Activity Test Spot ${suffix}` } }),
       prisma.school.create({ data: { name: `Delete Activity Test School ${suffix}` } }),
-      prisma.sitePointType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
-      prisma.sitePointType.findUniqueOrThrow({ where: { code: "LANDING" } }),
+      prisma.siteType.findUniqueOrThrow({ where: { code: "TAKEOFF" } }),
+      prisma.siteType.findUniqueOrThrow({ where: { code: "LANDING" } }),
       prisma.flightType.findUniqueOrThrow({ where: { code: "LOCAL" } }),
       prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
     ]);
   userId = user.id;
   otherUserId = otherUser.id;
-  siteId = site.id;
+  spotId = spot.id;
   schoolId = school.id;
   flightTypeId = flightType.id;
   trainingCampTypeId = trainingCampType.id;
 
   const [takeoffPoint, landingPoint] = await Promise.all([
-    prisma.sitePoint.create({
+    prisma.site.create({
       data: {
         label: "Takeoff",
-        siteId,
-        sitePointTypeId: takeoffType.id,
+        spotId,
+        siteTypeId: takeoffType.id,
         latitude: 45.9,
         longitude: 6.9,
         altitudeM: 1200,
       },
     }),
-    prisma.sitePoint.create({
+    prisma.site.create({
       data: {
         label: "Landing",
-        siteId,
-        sitePointTypeId: landingType.id,
+        spotId,
+        siteTypeId: landingType.id,
         latitude: 45.8,
         longitude: 6.8,
         altitudeM: 450,
@@ -79,8 +79,8 @@ afterAll(async () => {
   await prisma.groundHandlingSession.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.trainingCamp.deleteMany({ where: { activityId: { in: activityIds } } });
   await prisma.activity.deleteMany({ where: { id: { in: activityIds } } });
-  await prisma.sitePoint.deleteMany({ where: { siteId } });
-  await prisma.site.delete({ where: { id: siteId } });
+  await prisma.site.deleteMany({ where: { spotId } });
+  await prisma.spot.delete({ where: { id: spotId } });
   await prisma.school.delete({ where: { id: schoolId } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
@@ -110,7 +110,7 @@ describe("deleteActivity (integration)", () => {
 
   it("deletes a GroundHandlingSession's Activity along with it", async () => {
     const session = await createGroundHandlingSession(userId, {
-      siteId,
+      spotId,
       date: "2025-02-01",
       time: "10:00",
       durationMin: "20",
@@ -162,7 +162,7 @@ describe("deleteActivity (integration)", () => {
     activityIds.push(flight.activityId);
 
     const session = await createGroundHandlingSession(userId, {
-      siteId,
+      spotId,
       date: "2025-01-13",
       time: "10:00",
       durationMin: "20",

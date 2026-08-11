@@ -6,9 +6,6 @@ import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
 import { createSiteAction } from "./create-site";
 
-// requireAdmin et createSite sont mockés (déjà couverts par
-// lib/current-user.test.ts et create-site.service.integration.test.ts) : on
-// ne vérifie ici que le comportement propre à l'action.
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/sites", () => ({ createSite: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
@@ -32,11 +29,11 @@ describe("createSiteAction", () => {
   it("calls createSite with the submitted data and redirects on success", async () => {
     vi.mocked(createSite).mockResolvedValue({} as never);
     const formData = new FormData();
-    formData.set("name", "Nouveau site");
+    formData.set("label", "Nouveau site");
 
     await createSiteAction(null, formData);
 
-    expect(createSite).toHaveBeenCalledWith(expect.objectContaining({ name: "Nouveau site" }));
+    expect(createSite).toHaveBeenCalledWith(expect.objectContaining({ label: "Nouveau site" }));
     expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", "Site créé."));
   });
 

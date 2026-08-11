@@ -5,7 +5,7 @@
 - PostgreSQL
 - Prisma ORM
 - UUID pour toutes les clés primaires
-- données métier isolées par utilisateur (exception justifiée : `Site` et `School` sont des données de référence du monde réel, partagées entre utilisateurs)
+- données métier isolées par utilisateur (exception justifiée : `Spot`, `Site` et `School` sont des données de référence du monde réel, partagées entre utilisateurs)
 
 ---
 
@@ -111,7 +111,7 @@ Spécialisation d'une Activity.
 Relations :
 
 - appartient à une Activity
-- takeoffPoint et landingPoint : chacun un SitePoint, potentiellement de sites différents (voir SitePoint ci-dessous)
+- takeoffPoint et landingPoint : chacun un Site, potentiellement de spots différents (voir Site ci-dessous)
 - peut appartenir à un TrainingCamp
 - appartient à un FlightType
 
@@ -122,7 +122,7 @@ Champs :
 - observations
 - improvementPoints
 
-Pas de `siteId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `takeoffPoint.altitudeM`/`landingPoint.altitudeM`. Le `Flight` ne référence jamais un `Site` directement (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`) : `takeoffPointId` doit référencer un `SitePoint` de type TAKEOFF, `landingPointId` un `SitePoint` de type LANDING — non exprimable en contrainte SQL (le type dépend d'une autre table), vérifié côté applicatif.
+Pas de `spotId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `takeoffPoint.altitudeM`/`landingPoint.altitudeM`. Le `Flight` ne référence jamais un `Spot` directement (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`, et ADR 007, `docs/decisions/007-site-spot-terminology-rename.md`, pour le vocabulaire actuel) : `takeoffPointId` doit référencer un `Site` de type TAKEOFF, `landingPointId` un `Site` de type LANDING — non exprimable en contrainte SQL (le type dépend d'une autre table), vérifié côté applicatif.
 
 ---
 
@@ -135,7 +135,7 @@ Champs :
 - id
 - code (unique)
 
-Pas de `label`, même principe que `ActivityType`/`SitePointType`.
+Pas de `label`, même principe que `ActivityType`/`SiteType`.
 
 Valeurs initiales (peuplées par le seed) :
 
@@ -170,7 +170,7 @@ Champs :
 
 ### TrainingCampType
 
-Référentiel des types de stage (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`/`SitePointType`/`FlightType`). Remplace l'ancien champ `TrainingCamp.campType` (texte libre).
+Référentiel des types de stage (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`/`SiteType`/`FlightType`). Remplace l'ancien champ `TrainingCamp.campType` (texte libre).
 
 Champs :
 
@@ -204,7 +204,7 @@ Spécialisation d'une Activity.
 Relations :
 
 - appartient à une Activity
-- appartient à un Site
+- appartient à un Spot
 - peut appartenir à un TrainingCamp
 
 Champs :
@@ -217,7 +217,7 @@ Champs :
 
 ---
 
-### Site
+### Spot
 
 Lieu de pratique. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md) : destiné à une future gestion applicative, pas seulement au seed.
 
@@ -226,23 +226,23 @@ Champs :
 - name
 - region (optionnel)
 - countryCode (optionnel) — code pays ISO 3166-1 alpha-2 (`FR`, `CH`, `IT`, `ES`...), pas du texte libre
-- latitude (optionnel) — localisation approximative du site
+- latitude (optionnel) — localisation approximative du spot
 - longitude (optionnel)
 - createdAt
 - updatedAt
 
-Pas de notion de "point principal" : un `Site` ne référence aucun `SitePoint` (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`, qui revient sur ce choix initialement décrit dans l'ADR 002).
+Pas de notion de "site principal" : un `Spot` ne référence aucun `Site` (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`, qui revient sur ce choix initialement décrit dans l'ADR 002 ; vocabulaire actuel `Spot`/`Site` voir ADR 007, `docs/decisions/007-site-spot-terminology-rename.md`).
 
 ---
 
-### SitePoint
+### Site
 
-Point physique précis appartenant à un Site : décollage ou atterrissage, selon son `SitePointType`. Un Site peut avoir plusieurs `SitePoint` d'un même `SitePointType` ; aucun n'est désigné comme "principal" (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`). Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Site`/`School`.
+Point physique précis appartenant à un Spot : décollage ou atterrissage, selon son `SiteType`. Un Spot peut avoir plusieurs `Site` d'un même `SiteType` ; aucun n'est désigné comme "principal" (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`). Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Spot`/`School`.
 
 Relations :
 
-- appartient à un Site
-- appartient à un SitePointType
+- appartient à un Spot
+- appartient à un SiteType
 
 Champs :
 
@@ -251,13 +251,13 @@ Champs :
 - altitudeM
 - orientationDeg (optionnel)
 
-Le type d'un `SitePoint` (TAKEOFF/LANDING) détermine directement le rôle qu'il peut jouer dans un `Flight` : `takeoffPointId` doit référencer un point TAKEOFF, `landingPointId` un point LANDING (voir ADR 005).
+Le type d'un `Site` (TAKEOFF/LANDING) détermine directement le rôle qu'il peut jouer dans un `Flight` : `takeoffPointId` doit référencer un site TAKEOFF, `landingPointId` un site LANDING (voir ADR 005).
 
 ---
 
-### SitePointType
+### SiteType
 
-Référentiel des types de point (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`).
+Référentiel des types de site (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`).
 
 Champs :
 
@@ -275,7 +275,7 @@ Valeurs initiales (peuplées par le seed) :
 
 ### School
 
-École fédérale de parapente. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Site`.
+École fédérale de parapente. Référentiel éditorial (ADR 004, docs/decisions/004-editable-referentials.md), même principe que `Spot`.
 
 Champs :
 
@@ -283,7 +283,7 @@ Champs :
 - address (optionnel)
 - postalCode (optionnel)
 - city (optionnel)
-- countryCode (optionnel) — code pays ISO 3166-1 alpha-2, même convention que `Site.countryCode`
+- countryCode (optionnel) — code pays ISO 3166-1 alpha-2, même convention que `Spot.countryCode`
 - latitude (optionnel)
 - longitude (optionnel)
 - website (optionnel)
@@ -308,17 +308,17 @@ Activity 1,0..1 TrainingCamp
 
 Activity 1,0..1 GroundHandlingSession
 
-Site 1,N SitePoint
+Spot 1,N Site
 
-SitePointType 1,N SitePoint
+SiteType 1,N Site
 
-SitePoint 1,N Flight (takeoffPoint)
+Site 1,N Flight (takeoffPoint)
 
-SitePoint 1,N Flight (landingPoint)
+Site 1,N Flight (landingPoint)
 
 FlightType 1,N Flight
 
-Site 1,N GroundHandlingSession
+Spot 1,N GroundHandlingSession
 
 TrainingCamp 1,N Flight
 

@@ -4,7 +4,7 @@ import { groundHandlingSchema } from "./ground-handling";
 const validGroundHandling = {
   date: "2025-01-15",
   time: "10:00",
-  siteId: "550e8400-e29b-41d4-a716-446655440000",
+  spotId: "550e8400-e29b-41d4-a716-446655440000",
   durationMin: "30",
   exercises: "Contrôle au sol, gestion des surventes.",
 };
@@ -40,8 +40,8 @@ describe("groundHandlingSchema", () => {
     }
   });
 
-  it("rejects a session without a date or site", () => {
-    const { date, siteId, ...rest } = validGroundHandling;
+  it("rejects a session without a date or spot", () => {
+    const { date, spotId, ...rest } = validGroundHandling;
     const result = groundHandlingSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });

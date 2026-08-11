@@ -1,14 +1,23 @@
 import { prisma } from "@/lib/prisma";
 
-// Site est une donnée de référence partagée (schema.prisma), pas de userId.
-// _count.points plutôt que le détail complet des points (docs/admin.md >
-// Gestion des sites, "nombre de points associés") : la liste admin n'a pas
-// besoin de charger chaque SitePoint pour afficher un simple compteur.
-export async function listSites(query?: string) {
+export type ListSitesFilters = {
+  query?: string;
+  spotId?: string;
+  typeCode?: "TAKEOFF" | "LANDING";
+};
+
+// Liste admin (/admin/sites), à distinguer de search-sites.service.ts
+// (recherche débouncée du formulaire de vol) : filtres combinables
+// (recherche par nom, spot, type — docs/admin.md > Gestion des sites).
+export async function listSites(filters: ListSitesFilters = {}) {
   return prisma.site.findMany({
-    where: query ? { name: { contains: query, mode: "insensitive" } } : undefined,
-    include: { _count: { select: { points: true } } },
-    orderBy: { name: "asc" },
+    where: {
+      label: filters.query ? { contains: filters.query, mode: "insensitive" } : undefined,
+      spotId: filters.spotId,
+      siteType: filters.typeCode ? { code: filters.typeCode } : undefined,
+    },
+    include: { spot: true, siteType: true },
+    orderBy: [{ spot: { name: "asc" } }, { label: "asc" }],
   });
 }
 
