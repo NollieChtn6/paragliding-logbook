@@ -23,6 +23,7 @@ export async function signUp(rawInput: unknown): Promise<void> {
   await auth.api.signUpEmail({
     body: {
       name: input.name,
+      city: input.city,
       email: input.email,
       password: input.password,
     },

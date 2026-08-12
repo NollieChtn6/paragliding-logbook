@@ -18,15 +18,21 @@ Utilisateur de l'application.
 Champs :
 
 - id
-- name
+- name — prénom (label "Prénom" côté UI)
 - email
 - emailVerified
 - image (optionnel)
+- city (optionnel) — ville de résidence, recherche BAN (`type=municipality`)
 - role (`UserRole` : `USER`/`ADMIN`, défaut `USER`)
 - createdAt
 - updatedAt
 
 Pas de mot de passe sur `User` : le hash Argon2 vit sur `Account` (voir ci-dessous).
+
+`name` est un champ "core" de Better Auth (géré nativement, sans
+configuration) ; `city` doit en revanche être déclaré en `additionalFields`
+(`src/lib/auth.ts`) pour qu'`auth.api.updateUser`/`signUpEmail` l'acceptent
+— contrairement à `role`, jamais exposé à Better Auth (voir ci-dessous).
 
 `role` : jamais choisi par l'utilisateur (non exposé à Better Auth comme
 additionalField), `ADMIN` attribué uniquement en base — voir

@@ -53,6 +53,35 @@ describe("signUp (integration)", () => {
     expect(account.password).not.toBe("a-strong-password-12");
   });
 
+  it("stores the optional city when provided", async () => {
+    const email = uniqueEmail();
+
+    await signUp({
+      name: "Jane Doe",
+      city: "Annecy",
+      email,
+      password: "a-strong-password-12",
+      confirmPassword: "a-strong-password-12",
+    });
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(user.city).toBe("Annecy");
+  });
+
+  it("leaves city null when not provided", async () => {
+    const email = uniqueEmail();
+
+    await signUp({
+      name: "Jane Doe",
+      email,
+      password: "a-strong-password-12",
+      confirmPassword: "a-strong-password-12",
+    });
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+    expect(user.city).toBeNull();
+  });
+
   it("rejects input that fails the Zod schema without calling Better Auth", async () => {
     await expect(
       signUp({

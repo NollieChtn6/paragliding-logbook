@@ -66,4 +66,23 @@ describe("updateProfile (integration)", () => {
     const after = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(after.name).toBe(before.name);
   });
+
+  it("updates the user's city", async () => {
+    const headers = await signInHeaders();
+
+    await updateProfile(headers, { name: "New Name", city: "Annecy" });
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.city).toBe("Annecy");
+  });
+
+  it("accepts an empty city (optional field, clears the stored value)", async () => {
+    const headers = await signInHeaders();
+    await updateProfile(headers, { name: "New Name", city: "Annecy" });
+
+    await updateProfile(headers, { name: "New Name", city: "" });
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    expect(user.city).toBeNull();
+  });
 });

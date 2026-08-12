@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { CityCombobox } from "@/features/account/city-combobox";
 
 // Doit rester en phase avec SIGNUP_INVITE_CODE_LENGTH
 // (lib/signup-invite-code.ts) : pas importable ici tel quel, ce module lit
@@ -168,9 +169,11 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
       <input type="hidden" name="inviteCode" value={inviteCode} />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Nom</Label>
-        <Input id="name" name="name" type="text" autoComplete="name" required />
+        <Label htmlFor="name">Prénom</Label>
+        <Input id="name" name="name" type="text" autoComplete="given-name" required />
       </div>
+
+      <CityCombobox name="city" />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Adresse email</Label>
