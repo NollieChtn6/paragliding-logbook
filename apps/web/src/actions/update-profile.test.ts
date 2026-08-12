@@ -29,13 +29,13 @@ describe("updateProfileAction", () => {
 
   it("calls updateProfile with the submitted data and returns success, without redirecting", async () => {
     vi.mocked(updateProfile).mockResolvedValue(undefined);
-    const formData = formDataFor({ name: "Jane Doe" });
+    const formData = formDataFor({ name: "Jane Doe", city: "Annecy" });
 
     const result = await updateProfileAction(null, formData);
 
     expect(updateProfile).toHaveBeenCalledWith(
       undefined,
-      expect.objectContaining({ name: "Jane Doe" }),
+      expect.objectContaining({ name: "Jane Doe", city: "Annecy" }),
     );
     expect(result).toEqual({ success: true });
   });

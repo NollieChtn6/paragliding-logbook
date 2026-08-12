@@ -33,10 +33,11 @@ Séance de gonflage ou de travail au sol.
 ### User
 
 - id
-- name
+- name — prénom (label "Prénom" côté UI, colonne toujours nommée `name`)
 - email
 - emailVerified
 - image (optionnel)
+- city (optionnel) — ville de résidence, saisie via recherche BAN (`type=municipality`), affichée sous la marque dans la barre latérale/l'en-tête mobile quand renseignée
 - role (`UserRole` : `USER`/`ADMIN`, défaut `USER`)
 - createdAt
 - updatedAt
@@ -44,6 +45,11 @@ Séance de gonflage ou de travail au sol.
 Authentification email + mot de passe via Better Auth : le hash Argon2 vit
 sur `Account` (provider `credential`), pas sur `User` — voir
 docs/database-design.md pour le détail des modèles `Session`/`Account`/`Verification`.
+
+`city`, contrairement à `name` (champ "core" de Better Auth), doit être
+déclaré en `additionalFields` dans la config Better Auth (`src/lib/auth.ts`),
+sans quoi `auth.api.updateUser`/`signUpEmail` l'ignoreraient silencieusement
+malgré la colonne en base.
 
 `role` détermine l'accès à `/admin` (`requireAdmin()`,
 `src/lib/current-user.ts`) : jamais choisi par l'utilisateur à l'inscription,

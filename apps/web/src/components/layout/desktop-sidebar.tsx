@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings } from "lucide-react";
+import { MapPin, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -10,28 +10,43 @@ import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
+type DesktopSidebarProps = {
+  city?: string | null;
+};
+
 // Colonne fixe visible à partir de md, masquée en dessous (MobileBottomNav
 // prend le relais). Porte la marque, la navigation, et le thème/déconnexion
 // en pied — MobileBottomNav n'a que la navigation, ces deux actions vivent
 // dans la bande haute mobile d'AppShell. Jamais rendue pour un rôle ADMIN
 // (voir app-shell.tsx), donc pas de lien Administration ici.
-export function DesktopSidebar() {
+export function DesktopSidebar({ city }: DesktopSidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside className="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 md:flex">
-      <Link
-        href="/"
-        className="mb-6 flex items-center gap-2 text-base font-semibold tracking-tight text-sidebar-foreground"
-      >
-        <span
-          className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-base"
-          aria-hidden
+      <div className="mb-6 flex flex-col gap-1">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-base font-semibold tracking-tight text-sidebar-foreground"
         >
-          🪂
-        </span>
-        THERMIK
-      </Link>
+          <span
+            className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-base"
+            aria-hidden
+          >
+            🪂
+          </span>
+          THERMIK
+        </Link>
+        {/* pl-10 aligne sous le texte (badge size-8 + gap-2 = 40px = pl-10) :
+        n'apparaît que si l'utilisateur a renseigné sa ville sur son profil
+        (facultatif, voir features/account/profile-form.tsx). */}
+        {city && (
+          <span className="flex items-center gap-1 pl-10 text-xs text-muted-foreground">
+            <MapPin className="size-3" aria-hidden />
+            {city}
+          </span>
+        )}
+      </div>
 
       <nav className="flex flex-1 flex-col gap-1">
         {NAV_ITEMS.map((item) => {

@@ -10,8 +10,15 @@ export const signUpSchema = z
     name: z
       .string()
       .trim()
-      .min(1, "Le nom est obligatoire.")
-      .max(100, "Le nom ne doit pas dépasser 100 caractères."),
+      .min(1, "Le prénom est obligatoire.")
+      .max(100, "Le prénom ne doit pas dépasser 100 caractères."),
+    // Même règle que city sur update-profile.ts (lib/validations/update-profile.ts).
+    city: z
+      .string()
+      .trim()
+      .max(100, "La ville ne doit pas dépasser 100 caractères.")
+      .optional()
+      .transform((value) => (value ? value : undefined)),
     email: z
       .string()
       .trim()

@@ -30,7 +30,7 @@ export default async function SecuritySettingsPage() {
             <CardTitle>Profil</CardTitle>
           </CardHeader>
           <CardContent>
-            <ProfileForm name={user.name} />
+            <ProfileForm name={user.name} city={user.city} />
           </CardContent>
         </Card>
 

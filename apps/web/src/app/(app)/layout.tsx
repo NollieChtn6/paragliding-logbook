@@ -17,5 +17,5 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
     redirect("/admin");
   }
 
-  return <AppShell>{children}</AppShell>;
+  return <AppShell city={user?.city}>{children}</AppShell>;
 }
