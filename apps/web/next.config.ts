@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      // Le service worker lui-même ne doit jamais être mis en cache
+      // agressivement (CDN/navigateur) : sans ça, une mise à jour de
+      // public/sw.js peut mettre longtemps à être prise en compte par les
+      // clients déjà installés (docs/decisions/008).
+      {
+        source: "/sw.js",
+        headers: [{ key: "Cache-Control", value: "no-cache" }],
+      },
     ];
   },
 };

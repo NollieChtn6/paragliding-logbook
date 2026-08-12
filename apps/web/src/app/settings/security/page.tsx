@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/layout/page-header";
+import { InstallSettingsCard } from "@/components/pwa/install-settings-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "@/features/account/change-password-form";
 import { ProfileForm } from "@/features/account/profile-form";
@@ -37,6 +38,8 @@ export default async function SecuritySettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      <InstallSettingsCard />
     </div>
   );
 }

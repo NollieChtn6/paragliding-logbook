@@ -37,6 +37,7 @@ Créer un carnet de vol numérique personnel permettant de suivre sa progression
 - [x] Préparer une interface mobile-first
 - [x] Toasts de succès (connexion, création, modification, suppression) et d'erreur sur tous les formulaires — `components/ui/toast.tsx` (`@base-ui/react/toast`), `components/toast-listener.tsx` + `lib/toast-redirect.ts` pour afficher un toast après une redirection serveur
 - [x] États de chargement — `loading.tsx` (Suspense implicite de Next.js) sur `(app)`, `admin` et `settings`, `components/page-loader.tsx` partagé
+- [x] Application installable (PWA) — manifest et icônes générés (`app/manifest.ts`, `app/icon.tsx`, `app/apple-icon.tsx`), service worker minimal écrit à la main avec page de repli hors-ligne (`public/sw.js`, `/offline`), invite d'installation sur le dashboard avec QR code pour récupérer l'app sur son téléphone (`components/pwa/`, ADR 008)
 
 #### Base de données
 
@@ -271,7 +272,6 @@ Ces fonctionnalités sont volontairement hors MVP.
 - [ ] Notifications / rappels
 - [ ] Partage public optionnel d'un vol
 - [ ] Export des données personnelles (JSON, PDF)
-- [ ] Mode PWA / application mobile installable, avec fonctionnement offline partiel
 
 ---
 

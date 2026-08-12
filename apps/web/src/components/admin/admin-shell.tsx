@@ -27,11 +27,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    // Même correctif que AppShell (components/layout/app-shell.tsx) : sans
-    // le cap md:h-svh/overflow-hidden, la sidebar défilait avec le contenu
-    // dès qu'une page (ex. liste des sites) dépassait la hauteur
-    // d'écran.
-    <div className="flex min-h-svh md:h-svh md:overflow-hidden">
+    // Même correctif que AppShell (components/layout/app-shell.tsx) : h-svh/
+    // overflow-hidden sans condition de largeur, sinon la sidebar (desktop)
+    // ou le header/la rangée d'onglets (mobile) défilaient avec le contenu
+    // dès qu'une page (ex. liste des sites) dépassait la hauteur d'écran.
+    <div className="flex h-svh overflow-hidden">
       <aside className="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 md:flex">
         <div className="mb-6 flex items-center gap-2 text-base font-semibold tracking-tight text-sidebar-foreground">
           <span
@@ -85,7 +85,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <VersionBadge className="mt-2 text-center" />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
           <span className="text-sm font-semibold tracking-tight text-foreground">
             Administration
@@ -129,7 +129,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <main className="mx-auto w-full max-w-4xl flex-1 p-4 pb-8 md:overflow-y-auto md:p-6">
+        <main className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto p-4 pb-8 md:p-6">
           {children}
         </main>
       </div>
