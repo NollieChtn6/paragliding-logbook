@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.8.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.7.0...paragliding-logbook-v1.8.0) (2026-08-12)
+
+
+### Features
+
+* **pwa:** make THERMIK installable with a service worker and QR install prompt ([75887e9](https://github.com/NollieChtn6/paragliding-logbook/commit/75887e915ba1aa3a4f84ccb01109cd667a7ae9ee))
+* **pwa:** make THERMIK installable with a service worker and QR install prompt ([3cf056c](https://github.com/NollieChtn6/paragliding-logbook/commit/3cf056c310a238d3b21be196d615f044b34b1dfb))
+
+
+### Bug Fixes
+
+* **layout:** keep top/bottom bars fixed on mobile, scroll only the content ([2efe0fd](https://github.com/NollieChtn6/paragliding-logbook/commit/2efe0fd3460ce139f9e67ff49e2a1303b219706f))
+* **layout:** keep top/bottom bars fixed on mobile, scroll only the content ([5aed9b4](https://github.com/NollieChtn6/paragliding-logbook/commit/5aed9b44b98e610ba62a3e7cf70da09cd6cedac4))
+
 ## [1.7.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.6.0...paragliding-logbook-v1.7.0) (2026-08-11)
 
 
