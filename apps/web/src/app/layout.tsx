@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
 import { EnvironmentBanner } from "@/components/environment-banner";
+import { InstallPromptProvider } from "@/components/pwa/install-prompt-provider";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastListener } from "@/components/toast-listener";
 import { Toaster } from "@/components/ui/toast";
@@ -22,6 +24,12 @@ export const metadata: Metadata = {
   title: "THERMIK — Carnet de vols & progression",
   description:
     "THERMIK, carnet de vols & progression : suivez vos vols, stages et gonflages, et votre progression en parapente.",
+  // statusBarStyle "default" (pas "black-translucent") : ce dernier fait
+  // passer le contenu sous la barre de statut iOS, ce que l'app ne gère nulle
+  // part (pas de padding de zone de sécurité en haut, seulement en bas pour
+  // MobileBottomNav) — aurait fait passer du contenu sous l'encoche/l'île
+  // dynamique sans qu'on l'ait demandé (docs/decisions/008).
+  appleWebApp: { title: "THERMIK", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -44,12 +52,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {/* Hors de ThemeProvider/Toaster : ne dépend d'aucun état client,
         doit rester visible même si l'un de ces providers échoue. */}
         <EnvironmentBanner />
+        <ServiceWorkerRegistration />
         <ThemeProvider>
           <Toaster>
             <Suspense fallback={null}>
               <ToastListener />
             </Suspense>
-            {children}
+            <InstallPromptProvider>{children}</InstallPromptProvider>
           </Toaster>
         </ThemeProvider>
       </body>

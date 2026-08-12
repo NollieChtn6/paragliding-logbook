@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ActivityCard, getActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { StatCard } from "@/components/stat-card";
 import { Button } from "@/components/ui/button";
 import { getActivitySummary } from "@/features/activities";
@@ -70,6 +71,8 @@ export default async function Home() {
           />
         </div>
       )}
+
+      <InstallPrompt hasActivities={stats.totalActivityCount > 0} />
 
       <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
         <div className="flex items-center justify-between">
