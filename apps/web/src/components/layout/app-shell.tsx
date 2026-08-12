@@ -22,18 +22,18 @@ type AppShellProps = {
 // mobile.
 export function AppShell({ children }: AppShellProps) {
   return (
-    // md:h-svh + md:overflow-hidden : sur desktop, la coquille (sidebar
-    // comprise) reste calée sur la hauteur de l'écran, seul <main> défile
-    // (md:overflow-y-auto ci-dessous) — sans ça, DesktopSidebar défilait
-    // avec le reste dès qu'une page (ex. liste d'activités) dépassait la
-    // hauteur d'écran. Comportement mobile inchangé (page entière
-    // défilante, normal en single-column) : min-h-svh sans cap en dessous
-    // de md.
-    <div className="flex min-h-svh md:h-svh md:overflow-hidden">
+    // h-svh + overflow-hidden, sans condition de largeur : la coquille
+    // (sidebar comprise sur desktop) reste toujours calée sur la hauteur de
+    // l'écran, seul <main> défile (overflow-y-auto ci-dessous) — sans ça, la
+    // page entière défilait dès qu'un écran (ex. liste d'activités)
+    // dépassait la hauteur de la fenêtre, et header/MobileBottomNav (fixed,
+    // donc déjà hors du flux) laissaient <main> défiler sous eux plutôt que
+    // de le contenir proprement entre les deux.
+    <div className="flex h-svh overflow-hidden">
       <AmbientArc />
       <DesktopSidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
           <Link
             href="/"
@@ -60,7 +60,7 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-3xl flex-1 p-4 pb-24 md:overflow-y-auto md:p-6">
+        <main className="mx-auto w-full max-w-3xl flex-1 overflow-y-auto p-4 pb-24 md:p-6">
           {children}
         </main>
       </div>
