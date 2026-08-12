@@ -2,7 +2,6 @@
 
 import { Download } from "lucide-react";
 import { InstallOptions } from "@/components/pwa/install-options";
-import { useInstallPrompt } from "@/components/pwa/install-prompt-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMounted } from "@/lib/use-mounted";
 
@@ -11,11 +10,18 @@ import { useMounted } from "@/lib/use-mounted";
 // (pas de bouton fermer, pas de persistance localStorage) — /settings/
 // security est une destination explicite, pas un nudge ponctuel
 // (docs/decisions/008).
+//
+// Contrairement à InstallPrompt (dashboard), pas de masquage en mode
+// standalone : l'usage type de cette carte est justement de l'ouvrir depuis
+// l'app déjà installée sur son propre téléphone, pour montrer le QR code à
+// quelqu'un d'autre — masquer la carte une fois installée casserait ce cas
+// d'usage. InstallOptions bascule déjà naturellement sur le QR code dans ce
+// contexte (beforeinstallprompt ne se déclenche jamais pour une app déjà
+// installée, donc canInstall reste faux).
 export function InstallSettingsCard() {
   const mounted = useMounted();
-  const { standalone } = useInstallPrompt();
 
-  if (!mounted || standalone) {
+  if (!mounted) {
     return null;
   }
 
