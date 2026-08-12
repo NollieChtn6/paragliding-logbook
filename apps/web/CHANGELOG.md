@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.8.0...paragliding-logbook-v1.8.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* **pwa:** show the install card before the account forms on /settings/security ([b5c6d4b](https://github.com/NollieChtn6/paragliding-logbook/commit/b5c6d4beb533b2d40ed26ece4b0127ae72fd54e6))
+* **pwa:** show the install card before the account forms on /settings/security ([64b7f6b](https://github.com/NollieChtn6/paragliding-logbook/commit/64b7f6b8f7f6cfa2403de0827796269f6f2c18a8))
+
 ## [1.8.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.7.0...paragliding-logbook-v1.8.0) (2026-08-12)
 
 
