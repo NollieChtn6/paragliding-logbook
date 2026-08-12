@@ -16,6 +16,11 @@ export default async function SecuritySettingsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title="Compte" description="Gérer votre profil et votre sécurité" />
 
+      {/* Avant Profil/Sécurité (pas après) : sur mobile, visible sans
+      défiler — utile pour montrer rapidement le QR code à quelqu'un depuis
+      son téléphone, le but même de cette carte. */}
+      <InstallSettingsCard />
+
       {/* Côte à côte à partir de md : les deux formulaires sont courts et
       indépendants, pas besoin de forcer un défilement vertical sur desktop.
       Empilés sur mobile (flex-col par défaut). */}
@@ -38,8 +43,6 @@ export default async function SecuritySettingsPage() {
           </CardContent>
         </Card>
       </div>
-
-      <InstallSettingsCard />
     </div>
   );
 }
