@@ -14,7 +14,7 @@ export async function updateProfile(headers: Headers, rawInput: unknown): Promis
   const input = updateProfileSchema.parse(rawInput);
 
   await auth.api.updateUser({
-    body: { name: input.name },
+    body: { name: input.name, city: input.city ?? null },
     headers,
   });
 }

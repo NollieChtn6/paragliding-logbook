@@ -16,6 +16,15 @@ export const auth = betterAuth({
       verify: ({ password, hash }) => verifyPassword(password, hash),
     },
   },
+  // city (facultatif) n'est pas un champ "core" de Better Auth comme
+  // name/image — sans additionalFields, auth.api.signUpEmail/updateUser
+  // l'ignoreraient silencieusement même si la colonne existe en base (voir
+  // prisma/schema.prisma > User).
+  user: {
+    additionalFields: {
+      city: { type: "string", required: false, input: true },
+    },
+  },
   // Identifiants alignés sur la convention @db.Uuid déjà utilisée par tout le
   // reste du schéma (voir prisma/schema.prisma) plutôt que le format par
   // défaut de Better Auth.

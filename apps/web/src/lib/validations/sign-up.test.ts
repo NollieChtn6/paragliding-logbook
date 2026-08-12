@@ -24,7 +24,7 @@ describe("signUpSchema", () => {
     const empty = signUpSchema.safeParse({ ...validInput, name: "   " });
     expect(empty.success).toBe(false);
     if (!empty.success) {
-      expect(empty.error.issues[0]?.message).toBe("Le nom est obligatoire.");
+      expect(empty.error.issues[0]?.message).toBe("Le prénom est obligatoire.");
     }
   });
 
@@ -32,7 +32,9 @@ describe("signUpSchema", () => {
     const result = signUpSchema.safeParse({ ...validInput, name: "a".repeat(101) });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("Le nom ne doit pas dépasser 100 caractères.");
+      expect(result.error.issues[0]?.message).toBe(
+        "Le prénom ne doit pas dépasser 100 caractères.",
+      );
     }
   });
 

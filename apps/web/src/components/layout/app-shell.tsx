@@ -1,4 +1,4 @@
-import { Settings } from "lucide-react";
+import { MapPin, Settings } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import { AmbientArc } from "@/components/ambient-arc";
@@ -10,6 +10,7 @@ import { MobileBottomNav } from "./mobile-bottom-nav";
 
 type AppShellProps = {
   children: React.ReactNode;
+  city?: string | null;
 };
 
 // Chrome commun des pages authentifiées (racine du route group (app), voir
@@ -20,7 +21,7 @@ type AppShellProps = {
 // marque + thème + déconnexion à partir de md ; en dessous, une bande haute
 // minimale assure la même fonction puisque DesktopSidebar est masquée en
 // mobile.
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, city }: AppShellProps) {
   return (
     // h-svh + overflow-hidden, sans condition de largeur : la coquille
     // (sidebar comprise sur desktop) reste toujours calée sur la hauteur de
@@ -31,17 +32,28 @@ export function AppShell({ children }: AppShellProps) {
     // de le contenir proprement entre les deux.
     <div className="flex h-svh overflow-hidden">
       <AmbientArc />
-      <DesktopSidebar />
+      <DesktopSidebar city={city} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
-          >
-            <span aria-hidden>🪂</span>
-            THERMIK
-          </Link>
+          <div className="flex flex-col gap-0.5">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
+            >
+              <span aria-hidden>🪂</span>
+              THERMIK
+            </Link>
+            {/* pl-6 aligne approximativement sous le texte (emoji + gap-2) :
+            même logique que DesktopSidebar, décision de cohérence
+            inter-plateforme plutôt que de réserver l'info au desktop. */}
+            {city && (
+              <span className="flex items-center gap-1 pl-6 text-xs text-muted-foreground">
+                <MapPin className="size-3" aria-hidden />
+                {city}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <Button
