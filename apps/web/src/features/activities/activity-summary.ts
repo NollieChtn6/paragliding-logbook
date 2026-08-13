@@ -1,4 +1,6 @@
-import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
+import { formatDate } from "@/lib/format-date";
+import type { Locale } from "@/lib/i18n/locale-cookie";
+import type { Messages } from "@/messages";
 import type { ActivityWithDetails } from "./queries";
 
 // 3 lignes distinctes (ActivityCard, components/activity-card.tsx) plutôt
@@ -10,10 +12,6 @@ export type ActivitySummary = {
   location: string;
   dateInfo: string;
 };
-
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("fr-FR");
-}
 
 // Extraction directe des composantes UTC (pas toLocaleTimeString, dépendant
 // du fuseau du serveur) : l'heure est stockée en UTC littéral, sans
@@ -38,37 +36,42 @@ export function formatFlightLocation(flight: {
 
 // Résumé condensé affiché dans la liste /activities (le détail complet est
 // réservé à /activities/[id]). Une fonction pure, indépendante de Prisma et
-// de React, pour rester facilement testable.
-export function getActivitySummary(activity: ActivityWithDetails): ActivitySummary {
+// de React (mais pas de la locale, transmise en paramètre comme partout
+// ailleurs — voir docs/decisions/009), pour rester facilement testable.
+export function getActivitySummary(
+  activity: ActivityWithDetails,
+  locale: Locale,
+  t: Messages,
+): ActivitySummary {
   if (activity.flight) {
     const { flight } = activity;
     return {
-      title: "Vol",
+      title: t.referenceLabels.activityType.FLIGHT,
       location: formatFlightLocation(flight),
-      dateInfo: `${formatDate(flight.date)} à ${formatTime(flight.date)}`,
+      dateInfo: `${formatDate(flight.date, locale)} ${t.common.at} ${formatTime(flight.date)}`,
     };
   }
 
   if (activity.trainingCamp) {
     const { trainingCamp } = activity;
     return {
-      title: "Stage",
+      title: t.referenceLabels.activityType.TRAINING_CAMP,
       location: trainingCamp.school.name,
-      dateInfo: `${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)}`,
+      dateInfo: `${formatDate(trainingCamp.startDate, locale)} → ${formatDate(trainingCamp.endDate, locale)}`,
     };
   }
 
   if (activity.groundHandlingSession) {
     const { groundHandlingSession } = activity;
     return {
-      title: "Gonflage",
+      title: t.referenceLabels.activityType.GROUND_HANDLING,
       location: groundHandlingSession.spot.name,
-      dateInfo: `${formatDate(groundHandlingSession.date)} à ${formatTime(groundHandlingSession.date)}`,
+      dateInfo: `${formatDate(groundHandlingSession.date, locale)} ${t.common.at} ${formatTime(groundHandlingSession.date)}`,
     };
   }
 
   return {
-    title: ACTIVITY_TYPE_LABELS[activity.activityType.code] ?? activity.activityType.code,
+    title: t.referenceLabels.activityType[activity.activityType.code] ?? activity.activityType.code,
     location: "",
     dateInfo: "",
   };

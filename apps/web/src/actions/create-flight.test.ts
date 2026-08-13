@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { createFlightAction } from "./create-flight";
 
 // Ne re-teste pas les règles métier Flight (déjà couvertes par
@@ -14,7 +15,9 @@ import { createFlightAction } from "./create-flight";
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/flights", () => ({ createFlight: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const CURRENT_USER = { id: "current-user-id" };
 
 describe("createFlightAction", () => {
@@ -33,8 +36,9 @@ describe("createFlightAction", () => {
     expect(createFlight).toHaveBeenCalledWith(
       CURRENT_USER.id,
       expect.objectContaining({ takeoffPointId: "some-point" }),
+      t.validation.flight,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Vol créé."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", t.toast.flightCreated));
   });
 
   it("maps a ZodError from createFlight to a validation error message", async () => {
@@ -53,7 +57,7 @@ describe("createFlightAction", () => {
 
     const result = await createFlightAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la création du vol." });
+    expect(result).toEqual({ success: false, error: t.toast.flightCreateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

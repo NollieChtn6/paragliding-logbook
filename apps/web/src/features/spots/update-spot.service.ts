@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { spotSchema } from "@/lib/validations/spot";
+import type { Messages } from "@/messages";
 
-export async function updateSpot(spotId: string, rawInput: unknown) {
-  const input = spotSchema.parse(rawInput);
+export async function updateSpot(
+  spotId: string,
+  rawInput: unknown,
+  t: Messages["validation"]["spot"],
+) {
+  const input = spotSchema(t).parse(rawInput);
   return prisma.spot.update({
     where: { id: spotId },
     // ?? null : un update Prisma ignore les champs undefined au lieu de les

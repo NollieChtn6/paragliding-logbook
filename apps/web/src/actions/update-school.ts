@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { updateSchool } from "@/features/schools";
 import { requireAdmin } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type UpdateSchoolActionState = { success: true } | { success: false; error: string };
 
@@ -14,15 +16,16 @@ export async function updateSchoolAction(
   formData: FormData,
 ): Promise<UpdateSchoolActionState> {
   await requireAdmin();
+  const t = getDictionary(await getLocale());
 
   try {
-    await updateSchool(schoolId, Object.fromEntries(formData));
+    await updateSchool(schoolId, Object.fromEntries(formData), t.validation.school);
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
-    return { success: false, error: "Erreur lors de la modification de l'école." };
+    return { success: false, error: t.toast.schoolUpdateError };
   }
 
-  redirect(withToast("/admin/schools", "École modifiée."));
+  redirect(withToast("/admin/schools", t.toast.schoolUpdated));
 }

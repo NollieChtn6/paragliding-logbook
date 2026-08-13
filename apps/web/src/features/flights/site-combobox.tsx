@@ -3,6 +3,7 @@
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { searchSitesAction } from "@/actions/search-sites";
+import { useT } from "@/components/locale-provider";
 import {
   Combobox,
   ComboboxCollection,
@@ -73,6 +74,7 @@ export function SiteCombobox({
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SiteOption[]>(defaultSite ? [defaultSite] : []);
   const [selectedSite, setSelectedSite] = useState<SiteOption | null>(defaultSite ?? null);
+  const t = useT();
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -110,7 +112,7 @@ export function SiteCombobox({
           aria-invalid={!!error}
         />
         <ComboboxContent>
-          <ComboboxEmpty>Aucun site trouvé.</ComboboxEmpty>
+          <ComboboxEmpty>{t.flights.noSiteFound}</ComboboxEmpty>
           <ComboboxList>
             {siteGroups.map((group) => (
               <ComboboxGroup key={group.spot.id} items={group.sites}>

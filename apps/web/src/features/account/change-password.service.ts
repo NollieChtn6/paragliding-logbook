@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { changePasswordSchema } from "@/lib/validations/change-password";
+import type { Messages } from "@/messages";
 
 // Pas de userId en paramètre, contrairement aux autres services (create/
 // update*(userId, rawInput)) : auth.api.changePassword résout lui-même
@@ -10,8 +11,12 @@ import { changePasswordSchema } from "@/lib/validations/change-password";
 // session courante (qui reste active, Better Auth pose le nouveau cookie
 // via le plugin nextCookies) et supprime toutes les autres sessions de
 // l'utilisateur.
-export async function changePassword(headers: Headers, rawInput: unknown): Promise<void> {
-  const input = changePasswordSchema.parse(rawInput);
+export async function changePassword(
+  headers: Headers,
+  rawInput: unknown,
+  t: Messages["validation"]["changePassword"],
+): Promise<void> {
+  const input = changePasswordSchema(t).parse(rawInput);
 
   await auth.api.changePassword({
     body: {

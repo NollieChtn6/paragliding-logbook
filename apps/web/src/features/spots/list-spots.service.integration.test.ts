@@ -1,8 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createSpot } from "./create-spot.service";
 import { getSpot } from "./get-spot.service";
 import { listSpots } from "./list-spots.service";
+
+const t = getDictionary("fr-FR").validation.spot;
 
 let spotId: string;
 let uniqueName: string;
@@ -10,7 +13,7 @@ let uniqueName: string;
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
   uniqueName = `List Spot Search Test ${suffix}`;
-  const spot = await createSpot({ name: uniqueName });
+  const spot = await createSpot({ name: uniqueName }, t);
   spotId = spot.id;
 });
 

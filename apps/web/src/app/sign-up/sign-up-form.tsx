@@ -7,6 +7,7 @@ import type * as React from "react";
 import { useActionState, useEffect, useState } from "react";
 import { signUpAction } from "@/actions/sign-up";
 import { verifySignUpInviteCodeAction } from "@/actions/verify-signup-invite-code";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -64,6 +65,7 @@ function SignUpInviteCodeStep({ signInHref, onValidCode }: SignUpInviteCodeStepP
   const [codeValue, setCodeValue] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useT().auth.signUp;
 
   async function handleComplete(code: string) {
     setIsVerifying(true);
@@ -71,7 +73,7 @@ function SignUpInviteCodeStep({ signInHref, onValidCode }: SignUpInviteCodeStepP
     const valid = await verifySignUpInviteCodeAction(code);
     setIsVerifying(false);
     if (!valid) {
-      setError("Code invalide.");
+      setError(t.invalidCode);
       setCodeValue("");
       return;
     }
@@ -80,10 +82,7 @@ function SignUpInviteCodeStep({ signInHref, onValidCode }: SignUpInviteCodeStepP
 
   return (
     <div className="flex flex-col items-center gap-4 text-center">
-      <p className="text-sm text-muted-foreground">
-        THERMIK est pour l'instant réservé à un cercle restreint. Entrez le code d'invitation reçu
-        pour créer un compte.
-      </p>
+      <p className="text-sm text-muted-foreground">{t.inviteIntro}</p>
 
       <InputOTP
         maxLength={INVITE_CODE_LENGTH}
@@ -104,7 +103,7 @@ function SignUpInviteCodeStep({ signInHref, onValidCode }: SignUpInviteCodeStepP
       </InputOTP>
 
       <p role="status" aria-live="polite" className="min-h-5 text-sm">
-        {isVerifying && <span className="text-muted-foreground">Vérification...</span>}
+        {isVerifying && <span className="text-muted-foreground">{t.verifying}</span>}
         {error && (
           <span role="alert" className="text-destructive">
             {error}
@@ -113,9 +112,9 @@ function SignUpInviteCodeStep({ signInHref, onValidCode }: SignUpInviteCodeStepP
       </p>
 
       <p className="text-sm text-muted-foreground">
-        Déjà un compte ?{" "}
+        {t.alreadyHaveAccount}{" "}
         <Link href={signInHref} className="font-medium text-primary hover:underline">
-          Se connecter
+          {t.signIn}
         </Link>
       </p>
     </div>
@@ -134,6 +133,8 @@ type SignUpDetailsStepProps = {
 function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetailsStepProps) {
   const [state, formAction, isPending] = useActionState(signUpAction, null);
   const [showPassword, setShowPassword] = useState(false);
+  const messages = useT();
+  const t = messages.auth.signUp;
 
   useEffect(() => {
     if (state?.success === false) {
@@ -156,7 +157,7 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
     }
     if (!confirmPassword.value) return;
     confirmPassword.setCustomValidity(
-      confirmPassword.value === password.value ? "" : "Les mots de passe ne correspondent pas.",
+      confirmPassword.value === password.value ? "" : messages.validation.signUp.passwordMismatch,
     );
   }
 
@@ -169,32 +170,32 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
       <input type="hidden" name="inviteCode" value={inviteCode} />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Prénom</Label>
+        <Label htmlFor="name">{t.nameLabel}</Label>
         <Input id="name" name="name" type="text" autoComplete="given-name" required />
       </div>
 
       <CityCombobox name="city" />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Adresse email</Label>
+        <Label htmlFor="email">{t.emailLabel}</Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="email@exemple.fr"
+          placeholder={t.emailPlaceholder}
           autoComplete="email"
           required
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="password">Mot de passe</Label>
+        <Label htmlFor="password">{t.passwordLabel}</Label>
         <div className="relative">
           <Input
             id="password"
             name="password"
             type={passwordFieldType}
-            placeholder="Votre mot de passe"
+            placeholder={t.passwordPlaceholder}
             className="pr-9"
             autoComplete="new-password"
             minLength={12}
@@ -204,24 +205,24 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
           <button
             type="button"
             onClick={toggleVisibility}
-            aria-label={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
-            title={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
+            aria-label={showPassword ? t.hidePasswords : t.showPasswords}
+            title={showPassword ? t.hidePasswords : t.showPasswords}
             className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         </div>
-        <p className="text-sm text-muted-foreground">Au moins 12 caractères.</p>
+        <p className="text-sm text-muted-foreground">{t.passwordHint}</p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+        <Label htmlFor="confirmPassword">{t.confirmPasswordLabel}</Label>
         <div className="relative">
           <Input
             id="confirmPassword"
             name="confirmPassword"
             type={passwordFieldType}
-            placeholder="Votre mot de passe"
+            placeholder={t.passwordPlaceholder}
             className="pr-9"
             autoComplete="new-password"
             onChange={handlePasswordFieldChange}
@@ -230,8 +231,8 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
           <button
             type="button"
             onClick={toggleVisibility}
-            aria-label={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
-            title={showPassword ? "Masquer les mots de passe" : "Afficher les mots de passe"}
+            aria-label={showPassword ? t.hidePasswords : t.showPasswords}
+            title={showPassword ? t.hidePasswords : t.showPasswords}
             className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -240,7 +241,7 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
       </div>
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Création du compte..." : "Créer mon compte"}
+        {isPending ? t.submitting : t.submit}
       </Button>
 
       {state?.success === false && (
@@ -250,7 +251,7 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
             <>
               {" "}
               <Link href={signInHref} className="font-medium underline underline-offset-2">
-                Se connecter
+                {t.signIn}
               </Link>
             </>
           )}
@@ -258,9 +259,9 @@ function SignUpDetailsStep({ redirectTo, inviteCode, signInHref }: SignUpDetails
       )}
 
       <p className="text-center text-sm text-muted-foreground">
-        Déjà un compte ?{" "}
+        {t.alreadyHaveAccount}{" "}
         <Link href={signInHref} className="font-medium text-primary hover:underline">
-          Se connecter
+          {t.signIn}
         </Link>
       </p>
     </form>

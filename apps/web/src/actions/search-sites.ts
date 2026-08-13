@@ -2,6 +2,8 @@
 
 import { searchSites } from "@/features/sites";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 // Appelée directement comme fonction async depuis un composant client (pas
 // via <form action>) : une recherche est une lecture, pas une mutation —
@@ -15,5 +17,6 @@ import { requireCurrentUser } from "@/lib/current-user";
 // évolution qui copierait ce fichier comme modèle.
 export async function searchSitesAction(query: string, type: "TAKEOFF" | "LANDING") {
   await requireCurrentUser();
-  return searchSites({ query, type });
+  const t = getDictionary(await getLocale());
+  return searchSites({ query, type }, t.validation.siteSearch);
 }

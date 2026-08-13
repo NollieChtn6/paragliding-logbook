@@ -2,18 +2,22 @@ import { SearchX } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
-export default function ActivityNotFound() {
+export default async function ActivityNotFound() {
+  const t = getDictionary(await getLocale()).activities;
+
   return (
     <EmptyState
       icon={SearchX}
-      title="Activité introuvable"
-      description="Cette activité n'existe pas ou ne vous appartient pas."
+      title={t.notFoundTitle}
+      description={t.notFoundDescription}
       action={
         <Button
           nativeButton={false}
           variant="outline"
-          render={<Link href="/activities">Retour aux activités</Link>}
+          render={<Link href="/activities">{t.backToActivities}</Link>}
         />
       }
     />

@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { updateProfileAction } from "@/actions/update-profile";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ type ProfileFormProps = {
 
 export function ProfileForm({ name, city }: ProfileFormProps) {
   const [state, formAction, isPending] = useActionState(updateProfileAction, null);
+  const t = useT();
 
   // Reconstruit une CitySuggestion à partir de la seule chaîne stockée
   // (User.city) : même principe que school-form.tsx pour initialAddress —
@@ -30,14 +32,14 @@ export function ProfileForm({ name, city }: ProfileFormProps) {
       toast.add({ title: state.error, type: "error" });
     }
     if (state?.success === true) {
-      toast.add({ title: "Profil mis à jour avec succès.", type: "success" });
+      toast.add({ title: t.toast.profileUpdateSuccess, type: "success" });
     }
-  }, [state]);
+  }, [state, t]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Prénom</Label>
+        <Label htmlFor="name">{t.account.nameLabel}</Label>
         <Input
           id="name"
           name="name"
@@ -51,7 +53,7 @@ export function ProfileForm({ name, city }: ProfileFormProps) {
       <CityCombobox name="city" defaultValue={initialCity} />
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : "Enregistrer"}
+        {isPending ? t.account.saving : t.account.save}
       </Button>
 
       {state?.success === false && (

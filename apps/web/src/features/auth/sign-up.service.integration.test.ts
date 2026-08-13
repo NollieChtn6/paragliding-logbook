@@ -2,7 +2,10 @@ import { APIError } from "better-auth/api";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
+import { getDictionary } from "@/messages";
 import { signUp } from "./sign-up.service";
+
+const t = getDictionary("fr-FR").validation.signUp;
 
 // Emails créés par les tests, nettoyés après chaque test (pas de beforeAll
 // partagé : chaque test crée son propre compte pour rester indépendant, même
@@ -37,12 +40,15 @@ describe("signUp (integration)", () => {
   it("creates the User and credential Account with an Argon2 hash", async () => {
     const email = uniqueEmail();
 
-    await signUp({
-      name: "Jane Doe",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+      },
+      t,
+    );
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
     expect(user.name).toBe("Jane Doe");
@@ -56,13 +62,16 @@ describe("signUp (integration)", () => {
   it("stores the optional city when provided", async () => {
     const email = uniqueEmail();
 
-    await signUp({
-      name: "Jane Doe",
-      city: "Annecy",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        city: "Annecy",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+      },
+      t,
+    );
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
     expect(user.city).toBe("Annecy");
@@ -71,12 +80,15 @@ describe("signUp (integration)", () => {
   it("leaves city null when not provided", async () => {
     const email = uniqueEmail();
 
-    await signUp({
-      name: "Jane Doe",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+      },
+      t,
+    );
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
     expect(user.city).toBeNull();
@@ -84,31 +96,40 @@ describe("signUp (integration)", () => {
 
   it("rejects input that fails the Zod schema without calling Better Auth", async () => {
     await expect(
-      signUp({
-        name: "Jane Doe",
-        email: "not-an-email",
-        password: "a-strong-password-12",
-        confirmPassword: "a-strong-password-12",
-      }),
+      signUp(
+        {
+          name: "Jane Doe",
+          email: "not-an-email",
+          password: "a-strong-password-12",
+          confirmPassword: "a-strong-password-12",
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("rejects sign-up with an email that is already used", async () => {
     const email = uniqueEmail();
-    await signUp({
-      name: "Jane Doe",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+      },
+      t,
+    );
 
     await expect(
-      signUp({
-        name: "Someone Else",
-        email,
-        password: "another-password-12",
-        confirmPassword: "another-password-12",
-      }),
+      signUp(
+        {
+          name: "Someone Else",
+          email,
+          password: "another-password-12",
+          confirmPassword: "another-password-12",
+        },
+        t,
+      ),
     ).rejects.toThrow(APIError);
   });
 
@@ -117,13 +138,16 @@ describe("signUp (integration)", () => {
     vi.stubEnv("SIGNUP_INVITE_CODE", "482913");
 
     await expect(
-      signUp({
-        name: "Jane Doe",
-        email,
-        password: "a-strong-password-12",
-        confirmPassword: "a-strong-password-12",
-        inviteCode: "111111",
-      }),
+      signUp(
+        {
+          name: "Jane Doe",
+          email,
+          password: "a-strong-password-12",
+          confirmPassword: "a-strong-password-12",
+          inviteCode: "111111",
+        },
+        t,
+      ),
     ).rejects.toThrow(SignUpNotAllowedError);
 
     await expect(prisma.user.findUnique({ where: { email } })).resolves.toBeNull();
@@ -133,13 +157,16 @@ describe("signUp (integration)", () => {
     const email = uniqueEmail();
     vi.stubEnv("SIGNUP_INVITE_CODE", "482913");
 
-    await signUp({
-      name: "Jane Doe",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-      inviteCode: "482913",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+        inviteCode: "482913",
+      },
+      t,
+    );
 
     await expect(prisma.user.findUnique({ where: { email } })).resolves.not.toBeNull();
   });

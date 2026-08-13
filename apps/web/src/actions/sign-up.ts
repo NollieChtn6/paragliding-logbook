@@ -4,9 +4,11 @@ import { APIError } from "better-auth/api";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { signUp } from "@/features/auth";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
 import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type SignUpActionState =
   | { success: true }
@@ -22,15 +24,16 @@ export async function signUpAction(
   formData: FormData,
 ): Promise<SignUpActionState> {
   const redirectTo = toSafeRedirectPath(formData.get("redirectTo")?.toString(), "/activities");
+  const t = getDictionary(await getLocale());
 
   try {
-    await signUp(Object.fromEntries(formData));
+    await signUp(Object.fromEntries(formData), t.validation.signUp);
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
     if (error instanceof SignUpNotAllowedError) {
-      return { success: false, error: error.message };
+      return { success: false, error: t.auth.signUp.notAllowed };
     }
     if (error instanceof APIError) {
       // Code posé par auth.api.signUpEmail quand l'email existe déjà (voir
@@ -39,16 +42,16 @@ export async function signUpAction(
       if (error.body?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
         return {
           success: false,
-          error: "Cette adresse email est déjà utilisée. Vous pouvez vous connecter.",
+          error: t.auth.signUp.emailAlreadyUsed,
           emailAlreadyUsed: true,
         };
       }
-      return { success: false, error: "Impossible de créer le compte." };
+      return { success: false, error: t.auth.signUp.accountCreationFailed };
     }
-    return { success: false, error: "Erreur lors de la création du compte." };
+    return { success: false, error: t.auth.signUp.accountCreationError };
   }
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter (voir signInAction).
-  redirect(withToast(redirectTo, "Compte créé avec succès."));
+  redirect(withToast(redirectTo, t.toast.signUpSuccess));
 }

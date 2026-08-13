@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { isSignUpInviteCodeValid, SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { signUpSchema } from "@/lib/validations/sign-up";
+import type { Messages } from "@/messages";
 
 // auth.api.signUpEmail reste l'unique responsable de la création du compte
 // (User + Account "credential", hash Argon2 via lib/password.ts branché dans
@@ -9,8 +10,11 @@ import { signUpSchema } from "@/lib/validations/sign-up";
 // Server Action (actions/sign-up.ts), le plugin nextCookies (lib/auth.ts)
 // pose automatiquement le cookie de session renvoyé par Better Auth — pas de
 // connexion manuelle supplémentaire à faire ici pour la connexion automatique.
-export async function signUp(rawInput: unknown): Promise<void> {
-  const input = signUpSchema.parse(rawInput);
+export async function signUp(
+  rawInput: unknown,
+  t: Messages["validation"]["signUp"],
+): Promise<void> {
+  const input = signUpSchema(t).parse(rawInput);
 
   // Code d'inscription (lib/signup-invite-code.ts) revérifié ici pour de bon
   // — c'est la frontière de sécurité réelle, l'étape dédiée de

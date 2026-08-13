@@ -3,6 +3,7 @@
 import { OctagonX } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 
 // Frontière d'erreur racine (convention Next.js App Router, doit être un
@@ -16,16 +17,22 @@ export default function RootError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useT().errorPage;
+
   return (
     <div className="flex min-h-svh w-full flex-col items-center justify-center px-4 py-8">
       <EmptyState
         icon={OctagonX}
-        title="Une erreur est survenue"
-        description="Une erreur inattendue s'est produite. Vous pouvez réessayer ou revenir à l'accueil."
+        title={t.title}
+        description={t.description}
         action={
           <div className="flex gap-2">
-            <Button onClick={reset}>Réessayer</Button>
-            <Button nativeButton={false} variant="outline" render={<Link href="/">Accueil</Link>} />
+            <Button onClick={reset}>{t.retry}</Button>
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href="/">{t.home}</Link>}
+            />
           </div>
         }
       />

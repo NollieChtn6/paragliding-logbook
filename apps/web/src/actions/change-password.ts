@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { ZodError } from "zod";
 import { changePassword } from "@/features/account";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export type ChangePasswordActionState = { success: true } | { success: false; error: string };
 
@@ -22,19 +24,24 @@ export async function changePasswordAction(
   // paramètre : auth.api.changePassword résout lui-même la session à partir
   // de headers (voir change-password.service.ts).
   await requireCurrentUser();
+  const t = getDictionary(await getLocale());
 
   try {
-    await changePassword(await headers(), Object.fromEntries(formData));
+    await changePassword(
+      await headers(),
+      Object.fromEntries(formData),
+      t.validation.changePassword,
+    );
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
     // Levée par auth.api.changePassword quand currentPassword ne correspond
     // pas au hash stocké (code "INVALID_PASSWORD").
     if (error instanceof APIError) {
-      return { success: false, error: "Mot de passe actuel incorrect." };
+      return { success: false, error: t.account.invalidCurrentPassword };
     }
-    return { success: false, error: "Erreur lors du changement de mot de passe." };
+    return { success: false, error: t.account.changePasswordError };
   }
 
   return { success: true };

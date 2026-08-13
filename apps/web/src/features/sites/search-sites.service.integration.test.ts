@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { searchSites } from "./search-sites.service";
+
+const t = getDictionary("fr-FR").validation.siteSearch;
 
 let spotId: string;
 let otherSpotId: string;
@@ -56,25 +59,25 @@ afterAll(async () => {
 
 describe("searchSites (integration)", () => {
   it("finds a takeoff site by name", async () => {
-    const results = await searchSites({ query: "Search Test Takeoff", type: "TAKEOFF" });
+    const results = await searchSites({ query: "Search Test Takeoff", type: "TAKEOFF" }, t);
 
     expect(results.some((site) => site.id === takeoffSiteId)).toBe(true);
   });
 
   it("finds a landing site by name", async () => {
-    const results = await searchSites({ query: "Search Test Landing", type: "LANDING" });
+    const results = await searchSites({ query: "Search Test Landing", type: "LANDING" }, t);
 
     expect(results.some((site) => site.id === landingSiteId)).toBe(true);
   });
 
   it("filters by type: a takeoff site does not show up in a landing search", async () => {
-    const results = await searchSites({ query: "Search Test Takeoff", type: "LANDING" });
+    const results = await searchSites({ query: "Search Test Takeoff", type: "LANDING" }, t);
 
     expect(results.some((site) => site.id === takeoffSiteId)).toBe(false);
   });
 
   it("includes the parent spot in each result", async () => {
-    const results = await searchSites({ query: "Search Test Takeoff", type: "TAKEOFF" });
+    const results = await searchSites({ query: "Search Test Takeoff", type: "TAKEOFF" }, t);
 
     const match = results.find((site) => site.id === takeoffSiteId);
     expect(match?.spot.id).toBe(spotId);

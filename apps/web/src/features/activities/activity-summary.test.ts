@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { getDictionary } from "@/messages";
 import { getActivitySummary } from "./activity-summary";
 import type { ActivityWithDetails } from "./queries";
+
+const t = getDictionary("fr-FR");
 
 const spot = {
   id: "spot-1",
@@ -105,7 +108,7 @@ describe("getActivitySummary", () => {
       },
     };
 
-    expect(getActivitySummary(activity)).toEqual({
+    expect(getActivitySummary(activity, "fr-FR", t)).toEqual({
       title: "Vol",
       location: "Spot de test",
       dateInfo: "15/06/2025 à 09:15",
@@ -134,7 +137,7 @@ describe("getActivitySummary", () => {
       },
     };
 
-    expect(getActivitySummary(activity)).toEqual({
+    expect(getActivitySummary(activity, "fr-FR", t)).toEqual({
       title: "Vol",
       location: "Spot de test → Autre spot",
       dateInfo: "15/06/2025 à 13:45",
@@ -162,7 +165,7 @@ describe("getActivitySummary", () => {
       },
     };
 
-    expect(getActivitySummary(activity)).toEqual({
+    expect(getActivitySummary(activity, "fr-FR", t)).toEqual({
       title: "Stage",
       location: "École de test",
       dateInfo: "01/07/2025 → 05/07/2025",
@@ -188,7 +191,7 @@ describe("getActivitySummary", () => {
       },
     };
 
-    expect(getActivitySummary(activity)).toEqual({
+    expect(getActivitySummary(activity, "fr-FR", t)).toEqual({
       title: "Gonflage",
       location: "Spot de test",
       dateInfo: "10/03/2025 à 18:00",
@@ -201,7 +204,7 @@ describe("getActivitySummary", () => {
       activityType: { id: "at-9", code: "UNKNOWN_TYPE" },
     };
 
-    expect(getActivitySummary(activity)).toEqual({
+    expect(getActivitySummary(activity, "fr-FR", t)).toEqual({
       title: "UNKNOWN_TYPE",
       location: "",
       dateInfo: "",

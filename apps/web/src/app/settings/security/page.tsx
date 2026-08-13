@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "@/features/account/change-password-form";
 import { ProfileForm } from "@/features/account/profile-form";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 // Titre/URL "Sécurité" conservés (seule page de /settings existante, tous
 // les liens de nav pointent déjà vers /settings/security) même si la page
@@ -11,10 +13,11 @@ import { requireCurrentUser } from "@/lib/current-user";
 // une seule carte de plus serait disproportionné.
 export default async function SecuritySettingsPage() {
   const user = await requireCurrentUser();
+  const t = getDictionary(await getLocale()).account;
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Compte" description="Gérer votre profil et votre sécurité" />
+      <PageHeader title={t.pageTitle} description={t.pageDescription} />
 
       {/* Avant Profil/Sécurité (pas après) : sur mobile, visible sans
       défiler — utile pour montrer rapidement le QR code à quelqu'un depuis
@@ -27,7 +30,7 @@ export default async function SecuritySettingsPage() {
       <div className="flex flex-col gap-6 md:flex-row">
         <Card className="md:flex-1">
           <CardHeader>
-            <CardTitle>Profil</CardTitle>
+            <CardTitle>{t.profileCardTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <ProfileForm name={user.name} city={user.city} />
@@ -36,7 +39,7 @@ export default async function SecuritySettingsPage() {
 
         <Card className="md:flex-1">
           <CardHeader>
-            <CardTitle>Sécurité</CardTitle>
+            <CardTitle>{t.securityCardTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <ChangePasswordForm email={user.email} />

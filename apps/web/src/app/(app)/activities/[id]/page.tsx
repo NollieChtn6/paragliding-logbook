@@ -25,16 +25,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFlightLocation, getActivityById } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { formatDate } from "@/lib/format-date";
 import { formatDurationMinutes } from "@/lib/format-duration";
-import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
+import { getLocale } from "@/lib/i18n/get-locale";
+import type { Locale } from "@/lib/i18n/locale-cookie";
+import { pluralize } from "@/lib/pluralize";
 import { cn } from "@/lib/utils";
+import { getDictionary, type Messages } from "@/messages";
 
 // Message affiché dans la boîte de confirmation quand le stage supprimé a
 // des vols/séances rattachés : trainingCampId est en onDelete: SetNull
 // (voir delete-activity.service.ts), ils sont dissociés, pas supprimés.
-function trainingCampDeletionWarning(activity: {
-  trainingCamp: { flights: unknown[]; groundHandlingSessions: unknown[] } | null;
-}): string | undefined {
+function trainingCampDeletionWarning(
+  activity: {
+    trainingCamp: { flights: unknown[]; groundHandlingSessions: unknown[] } | null;
+  },
+  t: Messages["activities"],
+): string | undefined {
   if (!activity.trainingCamp) {
     return undefined;
   }
@@ -44,32 +51,24 @@ function trainingCampDeletionWarning(activity: {
   const sessionCount = activity.trainingCamp.groundHandlingSessions.length;
 
   if (flightCount > 0) {
-    parts.push(`${flightCount} vol${flightCount > 1 ? "s" : ""}`);
+    parts.push(pluralize(flightCount, t.flightsCount));
   }
   if (sessionCount > 0) {
-    parts.push(`${sessionCount} séance${sessionCount > 1 ? "s" : ""} de gonflage`);
+    parts.push(pluralize(sessionCount, t.groundHandlingSessionsCount));
   }
   if (parts.length === 0) {
     return undefined;
   }
 
-  const verb = flightCount + sessionCount > 1 ? "resteront" : "restera";
-  return `${parts.join(" et ")} ${verb} dans votre carnet mais ne seront plus rattachés à ce stage.`;
+  const verb = flightCount + sessionCount > 1 ? t.remainPlural : t.remainSingular;
+  return `${parts.join(` ${t.and} `)} ${verb} ${t.deletionWarningSuffix}`;
 }
 
 export const dynamic = "force-dynamic";
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("fr-FR");
-}
-
 // Extraction directe des composantes UTC, voir activity-summary.ts.
 function formatTime(date: Date): string {
   return date.toISOString().slice(11, 16);
-}
-
-function formatTrainingCampType(trainingCampType: { code: string }): string {
-  return TRAINING_CAMP_TYPE_LABELS[trainingCampType.code] ?? trainingCampType.code;
 }
 
 // Nombre de jours inclusif entre le début et la fin d'un stage (ex. 1 → 5
@@ -88,6 +87,8 @@ function countStageDays(startDate: Date, endDate: Date): number {
 // suffit pas à distinguer duquel il s'agit.
 function TrainingCampBadge({
   trainingCamp,
+  locale,
+  t,
 }: {
   trainingCamp: {
     activityId: string;
@@ -96,7 +97,13 @@ function TrainingCampBadge({
     startDate: Date;
     endDate: Date;
   };
+  locale: Locale;
+  t: Messages;
 }) {
+  const typeLabel =
+    t.referenceLabels.trainingCampType[trainingCamp.trainingCampType.code] ??
+    trainingCamp.trainingCampType.code;
+
   return (
     <Link
       href={`/activities/${trainingCamp.activityId}`}
@@ -105,11 +112,11 @@ function TrainingCampBadge({
       <GraduationCap className="size-4 flex-none text-accent" aria-hidden />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="font-medium text-foreground">
-          Stage associé : {formatTrainingCampType(trainingCamp.trainingCampType)}
+          {t.activities.associatedTrainingCamp(typeLabel)}
         </span>
         <span className="text-sm text-muted-foreground">
-          {trainingCamp.school.name} · {formatDate(trainingCamp.startDate)} →{" "}
-          {formatDate(trainingCamp.endDate)}
+          {trainingCamp.school.name} · {formatDate(trainingCamp.startDate, locale)} →{" "}
+          {formatDate(trainingCamp.endDate, locale)}
         </span>
       </span>
       <ChevronRight className="size-4 flex-none text-muted-foreground" aria-hidden />
@@ -135,14 +142,22 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
     notFound();
   }
 
+  const locale = await getLocale();
+  const t = getDictionary(locale);
+  const ta = t.activities;
+
   const type = getActivityCardType(activity);
   const { icon: TypeIcon, className: typeIconClassName } = ACTIVITY_TYPE_STYLE[type];
-  const title = activity.flight ? "Vol" : activity.trainingCamp ? "Stage" : "Gonflage";
-  const entityLabel = activity.flight
-    ? "ce vol"
+  const title = activity.flight
+    ? ta.titleFlight
     : activity.trainingCamp
-      ? "ce stage"
-      : "cette séance";
+      ? ta.titleTrainingCamp
+      : ta.titleGroundHandling;
+  const entityLabel = activity.flight
+    ? ta.entityLabelFlight
+    : activity.trainingCamp
+      ? ta.entityLabelTrainingCamp
+      : ta.entityLabelGroundHandling;
 
   // Titre/sous-titre du bandeau hero : le nom le plus significatif de
   // l'activité (trajet, école, site) plutôt que de répéter "Vol"/"Stage"/
@@ -151,11 +166,11 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
     ? formatFlightLocation(activity.flight)
     : (activity.trainingCamp?.school.name ?? activity.groundHandlingSession?.spot.name ?? title);
   const heroSubtitle = activity.flight
-    ? `${formatDate(activity.flight.date)} à ${formatTime(activity.flight.date)}`
+    ? `${formatDate(activity.flight.date, locale)} ${t.common.at} ${formatTime(activity.flight.date)}`
     : activity.trainingCamp
-      ? `${formatDate(activity.trainingCamp.startDate)} → ${formatDate(activity.trainingCamp.endDate)}`
+      ? `${formatDate(activity.trainingCamp.startDate, locale)} → ${formatDate(activity.trainingCamp.endDate, locale)}`
       : activity.groundHandlingSession
-        ? `${formatDate(activity.groundHandlingSession.date)} à ${formatTime(activity.groundHandlingSession.date)}`
+        ? `${formatDate(activity.groundHandlingSession.date, locale)} ${t.common.at} ${formatTime(activity.groundHandlingSession.date)}`
         : "";
 
   return (
@@ -170,7 +185,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" aria-hidden />
-        Retour aux activités
+        {ta.backToActivities}
       </Link>
 
       <PageHeader
@@ -180,12 +195,12 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href={`/activities/${activity.id}/edit`}>Modifier</Link>}
+              render={<Link href={`/activities/${activity.id}/edit`}>{ta.edit}</Link>}
             />
             <DeleteActivityButton
               activityId={activity.id}
               entityLabel={entityLabel}
-              warning={trainingCampDeletionWarning(activity)}
+              warning={trainingCampDeletionWarning(activity, ta)}
             />
           </div>
         }
@@ -213,14 +228,15 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
             icon={Clock3}
-            label="Durée"
+            label={ta.durationLabel}
             value={formatDurationMinutes(activity.flight.durationMin)}
           />
           <StatCard
             icon={Tag}
-            label="Type de vol"
+            label={ta.flightTypeLabel}
             value={
-              FLIGHT_TYPE_LABELS[activity.flight.flightType.code] ?? activity.flight.flightType.code
+              t.referenceLabels.flightType[activity.flight.flightType.code] ??
+              activity.flight.flightType.code
             }
           />
         </div>
@@ -230,14 +246,19 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
             icon={Tag}
-            label="Type de stage"
-            value={formatTrainingCampType(activity.trainingCamp.trainingCampType)}
+            label={ta.trainingCampTypeLabel}
+            value={
+              t.referenceLabels.trainingCampType[activity.trainingCamp.trainingCampType.code] ??
+              activity.trainingCamp.trainingCampType.code
+            }
             tone="accent"
           />
           <StatCard
             icon={Clock3}
-            label="Durée"
-            value={`${countStageDays(activity.trainingCamp.startDate, activity.trainingCamp.endDate)} j`}
+            label={ta.durationLabel}
+            value={ta.daysUnit(
+              countStageDays(activity.trainingCamp.startDate, activity.trainingCamp.endDate),
+            )}
             tone="accent"
           />
         </div>
@@ -247,7 +268,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
             icon={Clock3}
-            label="Durée"
+            label={ta.durationLabel}
             value={formatDurationMinutes(activity.groundHandlingSession.durationMin)}
           />
         </div>
@@ -286,13 +307,16 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
 
           <Card>
             <CardContent className="flex flex-col gap-4">
-              <NoteSection title="Observations" text={activity.flight.observations} />
-              <NoteSection title="Points d'amélioration" text={activity.flight.improvementPoints} />
+              <NoteSection title={ta.observationsTitle} text={activity.flight.observations} />
+              <NoteSection
+                title={ta.improvementPointsTitle}
+                text={activity.flight.improvementPoints}
+              />
             </CardContent>
           </Card>
 
           {activity.flight.trainingCamp && (
-            <TrainingCampBadge trainingCamp={activity.flight.trainingCamp} />
+            <TrainingCampBadge trainingCamp={activity.flight.trainingCamp} locale={locale} t={t} />
           )}
         </>
       )}
@@ -305,13 +329,19 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
             <Card>
               <CardContent className="flex flex-col gap-4">
                 {activity.trainingCamp.observations && (
-                  <NoteSection title="Observations" text={activity.trainingCamp.observations} />
+                  <NoteSection
+                    title={ta.observationsTitle}
+                    text={activity.trainingCamp.observations}
+                  />
                 )}
                 {activity.trainingCamp.summary && (
-                  <NoteSection title="Bilan" text={activity.trainingCamp.summary} />
+                  <NoteSection title={ta.summaryTitle} text={activity.trainingCamp.summary} />
                 )}
                 {activity.trainingCamp.certification && (
-                  <NoteSection title="Certification" text={activity.trainingCamp.certification} />
+                  <NoteSection
+                    title={ta.certificationTitle}
+                    text={activity.trainingCamp.certification}
+                  />
                 )}
               </CardContent>
             </Card>
@@ -329,7 +359,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                   <AccordionTrigger>
                     <span className="flex items-center gap-2">
                       <Plane className="size-4 text-primary" aria-hidden />
-                      Vols associés ({activity.trainingCamp.flights.length})
+                      {ta.associatedFlightsHeading(activity.trainingCamp.flights.length)}
                     </span>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -345,7 +375,8 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                                 {formatFlightLocation(flight)}
                               </span>
                               <span className="text-sm text-muted-foreground">
-                                {formatDate(flight.date)} à {formatTime(flight.date)} ·{" "}
+                                {formatDate(flight.date, locale)} {t.common.at}{" "}
+                                {formatTime(flight.date)} ·{" "}
                                 {formatDurationMinutes(flight.durationMin)}
                               </span>
                             </span>
@@ -366,7 +397,9 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                   <AccordionTrigger>
                     <span className="flex items-center gap-2">
                       <Wind className="size-4 text-muted-foreground" aria-hidden />
-                      Séances associées ({activity.trainingCamp.groundHandlingSessions.length})
+                      {ta.associatedSessionsHeading(
+                        activity.trainingCamp.groundHandlingSessions.length,
+                      )}
                     </span>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -382,7 +415,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                                 {groundHandlingSession.spot.name}
                               </span>
                               <span className="text-sm text-muted-foreground">
-                                {formatDate(groundHandlingSession.date)} à{" "}
+                                {formatDate(groundHandlingSession.date, locale)} {t.common.at}{" "}
                                 {formatTime(groundHandlingSession.date)} ·{" "}
                                 {formatDurationMinutes(groundHandlingSession.durationMin)}
                               </span>
@@ -408,23 +441,30 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
           <Card>
             <CardContent className="flex flex-col gap-4">
               <NoteSection
-                title="Exercices travaillés"
+                title={ta.exercisesTitle}
                 text={activity.groundHandlingSession.exercises}
               />
               {activity.groundHandlingSession.difficulties && (
                 <NoteSection
-                  title="Difficultés rencontrées"
+                  title={ta.difficultiesTitle}
                   text={activity.groundHandlingSession.difficulties}
                 />
               )}
               {activity.groundHandlingSession.feeling && (
-                <NoteSection title="Ressenti" text={activity.groundHandlingSession.feeling} />
+                <NoteSection
+                  title={ta.feelingTitle}
+                  text={activity.groundHandlingSession.feeling}
+                />
               )}
             </CardContent>
           </Card>
 
           {activity.groundHandlingSession.trainingCamp && (
-            <TrainingCampBadge trainingCamp={activity.groundHandlingSession.trainingCamp} />
+            <TrainingCampBadge
+              trainingCamp={activity.groundHandlingSession.trainingCamp}
+              locale={locale}
+              t={t}
+            />
           )}
         </>
       )}

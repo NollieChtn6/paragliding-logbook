@@ -11,6 +11,8 @@ import { getDashboardData } from "@/features/dashboard";
 import { requireCurrentUser } from "@/lib/current-user";
 import { formatDurationMinutes } from "@/lib/format-duration";
 import { getGreeting } from "@/lib/greeting";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 // Les statistiques et activités récentes doivent toujours refléter l'état
 // actuel de la base, pas un instantané figé au build.
@@ -19,6 +21,8 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const user = await requireCurrentUser();
   const { stats, recentActivities } = await getDashboardData(user.id);
+  const locale = await getLocale();
+  const t = getDictionary(locale);
 
   return (
     // md:h-full/overflow-hidden : sur desktop, seule la liste d'activités
@@ -28,10 +32,13 @@ export default async function Home() {
     // conteneur absorbe toute la hauteur disponible lui-même.
     <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
       <PageHeader
-        title={getGreeting(user.name)}
-        description="Votre progression en un coup d'œil"
+        title={getGreeting(user.name, t.dashboard)}
+        description={t.dashboard.subtitle}
         actions={
-          <Button nativeButton={false} render={<Link href="/activities/new">Ajouter</Link>} />
+          <Button
+            nativeButton={false}
+            render={<Link href="/activities/new">{t.dashboard.addButton}</Link>}
+          />
         }
       />
 
@@ -40,32 +47,36 @@ export default async function Home() {
       rien, l'EmptyState ci-dessous suffit à guider un nouvel utilisateur. */}
       {stats.totalActivityCount > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <StatCard icon={Plane} label="Vols" value={stats.flightCount} />
+          <StatCard icon={Plane} label={t.dashboard.statFlights} value={stats.flightCount} />
           <StatCard
             icon={Hourglass}
-            label="Temps de vol cumulé"
+            label={t.dashboard.statTotalFlightTime}
             value={formatDurationMinutes(stats.totalFlightMinutes)}
           />
           <StatCard
             icon={Clock3}
-            label="Temps moyen par vol"
-            value={stats.averageFlightMinutes === null ? "—" : `${stats.averageFlightMinutes} min`}
+            label={t.dashboard.statAverageFlightTime}
+            value={
+              stats.averageFlightMinutes === null
+                ? "—"
+                : t.dashboard.minutesSuffix(stats.averageFlightMinutes)
+            }
           />
           <StatCard
             icon={Wind}
-            label="Séances de gonflage"
+            label={t.dashboard.statGroundHandlingSessions}
             value={stats.groundHandlingSessionCount}
             tone="accent"
           />
           <StatCard
             icon={Hourglass}
-            label="Temps de gonflage cumulé"
+            label={t.dashboard.statTotalGroundHandlingTime}
             value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
             tone="accent"
           />
           <StatCard
             icon={GraduationCap}
-            label="Formations suivies"
+            label={t.dashboard.statTrainingCamps}
             value={stats.trainingCampCount}
             tone="accent"
           />
@@ -77,30 +88,33 @@ export default async function Home() {
       <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium tracking-tight text-foreground">
-            Activités récentes
-            <span className="text-muted-foreground"> · {stats.totalActivityCount} au total</span>
+            {t.dashboard.recentActivities}
+            <span className="text-muted-foreground">
+              {" "}
+              · {t.dashboard.totalCount(stats.totalActivityCount)}
+            </span>
           </h2>
           <Link href="/activities" className="text-sm font-medium text-primary hover:underline">
-            Voir tout
+            {t.dashboard.seeAll}
           </Link>
         </div>
 
         {recentActivities.length === 0 ? (
           <EmptyState
-            title="Aucune activité enregistrée pour l'instant"
-            description="Vos vols, stages et séances de gonflage apparaîtront ici."
+            title={t.dashboard.emptyTitle}
+            description={t.dashboard.emptyDescription}
             action={
               <Button
                 nativeButton={false}
                 variant="outline"
-                render={<Link href="/activities/new">Ajouter une activité</Link>}
+                render={<Link href="/activities/new">{t.dashboard.addActivity}</Link>}
               />
             }
           />
         ) : (
           <div className="flex flex-col gap-2 md:overflow-y-auto">
             {recentActivities.map((activity) => {
-              const summary = getActivitySummary(activity);
+              const summary = getActivitySummary(activity, locale, t);
               return (
                 <ActivityCard
                   key={activity.id}

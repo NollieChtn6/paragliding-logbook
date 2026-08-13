@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
@@ -9,6 +10,7 @@ import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 // prend le relais au-delà). pb tient compte de la zone de sécurité iOS.
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-card shadow-[0_-1px_10px_rgba(0,0,0,0.06)] md:hidden">
@@ -26,7 +28,7 @@ export function MobileBottomNav() {
             aria-current={active ? "page" : undefined}
           >
             <Icon className="size-5" />
-            {item.label}
+            {t.shell[item.labelKey]}
           </Link>
         );
       })}

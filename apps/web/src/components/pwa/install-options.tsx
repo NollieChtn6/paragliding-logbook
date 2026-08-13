@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/components/locale-provider";
 import { useInstallPrompt } from "@/components/pwa/install-prompt-provider";
 import { InstallQrCode } from "@/components/pwa/install-qr-code";
 import { Button } from "@/components/ui/button";
@@ -12,16 +13,14 @@ import { Button } from "@/components/ui/button";
 // sniffing d'OS/navigateur.
 export function InstallOptions() {
   const { canInstall, promptInstall } = useInstallPrompt();
+  const t = useT();
 
   if (canInstall) {
     return (
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Ajoutez THERMIK à votre écran d&apos;accueil pour un accès rapide, comme une application
-          native.
-        </p>
+        <p className="text-sm text-muted-foreground">{t.pwa.installDescription}</p>
         <Button type="button" onClick={promptInstall}>
-          Installer
+          {t.pwa.installButton}
         </Button>
       </div>
     );
@@ -30,10 +29,7 @@ export function InstallOptions() {
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row">
       <InstallQrCode />
-      <p className="text-sm text-muted-foreground">
-        Scannez ce code avec votre téléphone pour ouvrir THERMIK, puis ajoutez-le à l&apos;écran
-        d&apos;accueil (menu Partager sur iOS, « Installer l&apos;application » sur Android).
-      </p>
+      <p className="text-sm text-muted-foreground">{t.pwa.qrDescription}</p>
     </div>
   );
 }

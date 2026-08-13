@@ -2,13 +2,19 @@ import { ZodError, type ZodIssue } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { prisma } from "@/lib/prisma";
 import { flightSchema } from "@/lib/validations/flight";
+import type { Messages } from "@/messages";
 
 // Même structure que createFlight (create-flight.service.ts) : valide, puis
 // persiste dans une transaction. La vérification de propriété (activité
 // appartient à userId) se fait dans la même transaction que l'update, pour
 // éviter une fenêtre entre le contrôle et l'écriture.
-export async function updateFlight(userId: string, activityId: string, rawInput: unknown) {
-  const input = flightSchema.parse(rawInput);
+export async function updateFlight(
+  userId: string,
+  activityId: string,
+  rawInput: unknown,
+  t: Messages["validation"]["flight"],
+) {
+  const input = flightSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
     const activity = await tx.activity.findFirst({ where: { id: activityId, userId } });
@@ -35,7 +41,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       const issue: ZodIssue = {
         code: "custom",
         path: ["takeoffPointId"],
-        message: "Ce point de décollage n'existe pas.",
+        message: t.takeoffNotFound,
       };
       throw new ZodError([issue]);
     }
@@ -43,7 +49,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       const issue: ZodIssue = {
         code: "custom",
         path: ["takeoffPointId"],
-        message: "Ce point n'est pas un point de décollage.",
+        message: t.takeoffWrongType,
       };
       throw new ZodError([issue]);
     }
@@ -51,7 +57,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       const issue: ZodIssue = {
         code: "custom",
         path: ["landingPointId"],
-        message: "Ce point d'atterrissage n'existe pas.",
+        message: t.landingNotFound,
       };
       throw new ZodError([issue]);
     }
@@ -59,7 +65,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       const issue: ZodIssue = {
         code: "custom",
         path: ["landingPointId"],
-        message: "Ce point n'est pas un point d'atterrissage.",
+        message: t.landingWrongType,
       };
       throw new ZodError([issue]);
     }
@@ -71,7 +77,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
       const issue: ZodIssue = {
         code: "custom",
         path: ["flightTypeId"],
-        message: "Ce type de vol n'existe pas.",
+        message: t.flightTypeNotFound,
       };
       throw new ZodError([issue]);
     }
@@ -88,7 +94,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
         const issue: ZodIssue = {
           code: "custom",
           path: ["trainingCampId"],
-          message: "Ce stage n'existe pas ou ne vous appartient pas.",
+          message: t.trainingCampNotFound,
         };
         throw new ZodError([issue]);
       }
@@ -100,7 +106,7 @@ export async function updateFlight(userId: string, activityId: string, rawInput:
         const issue: ZodIssue = {
           code: "custom",
           path: ["date"],
-          message: "La date du vol doit être comprise dans l'intervalle du stage.",
+          message: t.dateOutsideTrainingCamp,
         };
         throw new ZodError([issue]);
       }

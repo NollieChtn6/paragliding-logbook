@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { updateProfileSchema } from "@/lib/validations/update-profile";
+import type { Messages } from "@/messages";
 
 // Même principe que changePassword (change-password.service.ts) :
 // auth.api.updateUser résout lui-même l'utilisateur à partir de la session
@@ -10,8 +11,12 @@ import { updateProfileSchema } from "@/lib/validations/update-profile";
 // même `email` dans le body de /update-user) : changer d'email impliquerait
 // de revalider son adresse, ce que le projet ne fait pas encore (voir
 // docs/todo.md > vérification d'adresse email, backlog).
-export async function updateProfile(headers: Headers, rawInput: unknown): Promise<void> {
-  const input = updateProfileSchema.parse(rawInput);
+export async function updateProfile(
+  headers: Headers,
+  rawInput: unknown,
+  t: Messages["validation"]["updateProfile"],
+): Promise<void> {
+  const input = updateProfileSchema(t).parse(rawInput);
 
   await auth.api.updateUser({
     body: { name: input.name, city: input.city ?? null },

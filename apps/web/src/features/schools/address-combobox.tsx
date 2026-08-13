@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { searchAddressAction } from "@/actions/search-address";
+import { useT } from "@/components/locale-provider";
 import {
   Combobox,
   ComboboxCollection,
@@ -31,6 +32,7 @@ export function AddressCombobox({ name, defaultValue, onSelect }: AddressCombobo
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AddressSuggestion[]>(defaultValue ? [defaultValue] : []);
   const [selected, setSelected] = useState<AddressSuggestion | null>(defaultValue ?? null);
+  const t = useT().schools;
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -41,7 +43,7 @@ export function AddressCombobox({ name, defaultValue, onSelect }: AddressCombobo
 
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={name}>Adresse</Label>
+      <Label htmlFor={name}>{t.addressLabel}</Label>
       <Combobox
         items={results}
         value={selected}
@@ -57,9 +59,9 @@ export function AddressCombobox({ name, defaultValue, onSelect }: AddressCombobo
         filter={null}
         name={name}
       >
-        <ComboboxInput id={name} placeholder="Rechercher une adresse..." showClear />
+        <ComboboxInput id={name} placeholder={t.addressPlaceholder} showClear />
         <ComboboxContent>
-          <ComboboxEmpty>Aucune adresse trouvée.</ComboboxEmpty>
+          <ComboboxEmpty>{t.noAddressFound}</ComboboxEmpty>
           <ComboboxList>
             <ComboboxCollection>
               {(suggestion: AddressSuggestion) => (

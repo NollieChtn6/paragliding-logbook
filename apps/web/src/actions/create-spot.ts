@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { createSpot } from "@/features/spots";
 import { requireAdmin } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type CreateSpotActionState = { success: true } | { success: false; error: string };
 
@@ -19,15 +21,16 @@ export async function createSpotAction(
   formData: FormData,
 ): Promise<CreateSpotActionState> {
   await requireAdmin();
+  const t = getDictionary(await getLocale());
 
   try {
-    await createSpot(Object.fromEntries(formData));
+    await createSpot(Object.fromEntries(formData), t.validation.spot);
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
-    return { success: false, error: "Erreur lors de la création du spot." };
+    return { success: false, error: t.toast.spotCreateError };
   }
 
-  redirect(withToast("/admin/spots", "Spot créé."));
+  redirect(withToast("/admin/spots", t.toast.spotCreated));
 }

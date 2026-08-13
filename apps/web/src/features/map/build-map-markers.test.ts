@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { getDictionary } from "@/messages";
 import { buildMapMarkers } from "./build-map-markers";
 
-describe("buildMapMarkers", () => {
+describe.each(["fr-FR", "en-GB"] as const)("buildMapMarkers (%s)", (locale) => {
+  const t = getDictionary(locale).admin;
+
   it("maps a takeoff site to a TAKEOFF marker with details and related links", () => {
     const markers = buildMapMarkers(
       [
@@ -18,6 +21,7 @@ describe("buildMapMarkers", () => {
         },
       ],
       [],
+      t,
     );
 
     expect(markers).toEqual([
@@ -29,11 +33,11 @@ describe("buildMapMarkers", () => {
         longitude: 5.9,
         editHref: "/admin/sites/site-1/edit",
         details: [
-          { label: "Spot", value: "Saint-Hilaire-du-Touvet" },
-          { label: "Altitude", value: "900 m" },
-          { label: "Orientation", value: "180°" },
+          { label: t.markerSpotLabel, value: "Saint-Hilaire-du-Touvet" },
+          { label: t.markerAltitudeLabel, value: "900 m" },
+          { label: t.markerOrientationLabel, value: "180°" },
         ],
-        relatedLinks: [{ label: "Modifier le spot", href: "/admin/spots/spot-1/edit" }],
+        relatedLinks: [{ label: t.markerEditSpotLink, href: "/admin/spots/spot-1/edit" }],
         siblingSites: [],
       },
     ]);
@@ -55,10 +59,14 @@ describe("buildMapMarkers", () => {
         },
       ],
       [],
+      t,
     );
 
     expect(markers[0]?.kind).toBe("LANDING");
-    expect(markers[0]?.details).toContainEqual({ label: "Orientation", value: "—" });
+    expect(markers[0]?.details).toContainEqual({
+      label: t.markerOrientationLabel,
+      value: t.markerNoValue,
+    });
   });
 
   it("lists the other sites of the same spot as siblingSites", () => {
@@ -99,6 +107,7 @@ describe("buildMapMarkers", () => {
         },
       ],
       [],
+      t,
     );
 
     const takeoffMarker = markers.find((marker) => marker.id === "site-site-takeoff");
@@ -111,6 +120,7 @@ describe("buildMapMarkers", () => {
     const markers = buildMapMarkers(
       [],
       [{ id: "school-1", name: "École Test", city: "Annecy", latitude: 45.9, longitude: 6.1 }],
+      t,
     );
 
     expect(markers).toEqual([
@@ -121,7 +131,7 @@ describe("buildMapMarkers", () => {
         latitude: 45.9,
         longitude: 6.1,
         editHref: "/admin/schools/school-1/edit",
-        details: [{ label: "Ville", value: "Annecy" }],
+        details: [{ label: t.markerCityLabel, value: "Annecy" }],
         relatedLinks: [],
         siblingSites: [],
       },
@@ -140,6 +150,7 @@ describe("buildMapMarkers", () => {
           longitude: null,
         },
       ],
+      t,
     );
 
     expect(markers).toEqual([]);
