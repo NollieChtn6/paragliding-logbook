@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { ZodError } from "zod";
 import { updateProfile } from "@/features/account";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export type UpdateProfileActionState = { success: true } | { success: false; error: string };
 
@@ -20,14 +22,15 @@ export async function updateProfileAction(
   // auth.api.updateUser résout lui-même la session à partir de headers (voir
   // update-profile.service.ts).
   await requireCurrentUser();
+  const t = getDictionary(await getLocale());
 
   try {
-    await updateProfile(await headers(), Object.fromEntries(formData));
+    await updateProfile(await headers(), Object.fromEntries(formData), t.validation.updateProfile);
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
-    return { success: false, error: "Erreur lors de la mise à jour du profil." };
+    return { success: false, error: t.toast.profileUpdateError };
   }
 
   return { success: true };

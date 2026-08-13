@@ -2,14 +2,20 @@ import { ZodError, type ZodIssue } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { prisma } from "@/lib/prisma";
 import { trainingCampSchema } from "@/lib/validations/training-camp";
+import type { Messages } from "@/messages";
 
 // Même structure que createTrainingCamp (create-training-camp.service.ts).
 // Pas de règle métier cross-entité supplémentaire ici : trainingCampSchema
 // vérifie déjà startDate <= endDate. La règle "les vols/séances associés
 // doivent rester dans l'intervalle du stage" n'est pas revérifiée
 // rétroactivement lors d'une modification (hors périmètre actuel).
-export async function updateTrainingCamp(userId: string, activityId: string, rawInput: unknown) {
-  const input = trainingCampSchema.parse(rawInput);
+export async function updateTrainingCamp(
+  userId: string,
+  activityId: string,
+  rawInput: unknown,
+  t: Messages["validation"]["trainingCamp"],
+) {
+  const input = trainingCampSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
     const activity = await tx.activity.findFirst({ where: { id: activityId, userId } });
@@ -26,7 +32,7 @@ export async function updateTrainingCamp(userId: string, activityId: string, raw
       const issue: ZodIssue = {
         code: "custom",
         path: ["trainingCampTypeId"],
-        message: "Ce type de stage n'existe pas.",
+        message: t.typeNotFound,
       };
       throw new ZodError([issue]);
     }

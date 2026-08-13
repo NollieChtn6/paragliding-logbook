@@ -2,7 +2,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { LeaveFormButton } from "@/components/leave-form-button";
 import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { NewActivityForm } from "./new-activity-form";
 
 // La liste des types d'activité, sites et écoles doit toujours refléter
@@ -21,9 +23,11 @@ export default async function NewActivityPage() {
     ],
   );
 
+  const t = getDictionary(await getLocale());
+
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Nouvelle activité" actions={<LeaveFormButton />} />
+      <PageHeader title={t.activities.newActivity} actions={<LeaveFormButton />} />
       <NewActivityForm
         activityTypes={activityTypes}
         flightTypes={flightTypes}

@@ -5,7 +5,9 @@ import { ZodError } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type UpdateGroundHandlingSessionActionState =
   | { success: true }
@@ -19,18 +21,24 @@ export async function updateGroundHandlingSessionAction(
   formData: FormData,
 ): Promise<UpdateGroundHandlingSessionActionState> {
   const user = await requireCurrentUser();
+  const t = getDictionary(await getLocale());
 
   try {
-    await updateGroundHandlingSession(user.id, activityId, Object.fromEntries(formData));
+    await updateGroundHandlingSession(
+      user.id,
+      activityId,
+      Object.fromEntries(formData),
+      t.validation.groundHandling,
+    );
   } catch (error) {
     if (error instanceof ActivityNotFoundError) {
       notFound();
     }
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
-    return { success: false, error: "Erreur lors de la modification de la séance." };
+    return { success: false, error: t.toast.groundHandlingSessionUpdateError };
   }
 
-  redirect(withToast(`/activities/${activityId}`, "Séance modifiée."));
+  redirect(withToast(`/activities/${activityId}`, t.toast.groundHandlingSessionUpdated));
 }

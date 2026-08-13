@@ -5,6 +5,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { getActivityEventDate, getActivitySummary, listActivities } from "@/features/activities";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { pluralize } from "@/lib/pluralize";
+import { getDictionary } from "@/messages";
 import { ActivitiesFilter } from "./activities-filter";
 
 // La liste doit toujours refléter l'état actuel de la base, pas un
@@ -14,28 +17,30 @@ export const dynamic = "force-dynamic";
 export default async function ActivitiesPage() {
   const user = await requireCurrentUser();
   const activities = await listActivities(user.id);
+  const locale = await getLocale();
+  const t = getDictionary(locale);
 
   if (activities.length === 0) {
     return (
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Activités"
-          description="0 activité"
+          title={t.activities.pageTitle}
+          description={pluralize(0, t.activities.count)}
           actions={
             <Button
               nativeButton={false}
-              render={<Link href="/activities/new">Nouvelle activité</Link>}
+              render={<Link href="/activities/new">{t.activities.newActivity}</Link>}
             />
           }
         />
         <EmptyState
-          title="Aucune activité enregistrée pour l'instant"
-          description="Vos vols, stages et séances de gonflage apparaîtront ici."
+          title={t.activities.emptyTitle}
+          description={t.activities.emptyDescription}
           action={
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href="/activities/new">Ajouter une activité</Link>}
+              render={<Link href="/activities/new">{t.activities.addActivity}</Link>}
             />
           }
         />
@@ -50,7 +55,7 @@ export default async function ActivitiesPage() {
   return (
     <ActivitiesFilter
       activities={activities.map((activity) => {
-        const summary = getActivitySummary(activity);
+        const summary = getActivitySummary(activity, locale, t);
         return {
           id: activity.id,
           type: getActivityCardType(activity),

@@ -1,8 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { schoolSchema } from "@/lib/validations/school";
+import type { Messages } from "@/messages";
 
-export async function updateSchool(schoolId: string, rawInput: unknown) {
-  const input = schoolSchema.parse(rawInput);
+export async function updateSchool(
+  schoolId: string,
+  rawInput: unknown,
+  t: Messages["validation"]["school"],
+) {
+  const input = schoolSchema(t).parse(rawInput);
   return prisma.school.update({
     where: { id: schoolId },
     // ?? null : un update Prisma ignore les champs undefined au lieu de les

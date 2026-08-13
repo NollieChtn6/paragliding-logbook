@@ -4,12 +4,15 @@ import { z } from "zod";
 import { updateSite } from "@/features/sites";
 import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { updateSiteAction } from "./update-site";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/sites", () => ({ updateSite: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 const SITE_ID = "site-id";
 
@@ -37,8 +40,9 @@ describe("updateSiteAction", () => {
     expect(updateSite).toHaveBeenCalledWith(
       SITE_ID,
       expect.objectContaining({ label: "Site modifié" }),
+      t.validation.site,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", "Site modifié."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", t.toast.siteUpdated));
   });
 
   it("maps a ZodError from updateSite to a validation error message", async () => {
@@ -57,7 +61,7 @@ describe("updateSiteAction", () => {
 
     const result = await updateSiteAction(SITE_ID, null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la modification du site." });
+    expect(result).toEqual({ success: false, error: t.toast.siteUpdateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getDictionary } from "@/messages";
 import { schoolSchema } from "./school";
 
 const validSchool = {
@@ -10,43 +11,44 @@ const validSchool = {
   website: "https://www.exemple.fr",
 };
 
-describe("schoolSchema", () => {
+describe.each(["fr-FR", "en-GB"] as const)("schoolSchema (%s)", (locale) => {
+  const t = getDictionary(locale).validation.school;
+  const schema = schoolSchema(t);
+
   it("accepts a valid school", () => {
-    const result = schoolSchema.safeParse(validSchool);
+    const result = schema.safeParse(validSchool);
     expect(result.success).toBe(true);
   });
 
   it("accepts a school with only a name", () => {
-    const result = schoolSchema.safeParse({ name: "École minimale" });
+    const result = schema.safeParse({ name: "École minimale" });
     expect(result.success).toBe(true);
   });
 
   it("rejects a missing name", () => {
     const { name, ...rest } = validSchool;
-    const result = schoolSchema.safeParse(rest);
+    const result = schema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
   it("rejects an empty name", () => {
-    const result = schoolSchema.safeParse({ ...validSchool, name: "" });
+    const result = schema.safeParse({ ...validSchool, name: "" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("Le nom est obligatoire.");
+      expect(result.error.issues[0]?.message).toBe(t.nameRequired);
     }
   });
 
   it("rejects an invalid website URL", () => {
-    const result = schoolSchema.safeParse({ ...validSchool, website: "not-a-url" });
+    const result = schema.safeParse({ ...validSchool, website: "not-a-url" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe(
-        "Le site web doit être une URL valide (ex. https://exemple.fr).",
-      );
+      expect(result.error.issues[0]?.message).toBe(t.websiteInvalid);
     }
   });
 
   it("treats an empty website as absent", () => {
-    const result = schoolSchema.safeParse({ ...validSchool, website: "" });
+    const result = schema.safeParse({ ...validSchool, website: "" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.website).toBeUndefined();
@@ -54,12 +56,10 @@ describe("schoolSchema", () => {
   });
 
   it("rejects a country code that isn't 2 letters", () => {
-    const result = schoolSchema.safeParse({ ...validSchool, countryCode: "France" });
+    const result = schema.safeParse({ ...validSchool, countryCode: "France" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe(
-        "Le code pays doit contenir exactement 2 lettres (ex. FR).",
-      );
+      expect(result.error.issues[0]?.message).toBe(t.countryCodeInvalid);
     }
   });
 });

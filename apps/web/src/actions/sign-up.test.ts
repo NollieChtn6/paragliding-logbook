@@ -5,6 +5,7 @@ import { z } from "zod";
 import { signUp } from "@/features/auth";
 import { SignUpNotAllowedError } from "@/lib/signup-invite-code";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { signUpAction } from "./sign-up";
 
 // Même approche que change-password.test.ts / sign-in.test.ts : signUp
@@ -12,6 +13,9 @@ import { signUpAction } from "./sign-up";
 // l'action (mapping des erreurs, redirect, redirectTo).
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/auth", () => ({ signUp: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
+
+const t = getDictionary("fr-FR");
 
 function formDataFor(fields: Record<string, string>) {
   const formData = new FormData();
@@ -39,8 +43,9 @@ describe("signUpAction", () => {
 
     expect(signUp).toHaveBeenCalledWith(
       expect.objectContaining({ name: "Jane Doe", email: "jane.doe@example.com" }),
+      t.validation.signUp,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Compte créé avec succès."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", t.toast.signUpSuccess));
   });
 
   it("redirects to redirectTo when it is a safe internal path", async () => {
@@ -55,7 +60,7 @@ describe("signUpAction", () => {
 
     await signUpAction(null, formData);
 
-    expect(redirect).toHaveBeenCalledWith(withToast("/activities/new", "Compte créé avec succès."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities/new", t.toast.signUpSuccess));
   });
 
   it("falls back to /activities when redirectTo is an external URL (open redirect)", async () => {
@@ -70,7 +75,7 @@ describe("signUpAction", () => {
 
     await signUpAction(null, formData);
 
-    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Compte créé avec succès."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", t.toast.signUpSuccess));
   });
 
   it("maps a ZodError from signUp to a validation error message", async () => {
@@ -96,7 +101,7 @@ describe("signUpAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Cette adresse email est déjà utilisée. Vous pouvez vous connecter.",
+      error: t.auth.signUp.emailAlreadyUsed,
       emailAlreadyUsed: true,
     });
   });
@@ -108,7 +113,7 @@ describe("signUpAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Le code d'inscription est invalide.",
+      error: t.auth.signUp.notAllowed,
     });
     expect(redirect).not.toHaveBeenCalled();
   });
@@ -120,7 +125,7 @@ describe("signUpAction", () => {
 
     const result = await signUpAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Impossible de créer le compte." });
+    expect(result).toEqual({ success: false, error: t.auth.signUp.accountCreationFailed });
   });
 
   it("maps an unexpected error to a generic message", async () => {
@@ -130,7 +135,7 @@ describe("signUpAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Erreur lors de la création du compte.",
+      error: t.auth.signUp.accountCreationError,
     });
   });
 });

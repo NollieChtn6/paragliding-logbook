@@ -4,12 +4,15 @@ import { deleteSchool } from "@/features/schools";
 import { requireAdmin } from "@/lib/current-user";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { deleteSchoolAction } from "./delete-school";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/schools", () => ({ deleteSchool: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 const SCHOOL_ID = "school-id";
 
@@ -32,8 +35,8 @@ describe("deleteSchoolAction", () => {
 
     await deleteSchoolAction(SCHOOL_ID, null, new FormData());
 
-    expect(deleteSchool).toHaveBeenCalledWith(SCHOOL_ID);
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/schools", "École supprimée."));
+    expect(deleteSchool).toHaveBeenCalledWith(SCHOOL_ID, t.toast.schoolInUse);
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/schools", t.toast.schoolDeleted));
   });
 
   it("maps a ReferenceDataInUseError to its own message", async () => {
@@ -52,7 +55,7 @@ describe("deleteSchoolAction", () => {
 
     const result = await deleteSchoolAction(SCHOOL_ID, null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la suppression." });
+    expect(result).toEqual({ success: false, error: t.toast.deleteError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

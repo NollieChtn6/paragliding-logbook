@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { searchCityAction } from "@/actions/search-city";
+import { useT } from "@/components/locale-provider";
 import {
   Combobox,
   ComboboxCollection,
@@ -30,6 +31,7 @@ export function CityCombobox({ name, defaultValue }: CityComboboxProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<CitySuggestion[]>(defaultValue ? [defaultValue] : []);
   const [selected, setSelected] = useState<CitySuggestion | null>(defaultValue ?? null);
+  const t = useT().account;
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -40,7 +42,7 @@ export function CityCombobox({ name, defaultValue }: CityComboboxProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={name}>Ville</Label>
+      <Label htmlFor={name}>{t.cityLabel}</Label>
       <Combobox
         items={results}
         value={selected}
@@ -54,9 +56,9 @@ export function CityCombobox({ name, defaultValue }: CityComboboxProps) {
         filter={null}
         name={name}
       >
-        <ComboboxInput id={name} placeholder="Rechercher une ville..." showClear />
+        <ComboboxInput id={name} placeholder={t.cityPlaceholder} showClear />
         <ComboboxContent>
-          <ComboboxEmpty>Aucune ville trouvée.</ComboboxEmpty>
+          <ComboboxEmpty>{t.cityEmpty}</ComboboxEmpty>
           <ComboboxList>
             <ComboboxCollection>
               {(suggestion: CitySuggestion) => (

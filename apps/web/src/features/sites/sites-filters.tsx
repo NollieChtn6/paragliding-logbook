@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SITE_TYPE_LABELS } from "@/lib/reference-labels";
 
 type SitesFiltersProps = {
   spots: { id: string; name: string }[];
@@ -28,6 +28,8 @@ const TYPE_OPTIONS = ["TAKEOFF", "LANDING"] as const;
 // nombre de sites est amené à grandir (voir search-sites.service.ts).
 export function SitesFilters({ spots, query, spotId, typeCode }: SitesFiltersProps) {
   const router = useRouter();
+  const t = useT();
+  const ts = t.sites;
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams();
@@ -47,22 +49,20 @@ export function SitesFilters({ spots, query, spotId, typeCode }: SitesFiltersPro
       <form className="flex flex-1 gap-2">
         {spotId && <input type="hidden" name="spotId" value={spotId} />}
         {typeCode && <input type="hidden" name="typeCode" value={typeCode} />}
-        <Input name="q" defaultValue={query} placeholder="Rechercher un site..." />
+        <Input name="q" defaultValue={query} placeholder={ts.searchPlaceholder} />
         <Button type="submit" variant="outline">
-          Rechercher
+          {t.common.search}
         </Button>
       </form>
 
       <Select value={spotId ?? ""} onValueChange={(value) => updateParam("spotId", value ?? "")}>
         <SelectTrigger className="w-full sm:w-48">
-          <SelectValue placeholder="Tous les spots">
-            {(value: string | null) =>
-              spots.find((spot) => spot.id === value)?.name ?? "Tous les spots"
-            }
+          <SelectValue placeholder={ts.allSpots}>
+            {(value: string | null) => spots.find((spot) => spot.id === value)?.name ?? ts.allSpots}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Tous les spots</SelectItem>
+          <SelectItem value="">{ts.allSpots}</SelectItem>
           {spots.map((spot) => (
             <SelectItem key={spot.id} value={spot.id}>
               {spot.name}
@@ -76,17 +76,17 @@ export function SitesFilters({ spots, query, spotId, typeCode }: SitesFiltersPro
         onValueChange={(value) => updateParam("typeCode", value ?? "")}
       >
         <SelectTrigger className="w-full sm:w-40">
-          <SelectValue placeholder="Tous les types">
+          <SelectValue placeholder={ts.allTypes}>
             {(value: string | null) =>
-              value ? (SITE_TYPE_LABELS[value] ?? value) : "Tous les types"
+              value ? (t.referenceLabels.siteType[value] ?? value) : ts.allTypes
             }
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Tous les types</SelectItem>
+          <SelectItem value="">{ts.allTypes}</SelectItem>
           {TYPE_OPTIONS.map((code) => (
             <SelectItem key={code} value={code}>
-              {SITE_TYPE_LABELS[code] ?? code}
+              {t.referenceLabels.siteType[code] ?? code}
             </SelectItem>
           ))}
         </SelectContent>

@@ -2,8 +2,12 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ActivityNotFoundError } from "@/features/activities";
 import { createTrainingCamp } from "@/features/training-camps";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createFlight } from "./create-flight.service";
 import { updateFlight } from "./update-flight.service";
+
+const t = getDictionary("fr-FR").validation.flight;
+const trainingCampMessages = getDictionary("fr-FR").validation.trainingCamp;
 
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
@@ -107,28 +111,40 @@ beforeAll(async () => {
   landingPointId = landingPoint.id;
   otherSpotTakeoffPointId = otherSpotTakeoffPoint.id;
 
-  const trainingCamp = await createTrainingCamp(userId, {
-    startDate: "2025-01-10",
-    endDate: "2025-01-20",
-    schoolId,
-    trainingCampTypeId,
-  });
+  const trainingCamp = await createTrainingCamp(
+    userId,
+    {
+      startDate: "2025-01-10",
+      endDate: "2025-01-20",
+      schoolId,
+      trainingCampTypeId,
+    },
+    trainingCampMessages,
+  );
   trainingCampId = trainingCamp.id;
 
-  const otherUserTrainingCamp = await createTrainingCamp(otherUserId, {
-    startDate: "2025-01-10",
-    endDate: "2025-01-20",
-    schoolId,
-    trainingCampTypeId,
-  });
+  const otherUserTrainingCamp = await createTrainingCamp(
+    otherUserId,
+    {
+      startDate: "2025-01-10",
+      endDate: "2025-01-20",
+      schoolId,
+      trainingCampTypeId,
+    },
+    trainingCampMessages,
+  );
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 
-  const flight = await createFlight(userId, {
-    ...validFlightInput,
-    takeoffPointId,
-    landingPointId,
-    flightTypeId,
-  });
+  const flight = await createFlight(
+    userId,
+    {
+      ...validFlightInput,
+      takeoffPointId,
+      landingPointId,
+      flightTypeId,
+    },
+    t,
+  );
   flightId = flight.id;
   activityId = flight.activityId;
 });
@@ -150,14 +166,19 @@ afterAll(async () => {
 
 describe("updateFlight (integration)", () => {
   it("updates the Flight with the submitted data", async () => {
-    const updated = await updateFlight(userId, activityId, {
-      ...validFlightInput,
-      takeoffPointId,
-      landingPointId,
-      flightTypeId,
-      durationMin: "50",
-      observations: "Updated observations.",
-    });
+    const updated = await updateFlight(
+      userId,
+      activityId,
+      {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId,
+        flightTypeId,
+        durationMin: "50",
+        observations: "Updated observations.",
+      },
+      t,
+    );
 
     expect(updated.id).toBe(flightId);
     expect(updated.durationMin).toBe(50);
@@ -165,65 +186,95 @@ describe("updateFlight (integration)", () => {
   });
 
   it("accepts a takeoff point and a landing point belonging to two different spots", async () => {
-    const updated = await updateFlight(userId, activityId, {
-      ...validFlightInput,
-      takeoffPointId: otherSpotTakeoffPointId,
-      landingPointId,
-      flightTypeId,
-    });
+    const updated = await updateFlight(
+      userId,
+      activityId,
+      {
+        ...validFlightInput,
+        takeoffPointId: otherSpotTakeoffPointId,
+        landingPointId,
+        flightTypeId,
+      },
+      t,
+    );
 
     expect(updated.takeoffPointId).toBe(otherSpotTakeoffPointId);
     expect(updated.landingPointId).toBe(landingPointId);
 
     // Remet les points d'origine pour ne pas affecter les tests suivants.
-    await updateFlight(userId, activityId, {
-      ...validFlightInput,
-      takeoffPointId,
-      landingPointId,
-      flightTypeId,
-    });
+    await updateFlight(
+      userId,
+      activityId,
+      {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId,
+        flightTypeId,
+      },
+      t,
+    );
   });
 
   it("clears an optional field when it is omitted from the input", async () => {
-    await updateFlight(userId, activityId, {
-      ...validFlightInput,
-      takeoffPointId,
-      landingPointId,
-      flightTypeId,
-      trainingCampId,
-      date: "2025-01-12",
-    });
+    await updateFlight(
+      userId,
+      activityId,
+      {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId,
+        flightTypeId,
+        trainingCampId,
+        date: "2025-01-12",
+      },
+      t,
+    );
 
-    const withCamp = await updateFlight(userId, activityId, {
-      ...validFlightInput,
-      takeoffPointId,
-      landingPointId,
-      flightTypeId,
-    });
+    const withCamp = await updateFlight(
+      userId,
+      activityId,
+      {
+        ...validFlightInput,
+        takeoffPointId,
+        landingPointId,
+        flightTypeId,
+      },
+      t,
+    );
 
     expect(withCamp.trainingCampId).toBeNull();
   });
 
   it("fails with invalid data", async () => {
     await expect(
-      updateFlight(userId, activityId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-        durationMin: "-10",
-      }),
+      updateFlight(
+        userId,
+        activityId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+          durationMin: "-10",
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the takeoff point does not exist", async () => {
     await expect(
-      updateFlight(userId, activityId, {
-        ...validFlightInput,
-        takeoffPointId: crypto.randomUUID(),
-        landingPointId,
-        flightTypeId,
-      }),
+      updateFlight(
+        userId,
+        activityId,
+        {
+          ...validFlightInput,
+          takeoffPointId: crypto.randomUUID(),
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
@@ -231,56 +282,81 @@ describe("updateFlight (integration)", () => {
   // doit référencer un point TAKEOFF, landingPointId un point LANDING.
   it("fails when the takeoff point is actually a landing point", async () => {
     await expect(
-      updateFlight(userId, activityId, {
-        ...validFlightInput,
-        takeoffPointId: landingPointId,
-        landingPointId,
-        flightTypeId,
-      }),
+      updateFlight(
+        userId,
+        activityId,
+        {
+          ...validFlightInput,
+          takeoffPointId: landingPointId,
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the landing point is actually a takeoff point", async () => {
     await expect(
-      updateFlight(userId, activityId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId: takeoffPointId,
-        flightTypeId,
-      }),
+      updateFlight(
+        userId,
+        activityId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId: takeoffPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the flight type does not exist", async () => {
     await expect(
-      updateFlight(userId, activityId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId: crypto.randomUUID(),
-      }),
+      updateFlight(
+        userId,
+        activityId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId: crypto.randomUUID(),
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("throws ActivityNotFoundError when the activity does not exist", async () => {
     await expect(
-      updateFlight(userId, crypto.randomUUID(), {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-      }),
+      updateFlight(
+        userId,
+        crypto.randomUUID(),
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow(ActivityNotFoundError);
   });
 
   it("throws ActivityNotFoundError when the activity belongs to another user", async () => {
     await expect(
-      updateFlight(otherUserId, activityId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-      }),
+      updateFlight(
+        otherUserId,
+        activityId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow(ActivityNotFoundError);
   });
 
@@ -288,27 +364,37 @@ describe("updateFlight (integration)", () => {
   describe("with a trainingCampId", () => {
     it("fails when the flight date is outside the training camp's interval", async () => {
       await expect(
-        updateFlight(userId, activityId, {
-          ...validFlightInput,
-          takeoffPointId,
-          landingPointId,
-          flightTypeId,
-          trainingCampId,
-          date: "2025-01-25",
-        }),
+        updateFlight(
+          userId,
+          activityId,
+          {
+            ...validFlightInput,
+            takeoffPointId,
+            landingPointId,
+            flightTypeId,
+            trainingCampId,
+            date: "2025-01-25",
+          },
+          t,
+        ),
       ).rejects.toThrow();
     });
 
     it("fails when the training camp belongs to another user", async () => {
       await expect(
-        updateFlight(userId, activityId, {
-          ...validFlightInput,
-          takeoffPointId,
-          landingPointId,
-          flightTypeId,
-          trainingCampId: otherUserTrainingCampId,
-          date: "2025-01-12",
-        }),
+        updateFlight(
+          userId,
+          activityId,
+          {
+            ...validFlightInput,
+            takeoffPointId,
+            landingPointId,
+            flightTypeId,
+            trainingCampId: otherUserTrainingCampId,
+            date: "2025-01-12",
+          },
+          t,
+        ),
       ).rejects.toThrow();
     });
   });

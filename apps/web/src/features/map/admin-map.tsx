@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,6 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import type { Messages } from "@/messages";
 import type { MapMarker, MapMarkerKind } from "./build-map-markers";
 
 // Couleurs propres à cette carte (pas des tokens sémantiques réutilisés
@@ -30,13 +32,15 @@ const MARKER_COLORS: Record<MapMarkerKind, string> = {
   SCHOOL: "#7c3aed",
 };
 
-const MARKER_LABELS: Record<MapMarkerKind, string> = {
-  TAKEOFF: "Décollage",
-  LANDING: "Atterrissage",
-  SCHOOL: "École",
-};
-
 const ALL_KINDS: MapMarkerKind[] = ["TAKEOFF", "LANDING", "SCHOOL"];
+
+function getMarkerLabels(t: Messages["admin"]): Record<MapMarkerKind, string> {
+  return {
+    TAKEOFF: t.markerTakeoff,
+    LANDING: t.markerLanding,
+    SCHOOL: t.markerSchool,
+  };
+}
 
 // Mêmes icônes que le reste de l'app pour ce type de lieu : ArrowUpRight/
 // ArrowDownLeft pour décollage/atterrissage (trajet du vol, voir
@@ -147,6 +151,8 @@ type AdminMapProps = {
 };
 
 export function AdminMap({ markers }: AdminMapProps) {
+  const t = useT();
+  const markerLabels = getMarkerLabels(t.admin);
   const [activeKinds, setActiveKinds] = useState<Set<MapMarkerKind>>(new Set(ALL_KINDS));
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
   // Ne sert qu'à déclencher FitBounds sur un vrai changement de filtre
@@ -189,7 +195,7 @@ export function AdminMap({ markers }: AdminMapProps) {
       s'active/se désactive indépendamment (aucune combinaison exclusive),
       pas de contrôle de filtre séparé. */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">Filtrer :</span>
+        <span className="text-sm text-muted-foreground">{t.admin.mapFilterLabel}</span>
         {ALL_KINDS.map((kind) => {
           const active = activeKinds.has(kind);
           return (
@@ -206,7 +212,7 @@ export function AdminMap({ markers }: AdminMapProps) {
                 style={{ background: MARKER_COLORS[kind] }}
                 aria-hidden
               />
-              {MARKER_LABELS[kind]}
+              {markerLabels[kind]}
             </button>
           );
         })}
@@ -251,7 +257,7 @@ export function AdminMap({ markers }: AdminMapProps) {
           <SheetHeader>
             <SheetTitle>{selectedMarker?.label}</SheetTitle>
             <SheetDescription>
-              {selectedMarker ? MARKER_LABELS[selectedMarker.kind] : ""}
+              {selectedMarker ? markerLabels[selectedMarker.kind] : ""}
             </SheetDescription>
           </SheetHeader>
 
@@ -270,7 +276,7 @@ export function AdminMap({ markers }: AdminMapProps) {
             {selectedMarker && selectedMarker.siblingSites.length > 0 && (
               <div className="flex flex-col gap-1.5 border-t border-border pt-4">
                 <span className="text-xs font-medium text-muted-foreground uppercase">
-                  Autres sites du même spot
+                  {t.admin.mapOtherSitesHeading}
                 </span>
                 {selectedMarker.siblingSites.map((sibling) => {
                   const SiblingIcon = MARKER_ICON_COMPONENTS[sibling.kind];
@@ -307,7 +313,7 @@ export function AdminMap({ markers }: AdminMapProps) {
           <SheetFooter>
             <Button
               nativeButton={false}
-              render={<Link href={selectedMarker?.editHref ?? "#"}>Modifier</Link>}
+              render={<Link href={selectedMarker?.editHref ?? "#"}>{t.admin.mapEditButton}</Link>}
             />
           </SheetFooter>
         </SheetContent>

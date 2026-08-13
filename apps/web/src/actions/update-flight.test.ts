@@ -5,6 +5,7 @@ import { ActivityNotFoundError } from "@/features/activities";
 import { updateFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { updateFlightAction } from "./update-flight";
 
 // Même approche que create-flight.test.ts : updateFlight et
@@ -13,7 +14,9 @@ import { updateFlightAction } from "./update-flight";
 vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn() }));
 vi.mock("@/features/flights", () => ({ updateFlight: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const CURRENT_USER = { id: "current-user-id" };
 const ACTIVITY_ID = "some-activity-id";
 
@@ -34,8 +37,11 @@ describe("updateFlightAction", () => {
       CURRENT_USER.id,
       ACTIVITY_ID,
       expect.objectContaining({ takeoffPointId: "some-point" }),
+      t.validation.flight,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast(`/activities/${ACTIVITY_ID}`, "Vol modifié."));
+    expect(redirect).toHaveBeenCalledWith(
+      withToast(`/activities/${ACTIVITY_ID}`, t.toast.flightUpdated),
+    );
   });
 
   it("maps a ZodError from updateFlight to a validation error message", async () => {
@@ -63,7 +69,7 @@ describe("updateFlightAction", () => {
 
     const result = await updateFlightAction(ACTIVITY_ID, null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la modification du vol." });
+    expect(result).toEqual({ success: false, error: t.toast.flightUpdateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

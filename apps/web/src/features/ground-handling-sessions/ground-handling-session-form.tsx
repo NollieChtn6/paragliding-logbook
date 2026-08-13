@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useLocale, useT } from "@/components/locale-provider";
 import { SelectClearButton } from "@/components/select-clear-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { getFieldErrors } from "@/lib/form-validation";
-import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
+import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import { SpotCombobox, type SpotOption } from "./spot-combobox";
 
@@ -62,17 +63,6 @@ type GroundHandlingSessionFormProps = {
 const WIZARD_STEP_2_REQUIRED_FIELDS = ["date", "time", "spotId", "durationMin"];
 const WIZARD_STEP_3_REQUIRED_FIELDS = ["exercises"];
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("fr-FR");
-}
-
-function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
-  const typeLabel =
-    TRAINING_CAMP_TYPE_LABELS[trainingCamp.trainingCampType.code] ??
-    trainingCamp.trainingCampType.code;
-  return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
-}
-
 // Format attendu par <Input type="date">/<Input type="time">, voir
 // flight-form.tsx.
 function toDateInputValue(date: Date): string {
@@ -92,7 +82,7 @@ export function GroundHandlingSessionForm({
   action,
   defaultValues,
   defaultSpot,
-  submitLabel = "Créer la séance",
+  submitLabel,
   wizardStep,
   onWizardBack,
   onWizardNext,
@@ -106,6 +96,16 @@ export function GroundHandlingSessionForm({
   // flight-form.tsx pour la justification (toasts réservés à la
   // soumission/succès).
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [locale] = useLocale();
+  const t = useT();
+  const tg = t.groundHandlingSessions;
+
+  function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
+    const typeLabel =
+      t.referenceLabels.trainingCampType[trainingCamp.trainingCampType.code] ??
+      trainingCamp.trainingCampType.code;
+    return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate, locale)} → ${formatDate(trainingCamp.endDate, locale)})`;
+  }
 
   useEffect(() => {
     if (state?.success === false) {
@@ -117,7 +117,7 @@ export function GroundHandlingSessionForm({
     const form = formRef.current;
     if (!form) return;
 
-    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS);
+    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS, t.common);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -136,7 +136,7 @@ export function GroundHandlingSessionForm({
         const sessionDate = new Date(dateValue);
         if (sessionDate < selectedCamp.startDate || sessionDate > selectedCamp.endDate) {
           setFieldErrors({
-            date: "Doit être comprise dans l'intervalle du stage sélectionné (ou retirez le stage associé).",
+            date: tg.dateOutsideTrainingCampField,
           });
           return;
         }
@@ -151,7 +151,7 @@ export function GroundHandlingSessionForm({
   // pour exercises, sans effet en dehors du mode assistant.
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!wizardStep) return;
-    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS);
+    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS, t.common);
     if (Object.keys(errors).length > 0) {
       event.preventDefault();
       setFieldErrors(errors);
@@ -161,12 +161,12 @@ export function GroundHandlingSessionForm({
   return (
     <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
       {!wizardStep && (
-        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
+        <h2 className="text-lg font-medium tracking-tight text-foreground">{tg.detailsHeading}</h2>
       )}
       <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{tg.dateLabel}</Label>
             <Input
               id="date"
               name="date"
@@ -179,7 +179,7 @@ export function GroundHandlingSessionForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="time">Heure</Label>
+            <Label htmlFor="time">{tg.timeLabel}</Label>
             <Input
               id="time"
               name="time"
@@ -196,7 +196,7 @@ export function GroundHandlingSessionForm({
 
         {trainingCamps.length > 0 && (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+            <Label htmlFor="trainingCampId">{tg.trainingCampLabel}</Label>
             <div className="flex items-center gap-1.5">
               <Select
                 name="trainingCampId"
@@ -204,15 +204,15 @@ export function GroundHandlingSessionForm({
                 onValueChange={(value) => setTrainingCampId(value ?? "")}
               >
                 <SelectTrigger id="trainingCampId" className="w-full flex-1">
-                  <SelectValue placeholder="Aucun">
+                  <SelectValue placeholder={tg.none}>
                     {(value: string) => {
                       const trainingCamp = trainingCamps.find((tc) => tc.id === value);
-                      return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+                      return trainingCamp ? formatTrainingCampOption(trainingCamp) : tg.none;
                     }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucun</SelectItem>
+                  <SelectItem value="">{tg.none}</SelectItem>
                   {trainingCamps.map((trainingCamp) => (
                     <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
                       {formatTrainingCampOption(trainingCamp)}
@@ -223,7 +223,7 @@ export function GroundHandlingSessionForm({
               {trainingCampId && (
                 <SelectClearButton
                   onClear={() => setTrainingCampId("")}
-                  label="Effacer le stage associé"
+                  label={tg.clearTrainingCamp}
                 />
               )}
             </div>
@@ -231,7 +231,7 @@ export function GroundHandlingSessionForm({
         )}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="durationMin">Durée (min)</Label>
+          <Label htmlFor="durationMin">{tg.durationLabel}</Label>
           <Input
             id="durationMin"
             name="durationMin"
@@ -248,11 +248,13 @@ export function GroundHandlingSessionForm({
       </div>
 
       {!wizardStep && (
-        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
+        <h2 className="text-lg font-medium tracking-tight text-foreground">
+          {tg.observationsHeading}
+        </h2>
       )}
       <div className={cn(wizardStep === 2 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="exercises">Exercices travaillés</Label>
+          <Label htmlFor="exercises">{tg.exercisesLabel}</Label>
           <Textarea
             id="exercises"
             name="exercises"
@@ -266,7 +268,7 @@ export function GroundHandlingSessionForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="difficulties">Difficultés rencontrées</Label>
+          <Label htmlFor="difficulties">{tg.difficultiesLabel}</Label>
           <Textarea
             id="difficulties"
             name="difficulties"
@@ -275,7 +277,7 @@ export function GroundHandlingSessionForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="feeling">Ressenti</Label>
+          <Label htmlFor="feeling">{tg.feelingLabel}</Label>
           <Textarea id="feeling" name="feeling" defaultValue={defaultValues?.feeling} />
         </div>
       </div>
@@ -283,7 +285,7 @@ export function GroundHandlingSessionForm({
       {wizardStep ? (
         <div className="mt-2 flex items-center justify-between gap-2">
           <Button type="button" variant="outline" onClick={onWizardBack}>
-            Précédent
+            {tg.previous}
           </Button>
           {/* key distinct sur les deux boutons : sans ça, passer de l'étape 2
           à 3 fait muter le même nœud DOM de type="button" à type="submit"
@@ -295,17 +297,17 @@ export function GroundHandlingSessionForm({
           TrainingCampForm, où aucun champ n'est requis. */}
           {wizardStep === 2 ? (
             <Button key="next" type="button" onClick={handleWizardNext}>
-              Suivant
+              {tg.next}
             </Button>
           ) : (
             <Button key="submit" type="submit" disabled={isPending}>
-              {isPending ? "Enregistrement..." : submitLabel}
+              {isPending ? t.common.saving : (submitLabel ?? tg.createSession)}
             </Button>
           )}
         </div>
       ) : (
         <Button type="submit" className="mt-2" disabled={isPending}>
-          {isPending ? "Enregistrement..." : submitLabel}
+          {isPending ? t.common.saving : (submitLabel ?? tg.createSession)}
         </Button>
       )}
 

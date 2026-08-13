@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { createGroundHandlingSessionAction } from "./create-ground-handling-session";
 
 // Ne re-teste pas les règles métier GroundHandlingSession (déjà couvertes par
@@ -18,7 +19,9 @@ vi.mock("@/features/ground-handling-sessions", () => ({
   createGroundHandlingSession: vi.fn(),
 }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const CURRENT_USER = { id: "current-user-id" };
 
 describe("createGroundHandlingSessionAction", () => {
@@ -37,8 +40,11 @@ describe("createGroundHandlingSessionAction", () => {
     expect(createGroundHandlingSession).toHaveBeenCalledWith(
       CURRENT_USER.id,
       expect.objectContaining({ siteId: "some-site" }),
+      t.validation.groundHandling,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Séance créée."));
+    expect(redirect).toHaveBeenCalledWith(
+      withToast("/activities", t.toast.groundHandlingSessionCreated),
+    );
   });
 
   it("maps a ZodError from createGroundHandlingSession to a validation error message", async () => {
@@ -59,7 +65,7 @@ describe("createGroundHandlingSessionAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Erreur lors de la création de la séance de gonflage.",
+      error: t.toast.groundHandlingSessionCreateError,
     });
     expect(redirect).not.toHaveBeenCalled();
   });

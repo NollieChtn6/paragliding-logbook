@@ -1,7 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTrainingCamp } from "@/features/training-camps";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createFlight } from "./create-flight.service";
+
+const t = getDictionary("fr-FR").validation.flight;
+const trainingCampMessages = getDictionary("fr-FR").validation.trainingCamp;
 
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
@@ -100,20 +104,28 @@ beforeAll(async () => {
   });
   schoolId = school.id;
 
-  const trainingCamp = await createTrainingCamp(userId, {
-    startDate: "2025-01-10",
-    endDate: "2025-01-20",
-    schoolId,
-    trainingCampTypeId,
-  });
+  const trainingCamp = await createTrainingCamp(
+    userId,
+    {
+      startDate: "2025-01-10",
+      endDate: "2025-01-20",
+      schoolId,
+      trainingCampTypeId,
+    },
+    trainingCampMessages,
+  );
   trainingCampId = trainingCamp.id;
 
-  const otherUserTrainingCamp = await createTrainingCamp(otherUserId, {
-    startDate: "2025-01-10",
-    endDate: "2025-01-20",
-    schoolId,
-    trainingCampTypeId,
-  });
+  const otherUserTrainingCamp = await createTrainingCamp(
+    otherUserId,
+    {
+      startDate: "2025-01-10",
+      endDate: "2025-01-20",
+      schoolId,
+      trainingCampTypeId,
+    },
+    trainingCampMessages,
+  );
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 });
 
@@ -138,12 +150,16 @@ describe("createFlight (integration)", () => {
     let activityId: string;
 
     beforeAll(async () => {
-      const flight = await createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-      });
+      const flight = await createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      );
       flightId = flight.id;
       activityId = flight.activityId;
     });
@@ -175,47 +191,63 @@ describe("createFlight (integration)", () => {
   });
 
   it("accepts a takeoff point and a landing point belonging to two different spots", async () => {
-    const flight = await createFlight(userId, {
-      ...validFlightInput,
-      takeoffPointId: otherSpotTakeoffPointId,
-      landingPointId,
-      flightTypeId,
-    });
+    const flight = await createFlight(
+      userId,
+      {
+        ...validFlightInput,
+        takeoffPointId: otherSpotTakeoffPointId,
+        landingPointId,
+        flightTypeId,
+      },
+      t,
+    );
     expect(flight.takeoffPointId).toBe(otherSpotTakeoffPointId);
     expect(flight.landingPointId).toBe(landingPointId);
   });
 
   it("fails with invalid data", async () => {
     await expect(
-      createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-        durationMin: "-10",
-      }),
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+          durationMin: "-10",
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the takeoff point does not exist", async () => {
     await expect(
-      createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId: crypto.randomUUID(),
-        landingPointId,
-        flightTypeId,
-      }),
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId: crypto.randomUUID(),
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the landing point does not exist", async () => {
     await expect(
-      createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId: crypto.randomUUID(),
-        flightTypeId,
-      }),
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId: crypto.randomUUID(),
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
@@ -224,34 +256,46 @@ describe("createFlight (integration)", () => {
   // exprimable par la seule FK SQL, vérifié dans le service.
   it("fails when the takeoff point is actually a landing point", async () => {
     await expect(
-      createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId: landingPointId,
-        landingPointId,
-        flightTypeId,
-      }),
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId: landingPointId,
+          landingPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the landing point is actually a takeoff point", async () => {
     await expect(
-      createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId: takeoffPointId,
-        flightTypeId,
-      }),
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId: takeoffPointId,
+          flightTypeId,
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the flight type does not exist", async () => {
     await expect(
-      createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId: crypto.randomUUID(),
-      }),
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId: crypto.randomUUID(),
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
@@ -259,14 +303,18 @@ describe("createFlight (integration)", () => {
   // doit avoir une date dans l'intervalle du stage.
   describe("with a trainingCampId", () => {
     it("succeeds when the flight date is within the training camp's interval", async () => {
-      const flight = await createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-        trainingCampId,
-        date: "2025-01-12",
-      });
+      const flight = await createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+          trainingCampId,
+          date: "2025-01-12",
+        },
+        t,
+      );
       expect(flight.trainingCampId).toBe(trainingCampId);
     });
 
@@ -276,54 +324,70 @@ describe("createFlight (integration)", () => {
     // jour du stage, son heure dépassant le minuit d'endDate. La comparaison
     // doit se faire au jour près (voir create-flight.service.ts).
     it("succeeds for a late-evening flight on the training camp's exact end date", async () => {
-      const flight = await createFlight(userId, {
-        ...validFlightInput,
-        takeoffPointId,
-        landingPointId,
-        flightTypeId,
-        trainingCampId,
-        date: "2025-01-20",
-        time: "22:30",
-      });
+      const flight = await createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+          trainingCampId,
+          date: "2025-01-20",
+          time: "22:30",
+        },
+        t,
+      );
       expect(flight.trainingCampId).toBe(trainingCampId);
     });
 
     it("fails when the flight date is before the training camp's start date", async () => {
       await expect(
-        createFlight(userId, {
-          ...validFlightInput,
-          takeoffPointId,
-          landingPointId,
-          flightTypeId,
-          trainingCampId,
-          date: "2025-01-05",
-        }),
+        createFlight(
+          userId,
+          {
+            ...validFlightInput,
+            takeoffPointId,
+            landingPointId,
+            flightTypeId,
+            trainingCampId,
+            date: "2025-01-05",
+          },
+          t,
+        ),
       ).rejects.toThrow();
     });
 
     it("fails when the flight date is after the training camp's end date", async () => {
       await expect(
-        createFlight(userId, {
-          ...validFlightInput,
-          takeoffPointId,
-          landingPointId,
-          flightTypeId,
-          trainingCampId,
-          date: "2025-01-25",
-        }),
+        createFlight(
+          userId,
+          {
+            ...validFlightInput,
+            takeoffPointId,
+            landingPointId,
+            flightTypeId,
+            trainingCampId,
+            date: "2025-01-25",
+          },
+          t,
+        ),
       ).rejects.toThrow();
     });
 
     it("fails when the training camp belongs to another user", async () => {
       await expect(
-        createFlight(userId, {
-          ...validFlightInput,
-          takeoffPointId,
-          landingPointId,
-          flightTypeId,
-          trainingCampId: otherUserTrainingCampId,
-          date: "2025-01-12",
-        }),
+        createFlight(
+          userId,
+          {
+            ...validFlightInput,
+            takeoffPointId,
+            landingPointId,
+            flightTypeId,
+            trainingCampId: otherUserTrainingCampId,
+            date: "2025-01-12",
+          },
+          t,
+        ),
       ).rejects.toThrow();
     });
   });

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useT } from "@/components/locale-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,23 +30,26 @@ type LeaveFormButtonProps = {
 // modification (/activities/[id]/edit), où le texte par défaut
 // ("la création"/"seront perdues") ne conviendrait pas — voir
 // activities/[id]/edit/page.tsx pour le texte adapté à la modification.
-export function LeaveFormButton({
-  href = "/",
-  label = "Annuler",
-  title = "Abandonner la création ?",
-  description = "Les informations saisies seront perdues.",
-}: LeaveFormButtonProps) {
+export function LeaveFormButton({ href = "/", label, title, description }: LeaveFormButtonProps) {
+  const t = useT();
+  const resolvedLabel = label ?? t.common.cancel;
+  const resolvedTitle = title ?? t.common.discardCreationTitle;
+  const resolvedDescription = description ?? t.common.discardCreationDescription;
+
   return (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="ghost">{label}</Button>} />
+      <AlertDialogTrigger render={<Button variant="ghost">{resolvedLabel}</Button>} />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle>{resolvedTitle}</AlertDialogTitle>
+          <AlertDialogDescription>{resolvedDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Continuer la saisie</AlertDialogCancel>
-          <AlertDialogAction nativeButton={false} render={<Link href={href}>Quitter</Link>} />
+          <AlertDialogCancel>{t.common.continueEditing}</AlertDialogCancel>
+          <AlertDialogAction
+            nativeButton={false}
+            render={<Link href={href}>{t.common.leave}</Link>}
+          />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

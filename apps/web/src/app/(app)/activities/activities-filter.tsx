@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { ActivityCard, type ActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import { pluralize } from "@/lib/pluralize";
 
 type ActivityListItem = {
   id: string;
@@ -36,12 +38,6 @@ const FILTER_TYPES: ActivityCardType[] = ["FLIGHT", "TRAINING_CAMP", "GROUND_HAN
 // Évite un défilement qui s'allonge indéfiniment avec l'historique : une
 // page de 20 tient largement sur un écran, mobile compris.
 const PAGE_SIZE = 20;
-
-const FILTER_LABELS: Record<ActivityCardType, string> = {
-  FLIGHT: "Vols",
-  TRAINING_CAMP: "Stages",
-  GROUND_HANDLING: "Séances de gonflage",
-};
 
 // Comparaison au jour près via une chaîne "yyyy-MM-dd", même principe que
 // create-flight.service.ts/update-flight.service.ts pour la règle "date
@@ -70,6 +66,14 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [page, setPage] = useState(1);
+  const t = useT();
+  const ta = t.activities;
+
+  const filterLabels: Record<ActivityCardType, string> = {
+    FLIGHT: ta.filterFlights,
+    TRAINING_CAMP: ta.filterTrainingCamps,
+    GROUND_HANDLING: ta.filterGroundHandling,
+  };
 
   const hasActiveFilters = selectedTypes.size > 0 || dateFrom !== "" || dateTo !== "";
 
@@ -134,20 +138,20 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
 
   const triggerLabel =
     selectedTypes.size === 0
-      ? "Tous les types"
+      ? ta.allTypes
       : selectedTypes.size === 1
-        ? FILTER_LABELS[[...selectedTypes][0]]
-        : `${selectedTypes.size} types sélectionnés`;
+        ? filterLabels[[...selectedTypes][0]]
+        : ta.typesSelected(selectedTypes.size);
 
   return (
     <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
       <PageHeader
-        title="Activités"
-        description={`${filteredActivities.length} activité${filteredActivities.length > 1 ? "s" : ""}`}
+        title={ta.pageTitle}
+        description={pluralize(filteredActivities.length, ta.count)}
         actions={
           <Button
             nativeButton={false}
-            render={<Link href="/activities/new">Nouvelle activité</Link>}
+            render={<Link href="/activities/new">{ta.newActivity}</Link>}
           />
         }
       />
@@ -156,7 +160,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="activities-date-from" className="text-xs text-muted-foreground">
-              Du
+              {ta.dateFromLabel}
             </Label>
             <Input
               id="activities-date-from"
@@ -169,7 +173,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="activities-date-to" className="text-xs text-muted-foreground">
-              Au
+              {ta.dateToLabel}
             </Label>
             <Input
               id="activities-date-to"
@@ -182,7 +186,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
           </div>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={resetFilters}>
-              Réinitialiser
+              {ta.reset}
             </Button>
           )}
         </div>
@@ -201,7 +205,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
               checked={selectedTypes.size === 0}
               onCheckedChange={setAllTypes}
             >
-              Tout
+              {ta.all}
             </DropdownMenuCheckboxItem>
             <DropdownMenuSeparator />
             {FILTER_TYPES.map((type) => (
@@ -210,7 +214,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
                 checked={selectedTypes.has(type)}
                 onCheckedChange={(checked) => toggleType(type, checked)}
               >
-                {FILTER_LABELS[type]}
+                {filterLabels[type]}
               </DropdownMenuCheckboxItem>
             ))}
           </DropdownMenuContent>
@@ -220,11 +224,11 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
       <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
         {filteredActivities.length === 0 ? (
           <EmptyState
-            title="Aucune activité ne correspond à ce filtre"
-            description="Essayez d'autres critères, ou réinitialisez les filtres."
+            title={ta.noResultsTitle}
+            description={ta.noResultsDescription}
             action={
               <Button variant="outline" onClick={resetFilters}>
-                Réinitialiser les filtres
+                {ta.resetFilters}
               </Button>
             }
           />
@@ -257,13 +261,11 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
                 disabled={page === 1}
                 onClick={() => setPage((current) => current - 1)}
               >
-                Précédent
+                {ta.previous}
               </Button>
             </PaginationItem>
             <PaginationItem>
-              <p className="px-2 text-sm text-muted-foreground">
-                Page {page} sur {pageCount}
-              </p>
+              <p className="px-2 text-sm text-muted-foreground">{ta.pageOf(page, pageCount)}</p>
             </PaginationItem>
             <PaginationItem>
               <Button
@@ -272,7 +274,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
                 disabled={page === pageCount}
                 onClick={() => setPage((current) => current + 1)}
               >
-                Suivant
+                {ta.next}
               </Button>
             </PaginationItem>
           </PaginationContent>

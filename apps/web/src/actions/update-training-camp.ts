@@ -5,7 +5,9 @@ import { ZodError } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type UpdateTrainingCampActionState = { success: true } | { success: false; error: string };
 
@@ -17,18 +19,24 @@ export async function updateTrainingCampAction(
   formData: FormData,
 ): Promise<UpdateTrainingCampActionState> {
   const user = await requireCurrentUser();
+  const t = getDictionary(await getLocale());
 
   try {
-    await updateTrainingCamp(user.id, activityId, Object.fromEntries(formData));
+    await updateTrainingCamp(
+      user.id,
+      activityId,
+      Object.fromEntries(formData),
+      t.validation.trainingCamp,
+    );
   } catch (error) {
     if (error instanceof ActivityNotFoundError) {
       notFound();
     }
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
-    return { success: false, error: "Erreur lors de la modification du stage." };
+    return { success: false, error: t.toast.trainingCampUpdateError };
   }
 
-  redirect(withToast(`/activities/${activityId}`, "Stage modifié."));
+  redirect(withToast(`/activities/${activityId}`, t.toast.trainingCampUpdated));
 }

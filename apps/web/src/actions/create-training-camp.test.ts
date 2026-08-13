@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { createTrainingCampAction } from "./create-training-camp";
 
 // Ne re-teste pas les règles métier TrainingCamp (déjà couvertes par
@@ -15,7 +16,9 @@ import { createTrainingCampAction } from "./create-training-camp";
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/training-camps", () => ({ createTrainingCamp: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const CURRENT_USER = { id: "current-user-id" };
 
 describe("createTrainingCampAction", () => {
@@ -34,8 +37,9 @@ describe("createTrainingCampAction", () => {
     expect(createTrainingCamp).toHaveBeenCalledWith(
       CURRENT_USER.id,
       expect.objectContaining({ schoolId: "some-school" }),
+      t.validation.trainingCamp,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/activities", "Stage créé."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/activities", t.toast.trainingCampCreated));
   });
 
   it("maps a ZodError from createTrainingCamp to a validation error message", async () => {
@@ -54,7 +58,7 @@ describe("createTrainingCampAction", () => {
 
     const result = await createTrainingCampAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la création du stage." });
+    expect(result).toEqual({ success: false, error: t.toast.trainingCampCreateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

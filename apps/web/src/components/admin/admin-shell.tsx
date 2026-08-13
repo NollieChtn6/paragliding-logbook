@@ -1,12 +1,12 @@
 "use client";
 
-import { Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
-import { SignOutButton } from "@/components/sign-out-button";
+import { AccountMenu } from "@/components/layout/account-menu";
+import { useT } from "@/components/locale-provider";
+import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { ADMIN_NAV_ITEMS, isAdminNavItemActive } from "./admin-nav-items";
@@ -25,6 +25,7 @@ import { ADMIN_NAV_ITEMS, isAdminNavItemActive } from "./admin-nav-items";
 // suffit pour un espace secondaire, sans surcharger l'écran.
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     // Même correctif que AppShell (components/layout/app-shell.tsx) : h-svh/
@@ -40,7 +41,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           >
             🪂
           </span>
-          Administration
+          {t.admin.title}
         </div>
 
         <nav className="flex flex-1 flex-col gap-1">
@@ -60,27 +61,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 aria-current={active ? "page" : undefined}
               >
                 <Icon className="size-4" />
-                {item.label}
+                {t.admin[item.labelKey]}
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex items-center justify-between border-t border-sidebar-border pt-4">
-          <ThemeToggle />
-          <Button
-            nativeButton={false}
-            variant="outline"
-            size="icon"
-            aria-label="Paramètres de sécurité"
-            title="Paramètres de sécurité"
-            render={
-              <Link href="/settings/security">
-                <Settings />
-              </Link>
-            }
-          />
-          <SignOutButton />
+        <div className="flex flex-col gap-3 border-t border-sidebar-border pt-4">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LocaleToggle />
+          </div>
+          <AccountMenu trigger="full" />
         </div>
         <VersionBadge className="mt-2 text-center" />
       </aside>
@@ -88,23 +80,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
           <span className="text-sm font-semibold tracking-tight text-foreground">
-            Administration
+            {t.admin.title}
           </span>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Button
-              nativeButton={false}
-              variant="outline"
-              size="icon"
-              aria-label="Paramètres de sécurité"
-              title="Paramètres de sécurité"
-              render={
-                <Link href="/settings/security">
-                  <Settings />
-                </Link>
-              }
-            />
-            <SignOutButton />
+            <LocaleToggle />
+            <AccountMenu />
           </div>
         </header>
 
@@ -123,7 +104,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 )}
                 aria-current={active ? "page" : undefined}
               >
-                {item.label}
+                {t.admin[item.labelKey]}
               </Link>
             );
           })}

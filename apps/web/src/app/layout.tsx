@@ -2,11 +2,13 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
 import { EnvironmentBanner } from "@/components/environment-banner";
+import { LocaleProvider } from "@/components/locale-provider";
 import { InstallPromptProvider } from "@/components/pwa/install-prompt-provider";
 import { ServiceWorkerRegistration } from "@/components/pwa/service-worker-registration";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ToastListener } from "@/components/toast-listener";
 import { Toaster } from "@/components/ui/toast";
+import { getLocale } from "@/lib/i18n/get-locale";
 import "./globals.css";
 
 // Plus Jakarta Sans (SIL OFL, docs/ui-directions.md) auto-hébergée : fichier
@@ -41,9 +43,15 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const locale = await getLocale();
+
   return (
-    <html lang="fr" className={`${fontSans.variable} h-full antialiased`} suppressHydrationWarning>
+    <html
+      lang={locale === "en-GB" ? "en" : "fr"}
+      className={`${fontSans.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
       {/* suppressHydrationWarning : certaines extensions navigateur (ex.
       ColorZilla) injectent un attribut sur <body> avant l'hydratation
       (ex. cz-shortcut-listen), provoquant un faux positif d'avertissement
@@ -51,16 +59,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col" suppressHydrationWarning>
         {/* Hors de ThemeProvider/Toaster : ne dépend d'aucun état client,
         doit rester visible même si l'un de ces providers échoue. */}
-        <EnvironmentBanner />
-        <ServiceWorkerRegistration />
-        <ThemeProvider>
-          <Toaster>
-            <Suspense fallback={null}>
-              <ToastListener />
-            </Suspense>
-            <InstallPromptProvider>{children}</InstallPromptProvider>
-          </Toaster>
-        </ThemeProvider>
+        <EnvironmentBanner locale={locale} />
+        <LocaleProvider initialLocale={locale}>
+          {/* ServiceWorkerRegistration a besoin de useT() (toast "nouvelle
+          version disponible") : doit vivre sous LocaleProvider, mais reste
+          hors de ThemeProvider/Toaster comme avant — pas de dépendance au
+          thème. */}
+          <ServiceWorkerRegistration />
+          <ThemeProvider>
+            <Toaster>
+              <Suspense fallback={null}>
+                <ToastListener />
+              </Suspense>
+              <InstallPromptProvider>{children}</InstallPromptProvider>
+            </Toaster>
+          </ThemeProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

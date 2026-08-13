@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createSchool } from "./create-school.service";
+
+const t = getDictionary("fr-FR").validation.school;
 
 const createdIds: string[] = [];
 
@@ -12,14 +15,17 @@ afterEach(async () => {
 describe("createSchool (integration)", () => {
   it("creates a school with the submitted data", async () => {
     const suffix = crypto.randomUUID();
-    const school = await createSchool({
-      name: `Integration Test School ${suffix}`,
-      address: "1 rue du Vol Libre",
-      postalCode: "38660",
-      city: "Plateau-des-Petites-Roches",
-      countryCode: "fr",
-      website: "https://www.exemple.fr",
-    });
+    const school = await createSchool(
+      {
+        name: `Integration Test School ${suffix}`,
+        address: "1 rue du Vol Libre",
+        postalCode: "38660",
+        city: "Plateau-des-Petites-Roches",
+        countryCode: "fr",
+        website: "https://www.exemple.fr",
+      },
+      t,
+    );
     createdIds.push(school.id);
 
     expect(school.name).toBe(`Integration Test School ${suffix}`);
@@ -29,7 +35,7 @@ describe("createSchool (integration)", () => {
 
   it("creates a school with only a name", async () => {
     const suffix = crypto.randomUUID();
-    const school = await createSchool({ name: `Integration Test School ${suffix}` });
+    const school = await createSchool({ name: `Integration Test School ${suffix}` }, t);
     createdIds.push(school.id);
 
     expect(school.address).toBeNull();
@@ -37,10 +43,10 @@ describe("createSchool (integration)", () => {
   });
 
   it("fails with an invalid website URL", async () => {
-    await expect(createSchool({ name: "Test", website: "not-a-url" })).rejects.toThrow();
+    await expect(createSchool({ name: "Test", website: "not-a-url" }, t)).rejects.toThrow();
   });
 
   it("fails with invalid data", async () => {
-    await expect(createSchool({ name: "" })).rejects.toThrow();
+    await expect(createSchool({ name: "" }, t)).rejects.toThrow();
   });
 });

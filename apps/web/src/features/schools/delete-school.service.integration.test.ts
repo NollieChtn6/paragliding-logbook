@@ -1,8 +1,12 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
+import { getDictionary } from "@/messages";
 import { createSchool } from "./create-school.service";
 import { deleteSchool } from "./delete-school.service";
+
+const t = getDictionary("fr-FR").validation.school;
+const schoolInUseMessage = getDictionary("fr-FR").toast.schoolInUse;
 
 const createdSchoolIds: string[] = [];
 
@@ -14,10 +18,10 @@ afterAll(async () => {
 describe("deleteSchool (integration)", () => {
   it("deletes a school with no associated training camps", async () => {
     const suffix = crypto.randomUUID();
-    const school = await createSchool({ name: `Delete School Test ${suffix}` });
+    const school = await createSchool({ name: `Delete School Test ${suffix}` }, t);
     createdSchoolIds.push(school.id);
 
-    await deleteSchool(school.id);
+    await deleteSchool(school.id, schoolInUseMessage);
 
     const found = await prisma.school.findUnique({ where: { id: school.id } });
     expect(found).toBeNull();
@@ -26,7 +30,7 @@ describe("deleteSchool (integration)", () => {
 
   it("refuses to delete a school that still has training camps", async () => {
     const suffix = crypto.randomUUID();
-    const school = await createSchool({ name: `Delete School With Camp Test ${suffix}` });
+    const school = await createSchool({ name: `Delete School With Camp Test ${suffix}` }, t);
     createdSchoolIds.push(school.id);
 
     const [user, activityType, trainingCampType] = await Promise.all([
@@ -49,7 +53,9 @@ describe("deleteSchool (integration)", () => {
       },
     });
 
-    await expect(deleteSchool(school.id)).rejects.toThrow(ReferenceDataInUseError);
+    await expect(deleteSchool(school.id, schoolInUseMessage)).rejects.toThrow(
+      ReferenceDataInUseError,
+    );
 
     await prisma.trainingCamp.deleteMany({ where: { activityId: activity.id } });
     await prisma.activity.deleteMany({ where: { id: activity.id } });

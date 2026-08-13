@@ -1,13 +1,14 @@
 "use client";
 
-import { MapPin, Settings } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignOutButton } from "@/components/sign-out-button";
+import { useT } from "@/components/locale-provider";
+import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
+import { AccountMenu } from "./account-menu";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
 type DesktopSidebarProps = {
@@ -21,6 +22,7 @@ type DesktopSidebarProps = {
 // (voir app-shell.tsx), donc pas de lien Administration ici.
 export function DesktopSidebar({ city }: DesktopSidebarProps) {
   const pathname = usePathname();
+  const t = useT();
 
   return (
     <aside className="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 md:flex">
@@ -65,27 +67,18 @@ export function DesktopSidebar({ city }: DesktopSidebarProps) {
               aria-current={active ? "page" : undefined}
             >
               <Icon className="size-4" />
-              {item.label}
+              {t.shell[item.labelKey]}
             </Link>
           );
         })}
       </nav>
 
-      <div className="flex items-center justify-between border-t border-sidebar-border pt-4">
-        <ThemeToggle />
-        <Button
-          nativeButton={false}
-          variant="outline"
-          size="icon"
-          aria-label="Paramètres de sécurité"
-          title="Paramètres de sécurité"
-          render={
-            <Link href="/settings/security">
-              <Settings />
-            </Link>
-          }
-        />
-        <SignOutButton />
+      <div className="flex flex-col gap-3 border-t border-sidebar-border pt-4">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <LocaleToggle />
+        </div>
+        <AccountMenu trigger="full" />
       </div>
       <VersionBadge className="mt-2 text-center" />
     </aside>

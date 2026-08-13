@@ -1,8 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
+import { getDictionary } from "@/messages";
 import { createSite } from "./create-site.service";
 import { deleteSite } from "./delete-site.service";
+
+const t = getDictionary("fr-FR").validation.site;
+const siteInUseMessage = getDictionary("fr-FR").toast.siteInUse;
 
 let spotId: string;
 let takeoffTypeId: string;
@@ -27,38 +31,47 @@ afterAll(async () => {
 
 describe("deleteSite (integration)", () => {
   it("deletes a site with no associated flights", async () => {
-    const site = await createSite({
-      label: "Site sans vol",
-      spotId,
-      siteTypeId: takeoffTypeId,
-      latitude: "45.3",
-      longitude: "5.9",
-      altitudeM: "900",
-    });
+    const site = await createSite(
+      {
+        label: "Site sans vol",
+        spotId,
+        siteTypeId: takeoffTypeId,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      },
+      t,
+    );
 
-    await deleteSite(site.id);
+    await deleteSite(site.id, siteInUseMessage);
 
     const found = await prisma.site.findUnique({ where: { id: site.id } });
     expect(found).toBeNull();
   });
 
   it("refuses to delete a site referenced by a flight as takeoff", async () => {
-    const takeoffSite = await createSite({
-      label: "Décollage utilisé",
-      spotId,
-      siteTypeId: takeoffTypeId,
-      latitude: "45.3",
-      longitude: "5.9",
-      altitudeM: "900",
-    });
-    const landingSite = await createSite({
-      label: "Atterrissage utilisé",
-      spotId,
-      siteTypeId: landingTypeId,
-      latitude: "45.3",
-      longitude: "5.9",
-      altitudeM: "300",
-    });
+    const takeoffSite = await createSite(
+      {
+        label: "Décollage utilisé",
+        spotId,
+        siteTypeId: takeoffTypeId,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      },
+      t,
+    );
+    const landingSite = await createSite(
+      {
+        label: "Atterrissage utilisé",
+        spotId,
+        siteTypeId: landingTypeId,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "300",
+      },
+      t,
+    );
 
     const suffix = crypto.randomUUID();
     const user = await prisma.user.create({
@@ -84,8 +97,12 @@ describe("deleteSite (integration)", () => {
       },
     });
 
-    await expect(deleteSite(takeoffSite.id)).rejects.toThrow(ReferenceDataInUseError);
-    await expect(deleteSite(landingSite.id)).rejects.toThrow(ReferenceDataInUseError);
+    await expect(deleteSite(takeoffSite.id, siteInUseMessage)).rejects.toThrow(
+      ReferenceDataInUseError,
+    );
+    await expect(deleteSite(landingSite.id, siteInUseMessage)).rejects.toThrow(
+      ReferenceDataInUseError,
+    );
 
     await prisma.flight.deleteMany({ where: { activityId: activity.id } });
     await prisma.activity.deleteMany({ where: { id: activity.id } });

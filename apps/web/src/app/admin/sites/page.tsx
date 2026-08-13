@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/table";
 import { listSites } from "@/features/sites";
 import { SitesFilters } from "@/features/sites/sites-filters";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -35,20 +37,22 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
     listSites({ query, spotId, typeCode }),
     prisma.spot.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
+  const t = getDictionary(await getLocale());
 
   const hasFilters = Boolean(query || spotId || typeCode);
+  const ts = t.sites;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Sites"
+        title={ts.pageTitle}
         actions={
           <Button
             nativeButton={false}
             render={
               <Link href="/admin/sites/new">
                 <Plus className="size-4" aria-hidden />
-                Nouveau site
+                {ts.newSite}
               </Link>
             }
           />
@@ -59,17 +63,13 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
 
       {sites.length === 0 ? (
         <EmptyState
-          title={hasFilters ? "Aucun site ne correspond à ces filtres" : "Aucun site enregistré"}
-          description={
-            hasFilters
-              ? "Essayez d'autres critères de recherche."
-              : "Créez le premier site de décollage ou d'atterrissage."
-          }
+          title={hasFilters ? ts.emptyFilteredTitle : ts.emptyNoneTitle}
+          description={hasFilters ? ts.emptyFilteredDescription : ts.emptyNoneDescription}
           action={
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href="/admin/sites/new">Créer un site</Link>}
+              render={<Link href="/admin/sites/new">{ts.createSiteButton}</Link>}
             />
           }
         />
@@ -78,11 +78,11 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Spot</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Altitude</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{ts.colName}</TableHead>
+                <TableHead>{ts.colSpot}</TableHead>
+                <TableHead>{ts.colType}</TableHead>
+                <TableHead>{ts.colAltitude}</TableHead>
+                <TableHead className="text-right">{ts.colActions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -105,7 +105,7 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
                         className={`inline-flex items-center gap-1 ${isTakeoff ? "text-primary" : "text-accent"}`}
                       >
                         <Icon className="size-4" aria-hidden />
-                        {isTakeoff ? "Décollage" : "Atterrissage"}
+                        {t.referenceLabels.siteType[site.siteType.code] ?? site.siteType.code}
                       </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{site.altitudeM} m</TableCell>
@@ -115,11 +115,13 @@ export default async function AdminSitesPage(props: PageProps<"/admin/sites">) {
                           nativeButton={false}
                           variant="ghost"
                           size="sm"
-                          render={<Link href={`/admin/sites/${site.id}/edit`}>Modifier</Link>}
+                          render={
+                            <Link href={`/admin/sites/${site.id}/edit`}>{t.common.edit}</Link>
+                          }
                         />
                         <AdminDeleteButton
                           action={deleteSiteAction.bind(null, site.id)}
-                          entityLabel={`le site « ${site.label} »`}
+                          entityLabel={ts.entityLabel(site.label)}
                         />
                       </div>
                     </TableCell>

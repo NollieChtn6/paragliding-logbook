@@ -3,6 +3,7 @@
 import { MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { searchSpotsAction } from "@/actions/search-spots";
+import { useT } from "@/components/locale-provider";
 import {
   Combobox,
   ComboboxCollection,
@@ -37,6 +38,7 @@ export function SpotCombobox({ name, defaultSpot, error }: SpotComboboxProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SpotOption[]>(defaultSpot ? [defaultSpot] : []);
   const [selectedSpot, setSelectedSpot] = useState<SpotOption | null>(defaultSpot ?? null);
+  const t = useT().groundHandlingSessions;
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -49,7 +51,7 @@ export function SpotCombobox({ name, defaultSpot, error }: SpotComboboxProps) {
     <div className="flex flex-col gap-2">
       <Label htmlFor={name} className="flex items-center gap-1.5">
         <MapPin className="size-4 text-muted-foreground" aria-hidden />
-        Spot
+        {t.spotLabel}
       </Label>
       <Combobox
         items={results}
@@ -64,13 +66,13 @@ export function SpotCombobox({ name, defaultSpot, error }: SpotComboboxProps) {
       >
         <ComboboxInput
           id={name}
-          placeholder="Rechercher un spot"
+          placeholder={t.spotPlaceholder}
           required
           showClear
           aria-invalid={!!error}
         />
         <ComboboxContent>
-          <ComboboxEmpty>Aucun spot trouvé.</ComboboxEmpty>
+          <ComboboxEmpty>{t.noSpotFound}</ComboboxEmpty>
           <ComboboxList>
             <ComboboxCollection>
               {(spot: SpotOption) => (

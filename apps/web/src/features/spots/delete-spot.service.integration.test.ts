@@ -1,8 +1,12 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
+import { getDictionary } from "@/messages";
 import { createSpot } from "./create-spot.service";
 import { deleteSpot } from "./delete-spot.service";
+
+const t = getDictionary("fr-FR").validation.spot;
+const spotInUseMessage = getDictionary("fr-FR").toast.spotInUse;
 
 const createdSpotIds: string[] = [];
 
@@ -15,10 +19,10 @@ afterAll(async () => {
 describe("deleteSpot (integration)", () => {
   it("deletes a spot with no referenced sites or sessions", async () => {
     const suffix = crypto.randomUUID();
-    const spot = await createSpot({ name: `Delete Spot Test ${suffix}` });
+    const spot = await createSpot({ name: `Delete Spot Test ${suffix}` }, t);
     createdSpotIds.push(spot.id);
 
-    await deleteSpot(spot.id);
+    await deleteSpot(spot.id, spotInUseMessage);
 
     const found = await prisma.spot.findUnique({ where: { id: spot.id } });
     expect(found).toBeNull();
@@ -27,7 +31,7 @@ describe("deleteSpot (integration)", () => {
 
   it("refuses to delete a spot that still has sites", async () => {
     const suffix = crypto.randomUUID();
-    const spot = await createSpot({ name: `Delete Spot With Sites Test ${suffix}` });
+    const spot = await createSpot({ name: `Delete Spot With Sites Test ${suffix}` }, t);
     createdSpotIds.push(spot.id);
 
     const siteType = await prisma.siteType.findUniqueOrThrow({
@@ -44,7 +48,7 @@ describe("deleteSpot (integration)", () => {
       },
     });
 
-    await expect(deleteSpot(spot.id)).rejects.toThrow(ReferenceDataInUseError);
+    await expect(deleteSpot(spot.id, spotInUseMessage)).rejects.toThrow(ReferenceDataInUseError);
 
     const stillExists = await prisma.spot.findUnique({ where: { id: spot.id } });
     expect(stillExists).not.toBeNull();

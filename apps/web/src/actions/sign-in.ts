@@ -2,8 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type SignInActionState = { success: true } | { success: false; error: string };
 
@@ -17,9 +19,10 @@ export async function signInAction(
   // mais reste une donnée client à cette étape : revalidée ici contre les
   // open redirects avant tout usage.
   const redirectTo = toSafeRedirectPath(formData.get("redirectTo")?.toString(), "/activities");
+  const t = getDictionary(await getLocale());
 
   if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
-    return { success: false, error: "Email et mot de passe requis." };
+    return { success: false, error: t.auth.signIn.missingCredentials };
   }
 
   try {
@@ -28,10 +31,10 @@ export async function signInAction(
     // Message générique volontaire (voir CLAUDE.md > Conventions de sécurité) :
     // ne pas distinguer email inconnu / mot de passe incorrect pour ne pas
     // révéler l'existence d'un compte.
-    return { success: false, error: "Email ou mot de passe incorrect." };
+    return { success: false, error: t.auth.signIn.invalidCredentials };
   }
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect(withToast(redirectTo, "Connexion réussie."));
+  redirect(withToast(redirectTo, t.toast.signInSuccess));
 }

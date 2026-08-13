@@ -6,7 +6,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { LeaveFormButton } from "@/components/leave-form-button";
 import { getSite } from "@/features/sites";
 import { SiteForm } from "@/features/sites/site-form";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -22,20 +24,22 @@ export default async function EditSitePage(props: PageProps<"/admin/sites/[id]/e
     notFound();
   }
 
+  const t = getDictionary(await getLocale());
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={`Modifier ${site.label}`}
+        title={t.sites.modifyTitle(site.label)}
         actions={
           <>
             <LeaveFormButton
               href={`/admin/spots/${site.spotId}/edit`}
-              title="Abandonner la modification ?"
-              description="Les modifications ne seront pas conservées."
+              title={t.common.discardChangesTitle}
+              description={t.common.discardChangesDescription}
             />
             <AdminDeleteButton
               action={deleteSiteAction.bind(null, site.id)}
-              entityLabel={`le site « ${site.label} »`}
+              entityLabel={t.sites.entityLabel(site.label)}
             />
           </>
         }
@@ -45,7 +49,7 @@ export default async function EditSitePage(props: PageProps<"/admin/sites/[id]/e
         spots={spots}
         siteTypes={siteTypes}
         action={updateSiteAction.bind(null, site.id)}
-        submitLabel="Modifier le site"
+        submitLabel={t.sites.editSite}
         defaultValues={{
           label: site.label,
           spotId: site.spotId,

@@ -1,11 +1,5 @@
 import { z } from "zod";
-
-// FormData renvoie une chaîne vide (pas undefined) pour un champ optionnel
-// laissé vide : on la normalise en undefined avant validation.
-const optionalUuid = z.preprocess(
-  (value) => (value === "" ? undefined : value),
-  z.string().uuid("Le stage sélectionné est invalide.").optional(),
-);
+import type { Messages } from "@/messages";
 
 // "YYYY-MM-DD" (Input type="date") + "HH:mm" (Input type="time") combinées en
 // un seul Date UTC littéral (pas de conversion de fuseau horaire : l'heure
@@ -33,34 +27,43 @@ const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 // les points, leur type (TAKEOFF/LANDING respectivement,
 // docs/decisions/005-flight-takeoff-landing-points.md) sont vérifiés dans
 // le service (nécessite une lecture en base).
-export const flightSchema = z
-  .object({
-    date: z.string().regex(dateRegex, "La date du vol est invalide."),
-    // Obligatoire (comme date) : permet d'ordonner plusieurs vols le même
-    // jour, sans quoi ils seraient tous ancrés à minuit et indistinguables
-    // par ordre chronologique (voir getActivityEventDate,
-    // features/activities/queries.ts).
-    time: z.string().regex(timeRegex, "L'heure du vol est invalide."),
-    takeoffPointId: z.string().uuid("Le point de décollage est invalide."),
-    landingPointId: z.string().uuid("Le point d'atterrissage est invalide."),
-    trainingCampId: optionalUuid,
-    durationMin: z.coerce
-      .number("La durée doit être un nombre de minutes.")
-      .int("La durée doit être un nombre entier de minutes.")
-      .positive("La durée doit être strictement positive."),
-    flightTypeId: z.string().uuid("Le type de vol est invalide."),
-    observations: z.string().trim().min(1, "Les observations sont obligatoires."),
-    improvementPoints: z.string().trim().min(1, "Les points d'amélioration sont obligatoires."),
-  })
-  .transform(({ time, ...rest }) => ({
-    ...rest,
-    date: new Date(`${rest.date}T${time}:00.000Z`),
-  }))
-  // `new Date()` évalué à chaque validation (et non figé au chargement du
-  // module) pour rester correct sur un process serveur longue durée.
-  .refine((data) => data.date <= new Date(), {
-    message: "La date du vol ne peut pas être dans le futur.",
-    path: ["date"],
-  });
+export function flightSchema(t: Messages["validation"]["flight"]) {
+  const optionalUuid = z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().uuid(t.trainingCampInvalid).optional(),
+  );
 
-export type FlightInput = z.infer<typeof flightSchema>;
+  return (
+    z
+      .object({
+        date: z.string().regex(dateRegex, t.dateInvalid),
+        // Obligatoire (comme date) : permet d'ordonner plusieurs vols le même
+        // jour, sans quoi ils seraient tous ancrés à minuit et indistinguables
+        // par ordre chronologique (voir getActivityEventDate,
+        // features/activities/queries.ts).
+        time: z.string().regex(timeRegex, t.timeInvalid),
+        takeoffPointId: z.string().uuid(t.takeoffInvalid),
+        landingPointId: z.string().uuid(t.landingInvalid),
+        trainingCampId: optionalUuid,
+        durationMin: z.coerce
+          .number(t.durationInvalid)
+          .int(t.durationInteger)
+          .positive(t.durationPositive),
+        flightTypeId: z.string().uuid(t.flightTypeInvalid),
+        observations: z.string().trim().min(1, t.observationsRequired),
+        improvementPoints: z.string().trim().min(1, t.improvementPointsRequired),
+      })
+      .transform(({ time, ...rest }) => ({
+        ...rest,
+        date: new Date(`${rest.date}T${time}:00.000Z`),
+      }))
+      // `new Date()` évalué à chaque validation (et non figé au chargement du
+      // module) pour rester correct sur un process serveur longue durée.
+      .refine((data) => data.date <= new Date(), {
+        message: t.dateInFuture,
+        path: ["date"],
+      })
+  );
+}
+
+export type FlightInput = z.infer<ReturnType<typeof flightSchema>>;

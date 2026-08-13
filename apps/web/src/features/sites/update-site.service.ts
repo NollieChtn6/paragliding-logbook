@@ -1,9 +1,14 @@
 import { ZodError, type ZodIssue } from "zod";
 import { prisma } from "@/lib/prisma";
 import { siteSchema } from "@/lib/validations/site";
+import type { Messages } from "@/messages";
 
-export async function updateSite(siteId: string, rawInput: unknown) {
-  const input = siteSchema.parse(rawInput);
+export async function updateSite(
+  siteId: string,
+  rawInput: unknown,
+  t: Messages["validation"]["site"],
+) {
+  const input = siteSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
     const [spot, siteType] = await Promise.all([
@@ -14,7 +19,7 @@ export async function updateSite(siteId: string, rawInput: unknown) {
       const issue: ZodIssue = {
         code: "custom",
         path: ["spotId"],
-        message: "Ce spot n'existe pas.",
+        message: t.spotNotFound,
       };
       throw new ZodError([issue]);
     }
@@ -22,7 +27,7 @@ export async function updateSite(siteId: string, rawInput: unknown) {
       const issue: ZodIssue = {
         code: "custom",
         path: ["siteTypeId"],
-        message: "Ce type de site n'existe pas.",
+        message: t.siteTypeNotFound,
       };
       throw new ZodError([issue]);
     }

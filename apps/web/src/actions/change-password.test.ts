@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { changePassword } from "@/features/account";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getDictionary } from "@/messages";
 import { changePasswordAction } from "./change-password";
 
 // Même approche que create-flight.test.ts : changePassword et
@@ -11,6 +12,9 @@ import { changePasswordAction } from "./change-password";
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("@/features/account", () => ({ changePassword: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
+
+const t = getDictionary("fr-FR");
 
 const CURRENT_USER = { id: "current-user-id" };
 
@@ -44,6 +48,7 @@ describe("changePasswordAction", () => {
         currentPassword: "old-password",
         newPassword: "a-new-password-12",
       }),
+      t.validation.changePassword,
     );
     expect(result).toEqual({ success: true });
   });
@@ -65,7 +70,7 @@ describe("changePasswordAction", () => {
 
     const result = await changePasswordAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Mot de passe actuel incorrect." });
+    expect(result).toEqual({ success: false, error: t.account.invalidCurrentPassword });
   });
 
   it("maps an unexpected error to a generic message", async () => {
@@ -75,7 +80,7 @@ describe("changePasswordAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Erreur lors du changement de mot de passe.",
+      error: t.account.changePasswordError,
     });
   });
 });

@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { changePasswordAction } from "@/actions/change-password";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,12 +20,14 @@ type ToggleVisibilityButtonProps = {
 // rien à "vérifier visuellement" sur un mot de passe qu'on n'est pas en
 // train de saisir pour la première fois, contrairement aux deux autres.
 function ToggleVisibilityButton({ visible, onToggle }: ToggleVisibilityButtonProps) {
+  const t = useT().account;
+
   return (
     <button
       type="button"
       onClick={onToggle}
-      aria-label={visible ? "Masquer les mots de passe" : "Afficher les mots de passe"}
-      title={visible ? "Masquer les mots de passe" : "Afficher les mots de passe"}
+      aria-label={visible ? t.hidePasswords : t.showPasswords}
+      title={visible ? t.hidePasswords : t.showPasswords}
       className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
     >
       {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -40,16 +43,17 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
   const [state, formAction, isPending] = useActionState(changePasswordAction, null);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const t = useT().account;
 
   useEffect(() => {
     if (state?.success === false) {
       toast.add({ title: state.error, type: "error" });
     }
     if (state?.success === true) {
-      toast.add({ title: "Mot de passe modifié avec succès.", type: "success" });
+      toast.add({ title: t.changePasswordSuccess, type: "success" });
       formRef.current?.reset();
     }
-  }, [state]);
+  }, [state, t]);
 
   const newPasswordFieldType = showNewPassword ? "text" : "password";
   const toggleNewPasswordVisibility = () => setShowNewPassword((value) => !value);
@@ -66,7 +70,7 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
       <input type="text" name="username" value={email} autoComplete="username" readOnly hidden />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+        <Label htmlFor="currentPassword">{t.currentPasswordLabel}</Label>
         <Input
           id="currentPassword"
           name="currentPassword"
@@ -77,7 +81,7 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+        <Label htmlFor="newPassword">{t.newPasswordLabel}</Label>
         <div className="relative">
           <Input
             id="newPassword"
@@ -93,11 +97,11 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
             onToggle={toggleNewPasswordVisibility}
           />
         </div>
-        <p className="text-sm text-muted-foreground">Au moins 12 caractères.</p>
+        <p className="text-sm text-muted-foreground">{t.newPasswordHint}</p>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+        <Label htmlFor="confirmPassword">{t.confirmNewPasswordLabel}</Label>
         <div className="relative">
           <Input
             id="confirmPassword"
@@ -115,7 +119,7 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
       </div>
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Modification..." : "Changer le mot de passe"}
+        {isPending ? t.changing : t.changePassword}
       </Button>
 
       {state?.success === false && (
@@ -125,7 +129,7 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
       )}
       {state?.success === true && (
         <p role="status" className="text-sm text-foreground">
-          Mot de passe modifié avec succès. Vos autres sessions ont été déconnectées.
+          {t.changePasswordSuccess}
         </p>
       )}
     </form>

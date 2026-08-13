@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { siteSearchSchema } from "@/lib/validations/site-search";
+import type { Messages } from "@/messages";
 
 const MAX_RESULTS = 20;
 
@@ -10,8 +11,8 @@ const MAX_RESULTS = 20;
 // différents. Requête vide (query === "") : renvoie quand même les premiers
 // résultats plutôt qu'une liste vide, pour ne pas laisser le champ de
 // recherche vide à l'ouverture.
-export async function searchSites(rawInput: unknown) {
-  const input = siteSearchSchema.parse(rawInput);
+export async function searchSites(rawInput: unknown, t: Messages["validation"]["siteSearch"]) {
+  const input = siteSearchSchema(t).parse(rawInput);
 
   return prisma.site.findMany({
     where: {

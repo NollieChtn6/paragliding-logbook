@@ -1,3 +1,5 @@
+import type { Messages } from "@/messages";
+
 // Utilisé par le mode assistant des formulaires (flight-form.tsx,
 // training-camp-form.tsx, ground-handling-session-form.tsx) pour afficher
 // une erreur en ligne sous chaque champ concerné, plutôt qu'un toast
@@ -6,12 +8,10 @@
 // sur `validity.valid`/`reportValidity()` : le champ réellement lié à
 // `name` pour SiteCombobox (voir site-combobox.tsx) n'est pas
 // forcément celui qui porte l'attribut `required` en interne.
-const REQUIRED_FIELD_ERROR = "Ce champ est obligatoire.";
-const INVALID_FIELD_ERROR = "Cette valeur n'est pas valide.";
-
 export function getFieldErrors(
   form: HTMLFormElement,
   fieldNames: string[],
+  t: Pick<Messages["common"], "requiredField" | "invalidField">,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   for (const fieldName of fieldNames) {
@@ -22,9 +22,9 @@ export function getFieldErrors(
       element instanceof HTMLTextAreaElement
     ) {
       if (!element.value) {
-        errors[fieldName] = REQUIRED_FIELD_ERROR;
+        errors[fieldName] = t.requiredField;
       } else if (!element.validity.valid) {
-        errors[fieldName] = INVALID_FIELD_ERROR;
+        errors[fieldName] = t.invalidField;
       }
     }
   }
