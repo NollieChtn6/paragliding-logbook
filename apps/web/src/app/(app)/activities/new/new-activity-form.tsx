@@ -5,12 +5,12 @@ import { createFlightAction } from "@/actions/create-flight";
 import { createGroundHandlingSessionAction } from "@/actions/create-ground-handling-session";
 import { createTrainingCampAction } from "@/actions/create-training-camp";
 import { ACTIVITY_TYPE_STYLE } from "@/components/activity-card";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FlightForm } from "@/features/flights/flight-form";
 import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/ground-handling-session-form";
 import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
-import { ACTIVITY_TYPE_LABELS } from "@/lib/reference-labels";
 import { cn } from "@/lib/utils";
 
 type NewActivityFormProps = {
@@ -38,13 +38,14 @@ const AVAILABLE_ACTIVITY_TYPE_CODES = new Set(["FLIGHT", "TRAINING_CAMP", "GROUN
 // value doit donc rester une string dès le premier rendu.
 const NO_SELECTION = "";
 
-const STEP_LABELS = ["Type d'activité", "Détails", "Observations"] as const;
-
 function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
+  const ta = useT().activities;
+  const stepLabels = [ta.stepActivityType, ta.stepDetails, ta.stepObservations] as const;
+
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-muted-foreground">
-        Étape {step} sur 3 · {STEP_LABELS[step - 1]}
+        {ta.stepIndicator(step, stepLabels[step - 1])}
       </p>
       <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
         <div
@@ -73,6 +74,7 @@ export function NewActivityForm({
 }: NewActivityFormProps) {
   const [selectedCode, setSelectedCode] = useState<string>(NO_SELECTION);
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const t = useT();
 
   function goToStep2() {
     setStep(2);
@@ -139,7 +141,7 @@ export function NewActivityForm({
                     {/* Le <label> englobant porte déjà l'association htmlFor : un
                     second <label> imbriqué (composant Label) serait invalide en HTML. */}
                     <span className="text-sm font-medium text-foreground">
-                      {ACTIVITY_TYPE_LABELS[activityType.code] ?? activityType.code}
+                      {t.referenceLabels.activityType[activityType.code] ?? activityType.code}
                     </span>
                   </label>
                 );
@@ -149,7 +151,7 @@ export function NewActivityForm({
 
         <div className="flex justify-end">
           <Button type="button" disabled={!selectedCode} onClick={goToStep2}>
-            Suivant
+            {t.activities.next}
           </Button>
         </div>
       </div>

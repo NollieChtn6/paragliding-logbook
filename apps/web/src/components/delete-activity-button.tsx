@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { deleteActivityAction } from "@/actions/delete-activity";
+import { useT } from "@/components/locale-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +35,7 @@ export function DeleteActivityButton({
     deleteActivityAction.bind(null, activityId),
     null,
   );
+  const t = useT().activities;
 
   useEffect(() => {
     if (state?.success === false) {
@@ -43,20 +45,20 @@ export function DeleteActivityButton({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger render={<Button variant="destructive">Supprimer</Button>} />
+      <AlertDialogTrigger render={<Button variant="destructive">{t.deleteButton}</Button>} />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer {entityLabel} ?</AlertDialogTitle>
+          <AlertDialogTitle>{t.deleteConfirmTitle(entityLabel)}</AlertDialogTitle>
           <AlertDialogDescription>
-            Cette action est définitive et ne peut pas être annulée.
+            {t.deleteConfirmDescription}
             {warning && <> {warning}</>}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
           <form action={formAction}>
             <AlertDialogAction type="submit" variant="destructive" disabled={isPending}>
-              {isPending ? "Suppression..." : "Supprimer"}
+              {isPending ? t.deleting : t.deleteButton}
             </AlertDialogAction>
           </form>
         </AlertDialogFooter>

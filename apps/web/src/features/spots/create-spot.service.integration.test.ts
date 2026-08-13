@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createSpot } from "./create-spot.service";
+
+const t = getDictionary("fr-FR").validation.spot;
 
 const createdIds: string[] = [];
 
@@ -12,13 +15,16 @@ afterEach(async () => {
 describe("createSpot (integration)", () => {
   it("creates a spot with the submitted data", async () => {
     const suffix = crypto.randomUUID();
-    const spot = await createSpot({
-      name: `Integration Test Spot ${suffix}`,
-      region: "Auvergne-Rhône-Alpes",
-      countryCode: "fr",
-      latitude: "45.3",
-      longitude: "5.9",
-    });
+    const spot = await createSpot(
+      {
+        name: `Integration Test Spot ${suffix}`,
+        region: "Auvergne-Rhône-Alpes",
+        countryCode: "fr",
+        latitude: "45.3",
+        longitude: "5.9",
+      },
+      t,
+    );
     createdIds.push(spot.id);
 
     expect(spot.name).toBe(`Integration Test Spot ${suffix}`);
@@ -30,7 +36,7 @@ describe("createSpot (integration)", () => {
 
   it("creates a spot with only a name", async () => {
     const suffix = crypto.randomUUID();
-    const spot = await createSpot({ name: `Integration Test Spot ${suffix}` });
+    const spot = await createSpot({ name: `Integration Test Spot ${suffix}` }, t);
     createdIds.push(spot.id);
 
     expect(spot.region).toBeNull();
@@ -38,6 +44,6 @@ describe("createSpot (integration)", () => {
   });
 
   it("fails with invalid data", async () => {
-    await expect(createSpot({ name: "" })).rejects.toThrow();
+    await expect(createSpot({ name: "" }, t)).rejects.toThrow();
   });
 });

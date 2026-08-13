@@ -3,8 +3,13 @@ import { createFlight } from "@/features/flights";
 import { createGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { createTrainingCamp } from "@/features/training-camps";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { ActivityNotFoundError } from "./activity-not-found.error";
 import { deleteActivity } from "./delete-activity.service";
+
+const flightMessages = getDictionary("fr-FR").validation.flight;
+const groundHandlingMessages = getDictionary("fr-FR").validation.groundHandling;
+const trainingCampMessages = getDictionary("fr-FR").validation.trainingCamp;
 
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
@@ -88,16 +93,20 @@ afterAll(async () => {
 
 describe("deleteActivity (integration)", () => {
   it("deletes a Flight's Activity and the Flight along with it", async () => {
-    const flight = await createFlight(userId, {
-      date: "2025-01-15",
-      time: "14:30",
-      takeoffPointId,
-      landingPointId,
-      durationMin: "35",
-      flightTypeId,
-      observations: "RAS",
-      improvementPoints: "RAS",
-    });
+    const flight = await createFlight(
+      userId,
+      {
+        date: "2025-01-15",
+        time: "14:30",
+        takeoffPointId,
+        landingPointId,
+        durationMin: "35",
+        flightTypeId,
+        observations: "RAS",
+        improvementPoints: "RAS",
+      },
+      flightMessages,
+    );
     activityIds.push(flight.activityId);
 
     await deleteActivity(userId, flight.activityId);
@@ -109,13 +118,17 @@ describe("deleteActivity (integration)", () => {
   });
 
   it("deletes a GroundHandlingSession's Activity along with it", async () => {
-    const session = await createGroundHandlingSession(userId, {
-      spotId,
-      date: "2025-02-01",
-      time: "10:00",
-      durationMin: "20",
-      exercises: "Contrôle au sol",
-    });
+    const session = await createGroundHandlingSession(
+      userId,
+      {
+        spotId,
+        date: "2025-02-01",
+        time: "10:00",
+        durationMin: "20",
+        exercises: "Contrôle au sol",
+      },
+      groundHandlingMessages,
+    );
     activityIds.push(session.activityId);
 
     await deleteActivity(userId, session.activityId);
@@ -125,12 +138,16 @@ describe("deleteActivity (integration)", () => {
   });
 
   it("deletes a childless TrainingCamp's Activity along with it", async () => {
-    const trainingCamp = await createTrainingCamp(userId, {
-      startDate: "2025-01-10",
-      endDate: "2025-01-20",
-      schoolId,
-      trainingCampTypeId,
-    });
+    const trainingCamp = await createTrainingCamp(
+      userId,
+      {
+        startDate: "2025-01-10",
+        endDate: "2025-01-20",
+        schoolId,
+        trainingCampTypeId,
+      },
+      trainingCampMessages,
+    );
     activityIds.push(trainingCamp.activityId);
 
     await deleteActivity(userId, trainingCamp.activityId);
@@ -140,35 +157,47 @@ describe("deleteActivity (integration)", () => {
   });
 
   it("dissociates (does not delete) a TrainingCamp's linked Flight and GroundHandlingSession on deletion", async () => {
-    const trainingCamp = await createTrainingCamp(userId, {
-      startDate: "2025-01-10",
-      endDate: "2025-01-20",
-      schoolId,
-      trainingCampTypeId,
-    });
+    const trainingCamp = await createTrainingCamp(
+      userId,
+      {
+        startDate: "2025-01-10",
+        endDate: "2025-01-20",
+        schoolId,
+        trainingCampTypeId,
+      },
+      trainingCampMessages,
+    );
     activityIds.push(trainingCamp.activityId);
 
-    const flight = await createFlight(userId, {
-      date: "2025-01-12",
-      time: "14:30",
-      takeoffPointId,
-      landingPointId,
-      durationMin: "35",
-      flightTypeId,
-      trainingCampId: trainingCamp.id,
-      observations: "RAS",
-      improvementPoints: "RAS",
-    });
+    const flight = await createFlight(
+      userId,
+      {
+        date: "2025-01-12",
+        time: "14:30",
+        takeoffPointId,
+        landingPointId,
+        durationMin: "35",
+        flightTypeId,
+        trainingCampId: trainingCamp.id,
+        observations: "RAS",
+        improvementPoints: "RAS",
+      },
+      flightMessages,
+    );
     activityIds.push(flight.activityId);
 
-    const session = await createGroundHandlingSession(userId, {
-      spotId,
-      date: "2025-01-13",
-      time: "10:00",
-      durationMin: "20",
-      exercises: "Contrôle au sol",
-      trainingCampId: trainingCamp.id,
-    });
+    const session = await createGroundHandlingSession(
+      userId,
+      {
+        spotId,
+        date: "2025-01-13",
+        time: "10:00",
+        durationMin: "20",
+        exercises: "Contrôle au sol",
+        trainingCampId: trainingCamp.id,
+      },
+      groundHandlingMessages,
+    );
     activityIds.push(session.activityId);
 
     await deleteActivity(userId, trainingCamp.activityId);
@@ -188,16 +217,20 @@ describe("deleteActivity (integration)", () => {
   });
 
   it("throws ActivityNotFoundError, and does not delete, when the activity belongs to another user", async () => {
-    const flight = await createFlight(userId, {
-      date: "2025-01-16",
-      time: "14:30",
-      takeoffPointId,
-      landingPointId,
-      durationMin: "35",
-      flightTypeId,
-      observations: "RAS",
-      improvementPoints: "RAS",
-    });
+    const flight = await createFlight(
+      userId,
+      {
+        date: "2025-01-16",
+        time: "14:30",
+        takeoffPointId,
+        landingPointId,
+        durationMin: "35",
+        flightTypeId,
+        observations: "RAS",
+        improvementPoints: "RAS",
+      },
+      flightMessages,
+    );
     activityIds.push(flight.activityId);
 
     await expect(deleteActivity(otherUserId, flight.activityId)).rejects.toThrow(

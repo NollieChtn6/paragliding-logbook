@@ -15,30 +15,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listSpots } from "@/features/spots";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
-
-function formatLocation(spot: { region: string | null; countryCode: string | null }): string {
-  if (spot.region && spot.countryCode) return `${spot.region} · ${spot.countryCode}`;
-  return spot.region ?? spot.countryCode ?? "—";
-}
 
 export default async function AdminSpotsPage(props: PageProps<"/admin/spots">) {
   const searchParams = await props.searchParams;
   const query = typeof searchParams.q === "string" ? searchParams.q : undefined;
   const spots = await listSpots(query);
+  const t = getDictionary(await getLocale());
+  const ts = t.spots;
+
+  function formatLocation(spot: { region: string | null; countryCode: string | null }): string {
+    if (spot.region && spot.countryCode) return `${spot.region} · ${spot.countryCode}`;
+    return spot.region ?? spot.countryCode ?? ts.noLocation;
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Spots"
+        title={ts.pageTitle}
         actions={
           <Button
             nativeButton={false}
             render={
               <Link href="/admin/spots/new">
                 <Plus className="size-4" aria-hidden />
-                Nouveau spot
+                {ts.newSpot}
               </Link>
             }
           />
@@ -46,23 +50,21 @@ export default async function AdminSpotsPage(props: PageProps<"/admin/spots">) {
       />
 
       <form className="flex gap-2">
-        <Input name="q" defaultValue={query} placeholder="Rechercher un spot..." />
+        <Input name="q" defaultValue={query} placeholder={ts.searchPlaceholder} />
         <Button type="submit" variant="outline">
-          Rechercher
+          {t.common.search}
         </Button>
       </form>
 
       {spots.length === 0 ? (
         <EmptyState
-          title={query ? "Aucun spot ne correspond à cette recherche" : "Aucun spot enregistré"}
-          description={
-            query ? "Essayez un autre terme de recherche." : "Créez le premier spot de référence."
-          }
+          title={query ? ts.emptyFilteredTitle : ts.emptyNoneTitle}
+          description={query ? ts.emptyFilteredDescription : ts.emptyNoneDescription}
           action={
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href="/admin/spots/new">Créer un spot</Link>}
+              render={<Link href="/admin/spots/new">{ts.createSpotButton}</Link>}
             />
           }
         />
@@ -71,10 +73,10 @@ export default async function AdminSpotsPage(props: PageProps<"/admin/spots">) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Région / Pays</TableHead>
-                <TableHead>Sites</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{ts.colName}</TableHead>
+                <TableHead>{ts.colRegionCountry}</TableHead>
+                <TableHead>{ts.colSites}</TableHead>
+                <TableHead className="text-right">{ts.colActions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -96,8 +98,8 @@ export default async function AdminSpotsPage(props: PageProps<"/admin/spots">) {
                         nativeButton={false}
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={`Modifier ${spot.name}`}
-                        title={`Modifier ${spot.name}`}
+                        aria-label={ts.modifyAriaLabel(spot.name)}
+                        title={ts.modifyAriaLabel(spot.name)}
                         render={
                           <Link href={`/admin/spots/${spot.id}/edit`}>
                             <Pencil className="size-4" aria-hidden />
@@ -106,7 +108,7 @@ export default async function AdminSpotsPage(props: PageProps<"/admin/spots">) {
                       />
                       <AdminDeleteButton
                         action={deleteSpotAction.bind(null, spot.id)}
-                        entityLabel={`le spot « ${spot.name} »`}
+                        entityLabel={ts.entityLabel(spot.name)}
                       />
                     </div>
                   </TableCell>

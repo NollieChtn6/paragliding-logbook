@@ -6,6 +6,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { LeaveFormButton } from "@/components/leave-form-button";
 import { getSchool } from "@/features/schools";
 import { SchoolForm } from "@/features/schools/school-form";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -17,20 +19,22 @@ export default async function EditSchoolPage(props: PageProps<"/admin/schools/[i
     notFound();
   }
 
+  const t = getDictionary(await getLocale());
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={`Modifier ${school.name}`}
+        title={t.schools.modifyTitle(school.name)}
         actions={
           <>
             <LeaveFormButton
               href="/admin/schools"
-              title="Abandonner la modification ?"
-              description="Les modifications ne seront pas conservées."
+              title={t.common.discardChangesTitle}
+              description={t.common.discardChangesDescription}
             />
             <AdminDeleteButton
               action={deleteSchoolAction.bind(null, school.id)}
-              entityLabel={`l'école « ${school.name} »`}
+              entityLabel={t.schools.entityLabel(school.name)}
             />
           </>
         }
@@ -38,7 +42,7 @@ export default async function EditSchoolPage(props: PageProps<"/admin/schools/[i
 
       <SchoolForm
         action={updateSchoolAction.bind(null, school.id)}
-        submitLabel="Modifier l'école"
+        submitLabel={t.schools.editSchool}
         defaultValues={{
           name: school.name,
           address: school.address ?? undefined,

@@ -4,12 +4,15 @@ import { z } from "zod";
 import { updateSpot } from "@/features/spots";
 import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { updateSpotAction } from "./update-spot";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/spots", () => ({ updateSpot: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 const SPOT_ID = "spot-id";
 
@@ -37,8 +40,9 @@ describe("updateSpotAction", () => {
     expect(updateSpot).toHaveBeenCalledWith(
       SPOT_ID,
       expect.objectContaining({ name: "Spot modifié" }),
+      t.validation.spot,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/spots", "Spot modifié."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/spots", t.toast.spotUpdated));
   });
 
   it("maps a ZodError from updateSpot to a validation error message", async () => {
@@ -57,7 +61,7 @@ describe("updateSpotAction", () => {
 
     const result = await updateSpotAction(SPOT_ID, null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la modification du spot." });
+    expect(result).toEqual({ success: false, error: t.toast.spotUpdateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

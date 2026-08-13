@@ -1,6 +1,7 @@
 "use client";
 
 import { Download } from "lucide-react";
+import { useT } from "@/components/locale-provider";
 import { InstallOptions } from "@/components/pwa/install-options";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMounted } from "@/lib/use-mounted";
@@ -20,6 +21,7 @@ import { useMounted } from "@/lib/use-mounted";
 // installée, donc canInstall reste faux).
 export function InstallSettingsCard() {
   const mounted = useMounted();
+  const t = useT();
 
   if (!mounted) {
     return null;
@@ -30,7 +32,7 @@ export function InstallSettingsCard() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Download className="size-4 text-primary" aria-hidden />
-          Installer l&apos;application
+          {t.pwa.installAppTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -4,7 +4,7 @@ import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
 // Relations directes de Site (schema.prisma) : flightsAsTakeoff et
 // flightsAsLanding. Bloquer si l'une des deux est non vide (docs/admin.md >
 // Suppression, "supprimer un Site ne doit pas supprimer des Flight").
-export async function deleteSite(siteId: string): Promise<void> {
+export async function deleteSite(siteId: string, siteInUseMessage: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
     const [takeoffCount, landingCount] = await Promise.all([
       tx.flight.count({ where: { takeoffPointId: siteId } }),
@@ -12,9 +12,7 @@ export async function deleteSite(siteId: string): Promise<void> {
     ]);
 
     if (takeoffCount > 0 || landingCount > 0) {
-      throw new ReferenceDataInUseError(
-        "Ce site est encore utilisé par au moins un vol : il ne peut pas être supprimé.",
-      );
+      throw new ReferenceDataInUseError(siteInUseMessage);
     }
 
     await tx.site.delete({ where: { id: siteId } });

@@ -4,12 +4,15 @@ import { z } from "zod";
 import { updateSchool } from "@/features/schools";
 import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { updateSchoolAction } from "./update-school";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/schools", () => ({ updateSchool: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 const SCHOOL_ID = "school-id";
 
@@ -37,8 +40,9 @@ describe("updateSchoolAction", () => {
     expect(updateSchool).toHaveBeenCalledWith(
       SCHOOL_ID,
       expect.objectContaining({ name: "École modifiée" }),
+      t.validation.school,
     );
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/schools", "École modifiée."));
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/schools", t.toast.schoolUpdated));
   });
 
   it("maps a ZodError from updateSchool to a validation error message", async () => {
@@ -59,7 +63,7 @@ describe("updateSchoolAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Erreur lors de la modification de l'école.",
+      error: t.toast.schoolUpdateError,
     });
     expect(redirect).not.toHaveBeenCalled();
   });

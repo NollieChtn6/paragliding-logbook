@@ -13,18 +13,21 @@ import { buildMapMarkers } from "@/features/map";
 import { AdminMapLoader } from "@/features/map/admin-map-loader";
 import { listSchools } from "@/features/schools";
 import { listSites } from "@/features/sites";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminMapPage() {
   const [sites, schools] = await Promise.all([listSites(), listSchools()]);
-  const markers = buildMapMarkers(sites, schools);
+  const t = getDictionary(await getLocale());
+  const markers = buildMapMarkers(sites, schools, t.admin);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Carte"
-        description="Spots, sites et écoles du référentiel"
+        title={t.admin.navMap}
+        description={t.admin.mapPageDescription}
         actions={
           <DropdownMenu>
             {/* buttonVariants() directement sur le trigger plutôt que
@@ -35,22 +38,21 @@ export default async function AdminMapPage() {
             comportement d'un <button> natif, seul le style manquait. */}
             <DropdownMenuTrigger className={buttonVariants()}>
               <Plus className="size-4" aria-hidden />
-              Nouveau
+              {t.admin.newButton}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem render={<Link href="/admin/spots/new">Spot</Link>} />
-              <DropdownMenuItem render={<Link href="/admin/sites/new">Site</Link>} />
-              <DropdownMenuItem render={<Link href="/admin/schools/new">École</Link>} />
+              <DropdownMenuItem render={<Link href="/admin/spots/new">{t.admin.menuSpot}</Link>} />
+              <DropdownMenuItem render={<Link href="/admin/sites/new">{t.admin.menuSite}</Link>} />
+              <DropdownMenuItem
+                render={<Link href="/admin/schools/new">{t.admin.menuSchool}</Link>}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
         }
       />
 
       {markers.length === 0 ? (
-        <EmptyState
-          title="Aucun lieu géolocalisé"
-          description="Les sites sont toujours géolocalisés ; les écoles apparaissent une fois leur adresse renseignée via la recherche BAN."
-        />
+        <EmptyState title={t.admin.mapEmptyTitle} description={t.admin.mapEmptyDescription} />
       ) : (
         <AdminMapLoader markers={markers} />
       )}

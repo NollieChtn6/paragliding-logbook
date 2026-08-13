@@ -1,3 +1,5 @@
+import type { Messages } from "@/messages";
+
 export type MapMarkerKind = "TAKEOFF" | "LANDING" | "SCHOOL";
 
 export type MapMarkerDetail = { label: string; value: string };
@@ -57,7 +59,11 @@ function siteKind(site: { siteType: { code: string } }): MapMarkerKind {
 // — le compte ADMIN n'est propriétaire d'aucun stage, et /activities/[id]
 // refuse déjà l'accès à qui n'en est pas propriétaire (décision explicite,
 // pas juste un oubli).
-export function buildMapMarkers(sites: SiteInput[], schools: SchoolInput[]): MapMarker[] {
+export function buildMapMarkers(
+  sites: SiteInput[],
+  schools: SchoolInput[],
+  t: Messages["admin"],
+): MapMarker[] {
   const siteMarkers: MapMarker[] = sites.map((site) => ({
     id: `site-${site.id}`,
     kind: siteKind(site),
@@ -66,14 +72,14 @@ export function buildMapMarkers(sites: SiteInput[], schools: SchoolInput[]): Map
     longitude: site.longitude,
     editHref: `/admin/sites/${site.id}/edit`,
     details: [
-      { label: "Spot", value: site.spot.name },
-      { label: "Altitude", value: `${site.altitudeM} m` },
+      { label: t.markerSpotLabel, value: site.spot.name },
+      { label: t.markerAltitudeLabel, value: `${site.altitudeM} m` },
       {
-        label: "Orientation",
-        value: site.orientationDeg !== null ? `${site.orientationDeg}°` : "—",
+        label: t.markerOrientationLabel,
+        value: site.orientationDeg !== null ? `${site.orientationDeg}°` : t.markerNoValue,
       },
     ],
-    relatedLinks: [{ label: "Modifier le spot", href: `/admin/spots/${site.spotId}/edit` }],
+    relatedLinks: [{ label: t.markerEditSpotLink, href: `/admin/spots/${site.spotId}/edit` }],
     siblingSites: sites
       .filter((other) => other.spotId === site.spotId && other.id !== site.id)
       .map((other) => ({
@@ -95,7 +101,7 @@ export function buildMapMarkers(sites: SiteInput[], schools: SchoolInput[]): Map
       latitude: school.latitude,
       longitude: school.longitude,
       editHref: `/admin/schools/${school.id}/edit`,
-      details: school.city ? [{ label: "Ville", value: school.city }] : [],
+      details: school.city ? [{ label: t.markerCityLabel, value: school.city }] : [],
       relatedLinks: [],
       siblingSites: [],
     }));

@@ -1,6 +1,7 @@
 "use client";
 
 import { QRCodeSVG } from "qrcode.react";
+import { useT } from "@/components/locale-provider";
 import { useMounted } from "@/lib/use-mounted";
 
 // Encode l'origine courante (window.location.origin), pas une URL en dur :
@@ -10,6 +11,7 @@ import { useMounted } from "@/lib/use-mounted";
 // rester scannable, y compris en thème sombre.
 export function InstallQrCode() {
   const mounted = useMounted();
+  const t = useT();
 
   if (!mounted) {
     return null;
@@ -22,7 +24,7 @@ export function InstallQrCode() {
         size={112}
         bgColor="#ffffff"
         fgColor="#2563eb"
-        title="Scanner pour ouvrir THERMIK sur votre téléphone"
+        title={t.pwa.qrCodeTitle}
       />
     </div>
   );

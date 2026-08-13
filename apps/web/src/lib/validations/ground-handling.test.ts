@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getDictionary } from "@/messages";
 import { groundHandlingSchema } from "./ground-handling";
 
 const validGroundHandling = {
@@ -9,14 +10,17 @@ const validGroundHandling = {
   exercises: "Contrôle au sol, gestion des surventes.",
 };
 
-describe("groundHandlingSchema", () => {
+describe.each(["fr-FR", "en-GB"] as const)("groundHandlingSchema (%s)", (locale) => {
+  const t = getDictionary(locale).validation.groundHandling;
+  const schema = groundHandlingSchema(t);
+
   it("accepts a valid ground handling session", () => {
-    const result = groundHandlingSchema.safeParse(validGroundHandling);
+    const result = schema.safeParse(validGroundHandling);
     expect(result.success).toBe(true);
   });
 
   it("accepts optional difficulties and feeling", () => {
-    const result = groundHandlingSchema.safeParse({
+    const result = schema.safeParse({
       ...validGroundHandling,
       difficulties: "Vent changeant.",
       feeling: "Bonne séance.",
@@ -25,7 +29,7 @@ describe("groundHandlingSchema", () => {
   });
 
   it("treats an empty difficulties as absent", () => {
-    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, difficulties: "" });
+    const result = schema.safeParse({ ...validGroundHandling, difficulties: "" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.difficulties).toBeUndefined();
@@ -33,7 +37,7 @@ describe("groundHandlingSchema", () => {
   });
 
   it("treats an empty trainingCampId as absent", () => {
-    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, trainingCampId: "" });
+    const result = schema.safeParse({ ...validGroundHandling, trainingCampId: "" });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.trainingCampId).toBeUndefined();
@@ -42,36 +46,36 @@ describe("groundHandlingSchema", () => {
 
   it("rejects a session without a date or spot", () => {
     const { date, spotId, ...rest } = validGroundHandling;
-    const result = groundHandlingSchema.safeParse(rest);
+    const result = schema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
-  it("rejects a negative duration with a French, user-friendly message", () => {
-    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, durationMin: "-10" });
+  it("rejects a negative duration with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validGroundHandling, durationMin: "-10" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("La durée doit être strictement positive.");
+      expect(result.error.issues[0]?.message).toBe(t.durationPositive);
     }
   });
 
-  it("rejects an empty exercises field with a French, user-friendly message", () => {
-    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, exercises: "  " });
+  it("rejects an empty exercises field with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validGroundHandling, exercises: "  " });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("Les exercices travaillés sont obligatoires.");
+      expect(result.error.issues[0]?.message).toBe(t.exercisesRequired);
     }
   });
 
-  it("rejects a malformed time with a French, user-friendly message", () => {
-    const result = groundHandlingSchema.safeParse({ ...validGroundHandling, time: "25:99" });
+  it("rejects a malformed time with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validGroundHandling, time: "25:99" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("L'heure de la séance est invalide.");
+      expect(result.error.issues[0]?.message).toBe(t.timeInvalid);
     }
   });
 
   it("combines date and time into a single UTC Date", () => {
-    const result = groundHandlingSchema.safeParse(validGroundHandling);
+    const result = schema.safeParse(validGroundHandling);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.date.toISOString()).toBe("2025-01-15T10:00:00.000Z");

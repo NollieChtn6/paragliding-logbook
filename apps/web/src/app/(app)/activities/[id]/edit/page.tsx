@@ -10,7 +10,9 @@ import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/g
 import { listTrainingCamps } from "@/features/training-camps";
 import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 
 // La liste des sites/écoles/stages doit toujours refléter l'état actuel de
 // la base, pas un instantané figé au build.
@@ -30,6 +32,8 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     notFound();
   }
 
+  const t = getDictionary(await getLocale());
+
   if (activity.flight) {
     const [flightTypes, trainingCamps] = await Promise.all([
       prisma.flightType.findMany({ select: { id: true, code: true } }),
@@ -39,12 +43,12 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     return (
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Modifier le vol"
+          title={t.flights.editFlight}
           actions={
             <LeaveFormButton
               href={`/activities/${activity.id}`}
-              title="Abandonner la modification ?"
-              description="Les modifications ne seront pas conservées."
+              title={t.common.discardChangesTitle}
+              description={t.common.discardChangesDescription}
             />
           }
         />
@@ -62,7 +66,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
             observations: activity.flight.observations,
             improvementPoints: activity.flight.improvementPoints,
           }}
-          submitLabel="Modifier le vol"
+          submitLabel={t.flights.editFlight}
         />
       </div>
     );
@@ -77,12 +81,12 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     return (
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Modifier le stage"
+          title={t.trainingCamps.editCamp}
           actions={
             <LeaveFormButton
               href={`/activities/${activity.id}`}
-              title="Abandonner la modification ?"
-              description="Les modifications ne seront pas conservées."
+              title={t.common.discardChangesTitle}
+              description={t.common.discardChangesDescription}
             />
           }
         />
@@ -99,7 +103,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
             summary: activity.trainingCamp.summary ?? undefined,
             certification: activity.trainingCamp.certification ?? undefined,
           }}
-          submitLabel="Modifier le stage"
+          submitLabel={t.trainingCamps.editCamp}
         />
       </div>
     );
@@ -111,12 +115,12 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
     return (
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Modifier la séance"
+          title={t.groundHandlingSessions.editSession}
           actions={
             <LeaveFormButton
               href={`/activities/${activity.id}`}
-              title="Abandonner la modification ?"
-              description="Les modifications ne seront pas conservées."
+              title={t.common.discardChangesTitle}
+              description={t.common.discardChangesDescription}
             />
           }
         />
@@ -132,7 +136,7 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
             difficulties: activity.groundHandlingSession.difficulties ?? undefined,
             feeling: activity.groundHandlingSession.feeling ?? undefined,
           }}
-          submitLabel="Modifier la séance"
+          submitLabel={t.groundHandlingSessions.editSession}
         />
       </div>
     );

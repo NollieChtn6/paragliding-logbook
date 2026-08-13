@@ -3,8 +3,10 @@
 import { redirect } from "next/navigation";
 import { deleteSpot } from "@/features/spots";
 import { requireAdmin } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type DeleteSpotActionState = { success: true } | { success: false; error: string };
 
@@ -16,15 +18,16 @@ export async function deleteSpotAction(
   _formData: FormData,
 ): Promise<DeleteSpotActionState> {
   await requireAdmin();
+  const t = getDictionary(await getLocale());
 
   try {
-    await deleteSpot(spotId);
+    await deleteSpot(spotId, t.toast.spotInUse);
   } catch (error) {
     if (error instanceof ReferenceDataInUseError) {
       return { success: false, error: error.message };
     }
-    return { success: false, error: "Erreur lors de la suppression." };
+    return { success: false, error: t.toast.deleteError };
   }
 
-  redirect(withToast("/admin/spots", "Spot supprimé."));
+  redirect(withToast("/admin/spots", t.toast.spotDeleted));
 }

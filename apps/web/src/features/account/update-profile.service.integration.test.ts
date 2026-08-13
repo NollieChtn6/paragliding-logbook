@@ -2,7 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { auth } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { updateProfile } from "./update-profile.service";
+
+const t = getDictionary("fr-FR").validation.updateProfile;
 
 // Fixtures propres à ce test, indépendantes du seed dev.
 let userId: string;
@@ -51,7 +54,7 @@ describe("updateProfile (integration)", () => {
   it("updates the user's name", async () => {
     const headers = await signInHeaders();
 
-    await updateProfile(headers, { name: "New Name" });
+    await updateProfile(headers, { name: "New Name" }, t);
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(user.name).toBe("New Name");
@@ -61,7 +64,7 @@ describe("updateProfile (integration)", () => {
     const headers = await signInHeaders();
     const before = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
 
-    await expect(updateProfile(headers, { name: "" })).rejects.toThrow();
+    await expect(updateProfile(headers, { name: "" }, t)).rejects.toThrow();
 
     const after = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(after.name).toBe(before.name);
@@ -70,7 +73,7 @@ describe("updateProfile (integration)", () => {
   it("updates the user's city", async () => {
     const headers = await signInHeaders();
 
-    await updateProfile(headers, { name: "New Name", city: "Annecy" });
+    await updateProfile(headers, { name: "New Name", city: "Annecy" }, t);
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(user.city).toBe("Annecy");
@@ -78,9 +81,9 @@ describe("updateProfile (integration)", () => {
 
   it("accepts an empty city (optional field, clears the stored value)", async () => {
     const headers = await signInHeaders();
-    await updateProfile(headers, { name: "New Name", city: "Annecy" });
+    await updateProfile(headers, { name: "New Name", city: "Annecy" }, t);
 
-    await updateProfile(headers, { name: "New Name", city: "" });
+    await updateProfile(headers, { name: "New Name", city: "" }, t);
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     expect(user.city).toBeNull();

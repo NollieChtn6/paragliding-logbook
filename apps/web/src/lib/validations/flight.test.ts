@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getDictionary } from "@/messages";
 import { flightSchema } from "./flight";
 
 const validFlight = {
@@ -12,15 +13,18 @@ const validFlight = {
   improvementPoints: "Work on approach phases.",
 };
 
-describe("flightSchema", () => {
+describe.each(["fr-FR", "en-GB"] as const)("flightSchema (%s)", (locale) => {
+  const t = getDictionary(locale).validation.flight;
+  const schema = flightSchema(t);
+
   it("accepts a valid flight", () => {
-    const result = flightSchema.safeParse(validFlight);
+    const result = schema.safeParse(validFlight);
     expect(result.success).toBe(true);
   });
 
   it("rejects a flight without a takeoff or landing point", () => {
     const { takeoffPointId, landingPointId, ...rest } = validFlight;
-    const result = flightSchema.safeParse(rest);
+    const result = schema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
@@ -28,45 +32,45 @@ describe("flightSchema", () => {
   // (nécessite une lecture en base) : la contrainte de type est vérifiée
   // dans le service, pas ici (docs/decisions/005-flight-takeoff-landing-points.md),
   // voir create-flight.service.integration.test.ts.
-  it("rejects a negative duration with a French, user-friendly message", () => {
-    const result = flightSchema.safeParse({ ...validFlight, durationMin: "-10" });
+  it("rejects a negative duration with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validFlight, durationMin: "-10" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("La durée doit être strictement positive.");
+      expect(result.error.issues[0]?.message).toBe(t.durationPositive);
     }
   });
 
-  it("rejects a malformed flight type id with a French, user-friendly message", () => {
-    const result = flightSchema.safeParse({ ...validFlight, flightTypeId: "not-a-uuid" });
+  it("rejects a malformed flight type id with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validFlight, flightTypeId: "not-a-uuid" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("Le type de vol est invalide.");
+      expect(result.error.issues[0]?.message).toBe(t.flightTypeInvalid);
     }
   });
 
-  it("rejects empty observations with a French, user-friendly message", () => {
-    const result = flightSchema.safeParse({ ...validFlight, observations: "" });
+  it("rejects empty observations with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validFlight, observations: "" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("Les observations sont obligatoires.");
+      expect(result.error.issues[0]?.message).toBe(t.observationsRequired);
     }
   });
 
   it("rejects a date in the future", () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const result = flightSchema.safeParse({
+    const result = schema.safeParse({
       ...validFlight,
       date: tomorrow.toISOString().slice(0, 10),
     });
     expect(result.success).toBe(false);
   });
 
-  it("rejects a malformed time with a French, user-friendly message", () => {
-    const result = flightSchema.safeParse({ ...validFlight, time: "25:99" });
+  it("rejects a malformed time with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validFlight, time: "25:99" });
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.message).toBe("L'heure du vol est invalide.");
+      expect(result.error.issues[0]?.message).toBe(t.timeInvalid);
     }
   });
 
@@ -75,7 +79,7 @@ describe("flightSchema", () => {
   // Date UTC littéral, sans conversion de fuseau horaire (voir le
   // commentaire au-dessus de flightSchema).
   it("combines date and time into a single UTC Date", () => {
-    const result = flightSchema.safeParse(validFlight);
+    const result = schema.safeParse(validFlight);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.date.toISOString()).toBe("2025-01-15T14:30:00.000Z");

@@ -5,12 +5,15 @@ import { ActivityNotFoundError } from "@/features/activities";
 import { updateGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { updateGroundHandlingSessionAction } from "./update-ground-handling-session";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn() }));
 vi.mock("@/features/ground-handling-sessions", () => ({ updateGroundHandlingSession: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const CURRENT_USER = { id: "current-user-id" };
 const ACTIVITY_ID = "some-activity-id";
 
@@ -31,9 +34,10 @@ describe("updateGroundHandlingSessionAction", () => {
       CURRENT_USER.id,
       ACTIVITY_ID,
       expect.objectContaining({ siteId: "some-site" }),
+      t.validation.groundHandling,
     );
     expect(redirect).toHaveBeenCalledWith(
-      withToast(`/activities/${ACTIVITY_ID}`, "Séance modifiée."),
+      withToast(`/activities/${ACTIVITY_ID}`, t.toast.groundHandlingSessionUpdated),
     );
   });
 
@@ -64,7 +68,7 @@ describe("updateGroundHandlingSessionAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Erreur lors de la modification de la séance.",
+      error: t.toast.groundHandlingSessionUpdateError,
     });
     expect(redirect).not.toHaveBeenCalled();
   });

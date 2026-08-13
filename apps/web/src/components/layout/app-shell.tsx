@@ -1,10 +1,10 @@
-import { MapPin, Settings } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
 import { AmbientArc } from "@/components/ambient-arc";
-import { SignOutButton } from "@/components/sign-out-button";
+import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { AccountMenu } from "./account-menu";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
@@ -56,19 +56,8 @@ export function AppShell({ children, city }: AppShellProps) {
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Button
-              nativeButton={false}
-              variant="outline"
-              size="icon"
-              aria-label="Paramètres de sécurité"
-              title="Paramètres de sécurité"
-              render={
-                <Link href="/settings/security">
-                  <Settings />
-                </Link>
-              }
-            />
-            <SignOutButton />
+            <LocaleToggle />
+            <AccountMenu />
           </div>
         </header>
 

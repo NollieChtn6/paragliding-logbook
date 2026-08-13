@@ -4,12 +4,15 @@ import { z } from "zod";
 import { createSite } from "@/features/sites";
 import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { createSiteAction } from "./create-site";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/sites", () => ({ createSite: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 
 describe("createSiteAction", () => {
@@ -33,8 +36,11 @@ describe("createSiteAction", () => {
 
     await createSiteAction(null, formData);
 
-    expect(createSite).toHaveBeenCalledWith(expect.objectContaining({ label: "Nouveau site" }));
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", "Site créé."));
+    expect(createSite).toHaveBeenCalledWith(
+      expect.objectContaining({ label: "Nouveau site" }),
+      t.validation.site,
+    );
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", t.toast.siteCreated));
   });
 
   it("maps a ZodError from createSite to a validation error message", async () => {
@@ -53,7 +59,7 @@ describe("createSiteAction", () => {
 
     const result = await createSiteAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la création du site." });
+    expect(result).toEqual({ success: false, error: t.toast.siteCreateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

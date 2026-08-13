@@ -5,12 +5,15 @@ import { ActivityNotFoundError } from "@/features/activities";
 import { updateTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { updateTrainingCampAction } from "./update-training-camp";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn() }));
 vi.mock("@/features/training-camps", () => ({ updateTrainingCamp: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const CURRENT_USER = { id: "current-user-id" };
 const ACTIVITY_ID = "some-activity-id";
 
@@ -31,9 +34,10 @@ describe("updateTrainingCampAction", () => {
       CURRENT_USER.id,
       ACTIVITY_ID,
       expect.objectContaining({ schoolId: "some-school" }),
+      t.validation.trainingCamp,
     );
     expect(redirect).toHaveBeenCalledWith(
-      withToast(`/activities/${ACTIVITY_ID}`, "Stage modifié."),
+      withToast(`/activities/${ACTIVITY_ID}`, t.toast.trainingCampUpdated),
     );
   });
 
@@ -62,7 +66,7 @@ describe("updateTrainingCampAction", () => {
 
     const result = await updateTrainingCampAction(ACTIVITY_ID, null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la modification du stage." });
+    expect(result).toEqual({ success: false, error: t.toast.trainingCampUpdateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

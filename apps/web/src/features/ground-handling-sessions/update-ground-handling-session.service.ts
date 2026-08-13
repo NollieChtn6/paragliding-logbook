@@ -2,6 +2,7 @@ import { ZodError, type ZodIssue } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { prisma } from "@/lib/prisma";
 import { groundHandlingSchema } from "@/lib/validations/ground-handling";
+import type { Messages } from "@/messages";
 
 // Même structure que createGroundHandlingSession
 // (create-ground-handling-session.service.ts).
@@ -9,8 +10,9 @@ export async function updateGroundHandlingSession(
   userId: string,
   activityId: string,
   rawInput: unknown,
+  t: Messages["validation"]["groundHandling"],
 ) {
-  const input = groundHandlingSchema.parse(rawInput);
+  const input = groundHandlingSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
     const activity = await tx.activity.findFirst({ where: { id: activityId, userId } });
@@ -31,7 +33,7 @@ export async function updateGroundHandlingSession(
         const issue: ZodIssue = {
           code: "custom",
           path: ["trainingCampId"],
-          message: "Ce stage n'existe pas ou ne vous appartient pas.",
+          message: t.trainingCampNotFound,
         };
         throw new ZodError([issue]);
       }
@@ -43,7 +45,7 @@ export async function updateGroundHandlingSession(
         const issue: ZodIssue = {
           code: "custom",
           path: ["date"],
-          message: "La date de la séance doit être comprise dans l'intervalle du stage.",
+          message: t.dateOutsideTrainingCamp,
         };
         throw new ZodError([issue]);
       }

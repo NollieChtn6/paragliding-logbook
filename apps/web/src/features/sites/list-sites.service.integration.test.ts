@@ -1,8 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createSite } from "./create-site.service";
 import { getSite } from "./get-site.service";
 import { listSites } from "./list-sites.service";
+
+const t = getDictionary("fr-FR").validation.site;
 
 let spotId: string;
 let otherSpotId: string;
@@ -21,22 +24,28 @@ beforeAll(async () => {
   otherSpotId = otherSpot.id;
 
   const [takeoff, landing] = await Promise.all([
-    createSite({
-      label: `Unique Takeoff ${suffix}`,
-      spotId,
-      siteTypeId: takeoffType.id,
-      latitude: "45.3",
-      longitude: "5.9",
-      altitudeM: "900",
-    }),
-    createSite({
-      label: `Unique Landing ${suffix}`,
-      spotId: otherSpotId,
-      siteTypeId: landingType.id,
-      latitude: "45.3",
-      longitude: "5.9",
-      altitudeM: "300",
-    }),
+    createSite(
+      {
+        label: `Unique Takeoff ${suffix}`,
+        spotId,
+        siteTypeId: takeoffType.id,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "900",
+      },
+      t,
+    ),
+    createSite(
+      {
+        label: `Unique Landing ${suffix}`,
+        spotId: otherSpotId,
+        siteTypeId: landingType.id,
+        latitude: "45.3",
+        longitude: "5.9",
+        altitudeM: "300",
+      },
+      t,
+    ),
   ]);
   takeoffSiteId = takeoff.id;
   landingSiteId = landing.id;

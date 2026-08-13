@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createSpot } from "@/features/spots";
 import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { createSpotAction } from "./create-spot";
 
 // requireAdmin et createSpot sont mockés (déjà couverts par
@@ -12,7 +13,9 @@ import { createSpotAction } from "./create-spot";
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/spots", () => ({ createSpot: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 
 describe("createSpotAction", () => {
@@ -36,8 +39,11 @@ describe("createSpotAction", () => {
 
     await createSpotAction(null, formData);
 
-    expect(createSpot).toHaveBeenCalledWith(expect.objectContaining({ name: "Nouveau spot" }));
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/spots", "Spot créé."));
+    expect(createSpot).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Nouveau spot" }),
+      t.validation.spot,
+    );
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/spots", t.toast.spotCreated));
   });
 
   it("maps a ZodError from createSpot to a validation error message", async () => {
@@ -56,7 +62,7 @@ describe("createSpotAction", () => {
 
     const result = await createSpotAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la création du spot." });
+    expect(result).toEqual({ success: false, error: t.toast.spotCreateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

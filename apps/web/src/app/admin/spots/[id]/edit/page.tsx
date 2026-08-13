@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSpot } from "@/features/spots";
 import { SpotForm } from "@/features/spots/spot-form";
-import { SITE_TYPE_LABELS } from "@/lib/reference-labels";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -22,20 +23,22 @@ export default async function EditSpotPage(props: PageProps<"/admin/spots/[id]/e
     notFound();
   }
 
+  const t = getDictionary(await getLocale());
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={`Modifier ${spot.name}`}
+        title={t.spots.modifyTitle(spot.name)}
         actions={
           <>
             <LeaveFormButton
               href="/admin/spots"
-              title="Abandonner la modification ?"
-              description="Les modifications ne seront pas conservées."
+              title={t.common.discardChangesTitle}
+              description={t.common.discardChangesDescription}
             />
             <AdminDeleteButton
               action={deleteSpotAction.bind(null, spot.id)}
-              entityLabel={`le spot « ${spot.name} »`}
+              entityLabel={t.spots.entityLabel(spot.name)}
             />
           </>
         }
@@ -43,7 +46,7 @@ export default async function EditSpotPage(props: PageProps<"/admin/spots/[id]/e
 
       <SpotForm
         action={updateSpotAction.bind(null, spot.id)}
-        submitLabel="Modifier le spot"
+        submitLabel={t.spots.editSpot}
         defaultValues={{
           name: spot.name,
           region: spot.region ?? undefined,
@@ -56,7 +59,7 @@ export default async function EditSpotPage(props: PageProps<"/admin/spots/[id]/e
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium tracking-tight text-foreground">
-            Sites ({spot.sites.length})
+            {t.sites.sitesCountTitle(spot.sites.length)}
           </h2>
           <Button
             nativeButton={false}
@@ -65,14 +68,14 @@ export default async function EditSpotPage(props: PageProps<"/admin/spots/[id]/e
             render={
               <Link href={`/admin/sites/new?spotId=${spot.id}`}>
                 <Plus className="size-4" aria-hidden />
-                Ajouter un site
+                {t.sites.addSite}
               </Link>
             }
           />
         </div>
 
         {spot.sites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Aucun site pour ce spot.</p>
+          <p className="text-sm text-muted-foreground">{t.sites.noSitesForSpot}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {spot.sites.map((site) => (
@@ -81,7 +84,7 @@ export default async function EditSpotPage(props: PageProps<"/admin/spots/[id]/e
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">{site.label}</p>
                     <p className="text-sm text-muted-foreground">
-                      {SITE_TYPE_LABELS[site.siteType.code] ?? site.siteType.code} ·{" "}
+                      {t.referenceLabels.siteType[site.siteType.code] ?? site.siteType.code} ·{" "}
                       {site.altitudeM} m
                     </p>
                   </div>
@@ -89,7 +92,7 @@ export default async function EditSpotPage(props: PageProps<"/admin/spots/[id]/e
                     nativeButton={false}
                     variant="ghost"
                     size="sm"
-                    render={<Link href={`/admin/sites/${site.id}/edit`}>Modifier</Link>}
+                    render={<Link href={`/admin/sites/${site.id}/edit`}>{t.common.edit}</Link>}
                   />
                 </CardContent>
               </Card>

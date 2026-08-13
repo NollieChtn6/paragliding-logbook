@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useT } from "@/components/locale-provider";
 import { toast } from "@/components/ui/toast";
 
 // Monté une fois dans layout.tsx : enregistre public/sw.js. Ne rend rien,
@@ -8,6 +9,8 @@ import { toast } from "@/components/ui/toast";
 // navigateurs/webviews qui ne le supportent pas, sans faire échouer le
 // reste de l'app (docs/decisions/008).
 export function ServiceWorkerRegistration() {
+  const t = useT();
+
   useEffect(() => {
     if (!("serviceWorker" in navigator)) {
       return;
@@ -32,12 +35,12 @@ export function ServiceWorkerRegistration() {
 
     function handleControllerChange() {
       toast.add({
-        title: "Nouvelle version disponible",
-        description: "Rechargez la page pour utiliser la dernière version.",
+        title: t.pwa.newVersionAvailable,
+        description: t.pwa.newVersionDescription,
         type: "info",
         timeout: 0,
         actionProps: {
-          children: "Recharger",
+          children: t.pwa.reload,
           onClick: () => window.location.reload(),
         },
       });
@@ -46,7 +49,7 @@ export function ServiceWorkerRegistration() {
     navigator.serviceWorker.addEventListener("controllerchange", handleControllerChange);
     return () =>
       navigator.serviceWorker.removeEventListener("controllerchange", handleControllerChange);
-  }, []);
+  }, [t]);
 
   return null;
 }

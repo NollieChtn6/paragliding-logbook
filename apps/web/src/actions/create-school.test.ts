@@ -4,12 +4,15 @@ import { z } from "zod";
 import { createSchool } from "@/features/schools";
 import { requireAdmin } from "@/lib/current-user";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { createSchoolAction } from "./create-school";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/schools", () => ({ createSchool: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 
 describe("createSchoolAction", () => {
@@ -33,8 +36,11 @@ describe("createSchoolAction", () => {
 
     await createSchoolAction(null, formData);
 
-    expect(createSchool).toHaveBeenCalledWith(expect.objectContaining({ name: "Nouvelle école" }));
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/schools", "École créée."));
+    expect(createSchool).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Nouvelle école" }),
+      t.validation.school,
+    );
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/schools", t.toast.schoolCreated));
   });
 
   it("maps a ZodError from createSchool to a validation error message", async () => {
@@ -53,7 +59,7 @@ describe("createSchoolAction", () => {
 
     const result = await createSchoolAction(null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la création de l'école." });
+    expect(result).toEqual({ success: false, error: t.toast.schoolCreateError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });

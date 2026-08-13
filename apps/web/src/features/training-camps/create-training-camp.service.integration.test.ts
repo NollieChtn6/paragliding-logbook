@@ -1,6 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { createTrainingCamp } from "./create-training-camp.service";
+
+const t = getDictionary("fr-FR").validation.trainingCamp;
 
 // Fixtures propres à ce test, indépendantes du seed dev (apps/web/prisma/seed.ts).
 let userId: string;
@@ -46,12 +49,16 @@ describe("createTrainingCamp (integration)", () => {
     let activityId: string;
 
     beforeAll(async () => {
-      const trainingCamp = await createTrainingCamp(userId, {
-        ...validTrainingCampInput,
-        schoolId,
-        trainingCampTypeId,
-        observations: "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
-      });
+      const trainingCamp = await createTrainingCamp(
+        userId,
+        {
+          ...validTrainingCampInput,
+          schoolId,
+          trainingCampTypeId,
+          observations: "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
+        },
+        t,
+      );
       trainingCampId = trainingCamp.id;
       activityId = trainingCamp.activityId;
     });
@@ -87,23 +94,31 @@ describe("createTrainingCamp (integration)", () => {
 
   it("fails with invalid data", async () => {
     await expect(
-      createTrainingCamp(userId, {
-        ...validTrainingCampInput,
-        schoolId,
-        trainingCampTypeId,
-        startDate: "2025-01-15",
-        endDate: "2025-01-10",
-      }),
+      createTrainingCamp(
+        userId,
+        {
+          ...validTrainingCampInput,
+          schoolId,
+          trainingCampTypeId,
+          startDate: "2025-01-15",
+          endDate: "2025-01-10",
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 
   it("fails when the training camp type does not exist", async () => {
     await expect(
-      createTrainingCamp(userId, {
-        ...validTrainingCampInput,
-        schoolId,
-        trainingCampTypeId: crypto.randomUUID(),
-      }),
+      createTrainingCamp(
+        userId,
+        {
+          ...validTrainingCampInput,
+          schoolId,
+          trainingCampTypeId: crypto.randomUUID(),
+        },
+        t,
+      ),
     ).rejects.toThrow();
   });
 });

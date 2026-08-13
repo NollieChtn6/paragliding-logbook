@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useT } from "@/components/locale-provider";
 import { SelectClearButton } from "@/components/select-clear-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { getFieldErrors } from "@/lib/form-validation";
-import { TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
 import { cn } from "@/lib/utils";
 
 type TrainingCampFormActionState = { success: true } | { success: false; error: string };
@@ -49,10 +49,6 @@ type TrainingCampFormProps = {
 
 const WIZARD_STEP_2_REQUIRED_FIELDS = ["startDate", "endDate", "schoolId", "trainingCampTypeId"];
 
-function formatTrainingCampTypeOption(trainingCampType: TrainingCampTypeOption): string {
-  return TRAINING_CAMP_TYPE_LABELS[trainingCampType.code] ?? trainingCampType.code;
-}
-
 // Format attendu par <Input type="date">, voir flight-form.tsx.
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -67,7 +63,7 @@ export function TrainingCampForm({
   trainingCampTypes,
   action,
   defaultValues,
-  submitLabel = "Créer le stage",
+  submitLabel,
   wizardStep,
   onWizardBack,
   onWizardNext,
@@ -84,6 +80,12 @@ export function TrainingCampForm({
   // flight-form.tsx pour la justification (toasts réservés à la
   // soumission/succès).
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const t = useT();
+  const tc = t.trainingCamps;
+
+  function formatTrainingCampTypeOption(trainingCampType: TrainingCampTypeOption): string {
+    return t.referenceLabels.trainingCampType[trainingCampType.code] ?? trainingCampType.code;
+  }
 
   useEffect(() => {
     if (state?.success === false) {
@@ -95,7 +97,7 @@ export function TrainingCampForm({
     const form = formRef.current;
     if (!form) return;
 
-    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS);
+    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS, t.common);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -112,7 +114,7 @@ export function TrainingCampForm({
     const endDateValue = endDateInput instanceof HTMLInputElement ? endDateInput.value : undefined;
     if (startDateValue && endDateValue && new Date(startDateValue) > new Date(endDateValue)) {
       setFieldErrors({
-        startDate: "Doit être antérieure ou égale à la date de fin.",
+        startDate: tc.startDateAfterEndDateField,
       });
       return;
     }
@@ -124,11 +126,11 @@ export function TrainingCampForm({
   return (
     <form ref={formRef} action={formAction} className="flex flex-col gap-4">
       {!wizardStep && (
-        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
+        <h2 className="text-lg font-medium tracking-tight text-foreground">{tc.detailsHeading}</h2>
       )}
       <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="startDate">Date de début</Label>
+          <Label htmlFor="startDate">{tc.startDateLabel}</Label>
           <Input
             id="startDate"
             name="startDate"
@@ -145,7 +147,7 @@ export function TrainingCampForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="endDate">Date de fin</Label>
+          <Label htmlFor="endDate">{tc.endDateLabel}</Label>
           <Input
             id="endDate"
             name="endDate"
@@ -160,7 +162,7 @@ export function TrainingCampForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="schoolId">École</Label>
+          <Label htmlFor="schoolId">{tc.schoolLabel}</Label>
           <div className="flex items-center gap-1.5">
             <Select
               name="schoolId"
@@ -173,9 +175,9 @@ export function TrainingCampForm({
                 className="w-full flex-1"
                 aria-invalid={!!fieldErrors.schoolId}
               >
-                <SelectValue placeholder="Choisir une école">
+                <SelectValue placeholder={tc.chooseSchool}>
                   {(value: string | null) =>
-                    schools.find((school) => school.id === value)?.name ?? "Choisir une école"
+                    schools.find((school) => school.id === value)?.name ?? tc.chooseSchool
                   }
                 </SelectValue>
               </SelectTrigger>
@@ -188,7 +190,7 @@ export function TrainingCampForm({
               </SelectContent>
             </Select>
             {schoolId && (
-              <SelectClearButton onClear={() => setSchoolId("")} label="Effacer l'école" />
+              <SelectClearButton onClear={() => setSchoolId("")} label={tc.clearSchool} />
             )}
           </div>
           {fieldErrors.schoolId && (
@@ -197,7 +199,7 @@ export function TrainingCampForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="trainingCampTypeId">Type de stage</Label>
+          <Label htmlFor="trainingCampTypeId">{tc.typeLabel}</Label>
           <div className="flex items-center gap-1.5">
             <Select
               name="trainingCampTypeId"
@@ -210,12 +212,12 @@ export function TrainingCampForm({
                 className="w-full flex-1"
                 aria-invalid={!!fieldErrors.trainingCampTypeId}
               >
-                <SelectValue placeholder="Choisir un type de stage">
+                <SelectValue placeholder={tc.chooseType}>
                   {(value: string | null) => {
                     const trainingCampType = trainingCampTypes.find((tct) => tct.id === value);
                     return trainingCampType
                       ? formatTrainingCampTypeOption(trainingCampType)
-                      : "Choisir un type de stage";
+                      : tc.chooseType;
                   }}
                 </SelectValue>
               </SelectTrigger>
@@ -228,10 +230,7 @@ export function TrainingCampForm({
               </SelectContent>
             </Select>
             {trainingCampTypeId && (
-              <SelectClearButton
-                onClear={() => setTrainingCampTypeId("")}
-                label="Effacer le type de stage"
-              />
+              <SelectClearButton onClear={() => setTrainingCampTypeId("")} label={tc.clearType} />
             )}
           </div>
           {fieldErrors.trainingCampTypeId && (
@@ -241,11 +240,13 @@ export function TrainingCampForm({
       </div>
 
       {!wizardStep && (
-        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
+        <h2 className="text-lg font-medium tracking-tight text-foreground">
+          {tc.observationsHeading}
+        </h2>
       )}
       <div className={cn(wizardStep === 2 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="observations">Observations</Label>
+          <Label htmlFor="observations">{tc.observationsLabel}</Label>
           <Textarea
             id="observations"
             name="observations"
@@ -254,12 +255,12 @@ export function TrainingCampForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="summary">Bilan</Label>
+          <Label htmlFor="summary">{tc.summaryLabel}</Label>
           <Textarea id="summary" name="summary" defaultValue={defaultValues?.summary} />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="certification">Certification</Label>
+          <Label htmlFor="certification">{tc.certificationLabel}</Label>
           <Input
             id="certification"
             name="certification"
@@ -271,7 +272,7 @@ export function TrainingCampForm({
       {wizardStep ? (
         <div className="mt-2 flex items-center justify-between gap-2">
           <Button type="button" variant="outline" onClick={onWizardBack}>
-            Précédent
+            {tc.previous}
           </Button>
           {/* key distinct sur les deux boutons : sans ça, passer de l'étape 2
           à 3 fait muter le même nœud DOM de type="button" à type="submit"
@@ -284,17 +285,17 @@ export function TrainingCampForm({
           native), le bug était pleinement visible sur ce formulaire. */}
           {wizardStep === 2 ? (
             <Button key="next" type="button" onClick={handleWizardNext}>
-              Suivant
+              {tc.next}
             </Button>
           ) : (
             <Button key="submit" type="submit" disabled={isPending}>
-              {isPending ? "Enregistrement..." : submitLabel}
+              {isPending ? t.common.saving : (submitLabel ?? tc.createCamp)}
             </Button>
           )}
         </div>
       ) : (
         <Button type="submit" className="mt-2" disabled={isPending}>
-          {isPending ? "Enregistrement..." : submitLabel}
+          {isPending ? t.common.saving : (submitLabel ?? tc.createCamp)}
         </Button>
       )}
 

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { updateProfile } from "@/features/account";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getDictionary } from "@/messages";
 import { updateProfileAction } from "./update-profile";
 
 // Même approche que change-password.test.ts : updateProfile et
@@ -10,6 +11,9 @@ import { updateProfileAction } from "./update-profile";
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("@/features/account", () => ({ updateProfile: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireCurrentUser: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
+
+const t = getDictionary("fr-FR");
 
 const CURRENT_USER = { id: "current-user-id" };
 
@@ -36,6 +40,7 @@ describe("updateProfileAction", () => {
     expect(updateProfile).toHaveBeenCalledWith(
       undefined,
       expect.objectContaining({ name: "Jane Doe", city: "Annecy" }),
+      t.validation.updateProfile,
     );
     expect(result).toEqual({ success: true });
   });
@@ -57,7 +62,7 @@ describe("updateProfileAction", () => {
 
     expect(result).toEqual({
       success: false,
-      error: "Erreur lors de la mise à jour du profil.",
+      error: t.toast.profileUpdateError,
     });
   });
 });

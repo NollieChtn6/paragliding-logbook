@@ -6,7 +6,7 @@ import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
 // vide protège transitivement les Flight (référencés via Site, jamais
 // directement via Spot) sans que ce service ait besoin de connaître Flight
 // — docs/admin.md > Suppression : jamais de cascade silencieuse.
-export async function deleteSpot(spotId: string): Promise<void> {
+export async function deleteSpot(spotId: string, spotInUseMessage: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
     const [siteCount, sessionCount] = await Promise.all([
       tx.site.count({ where: { spotId } }),
@@ -14,9 +14,7 @@ export async function deleteSpot(spotId: string): Promise<void> {
     ]);
 
     if (siteCount > 0 || sessionCount > 0) {
-      throw new ReferenceDataInUseError(
-        "Ce spot a encore des sites ou des séances de gonflage associés : supprimez-les d'abord.",
-      );
+      throw new ReferenceDataInUseError(spotInUseMessage);
     }
 
     await tx.spot.delete({ where: { id: spotId } });

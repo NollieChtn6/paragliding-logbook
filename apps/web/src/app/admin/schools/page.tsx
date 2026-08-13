@@ -15,30 +15,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listSchools } from "@/features/schools";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
 
 export const dynamic = "force-dynamic";
-
-function formatLocation(school: { city: string | null; countryCode: string | null }): string {
-  if (school.city && school.countryCode) return `${school.city} · ${school.countryCode}`;
-  return school.city ?? school.countryCode ?? "—";
-}
 
 export default async function AdminSchoolsPage(props: PageProps<"/admin/schools">) {
   const searchParams = await props.searchParams;
   const query = typeof searchParams.q === "string" ? searchParams.q : undefined;
   const schools = await listSchools(query);
+  const t = getDictionary(await getLocale());
+  const ts = t.schools;
+
+  function formatLocation(school: { city: string | null; countryCode: string | null }): string {
+    if (school.city && school.countryCode) return `${school.city} · ${school.countryCode}`;
+    return school.city ?? school.countryCode ?? ts.noLocation;
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Écoles"
+        title={ts.pageTitle}
         actions={
           <Button
             nativeButton={false}
             render={
               <Link href="/admin/schools/new">
                 <Plus className="size-4" aria-hidden />
-                Nouvelle école
+                {ts.newSchool}
               </Link>
             }
           />
@@ -46,25 +50,21 @@ export default async function AdminSchoolsPage(props: PageProps<"/admin/schools"
       />
 
       <form className="flex gap-2">
-        <Input name="q" defaultValue={query} placeholder="Rechercher une école..." />
+        <Input name="q" defaultValue={query} placeholder={ts.searchPlaceholder} />
         <Button type="submit" variant="outline">
-          Rechercher
+          {t.common.search}
         </Button>
       </form>
 
       {schools.length === 0 ? (
         <EmptyState
-          title={
-            query ? "Aucune école ne correspond à cette recherche" : "Aucune école enregistrée"
-          }
-          description={
-            query ? "Essayez un autre terme de recherche." : "Créez la première école de référence."
-          }
+          title={query ? ts.emptyFilteredTitle : ts.emptyNoneTitle}
+          description={query ? ts.emptyFilteredDescription : ts.emptyNoneDescription}
           action={
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href="/admin/schools/new">Créer une école</Link>}
+              render={<Link href="/admin/schools/new">{ts.createSchoolButton}</Link>}
             />
           }
         />
@@ -73,9 +73,9 @@ export default async function AdminSchoolsPage(props: PageProps<"/admin/schools"
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead>Ville / Pays</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{ts.colName}</TableHead>
+                <TableHead>{ts.colLocation}</TableHead>
+                <TableHead className="text-right">{ts.colActions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -96,8 +96,8 @@ export default async function AdminSchoolsPage(props: PageProps<"/admin/schools"
                         nativeButton={false}
                         variant="ghost"
                         size="icon-sm"
-                        aria-label={`Modifier ${school.name}`}
-                        title={`Modifier ${school.name}`}
+                        aria-label={ts.modifyAriaLabel(school.name)}
+                        title={ts.modifyAriaLabel(school.name)}
                         render={
                           <Link href={`/admin/schools/${school.id}/edit`}>
                             <Pencil className="size-4" aria-hidden />
@@ -106,7 +106,7 @@ export default async function AdminSchoolsPage(props: PageProps<"/admin/schools"
                       />
                       <AdminDeleteButton
                         action={deleteSchoolAction.bind(null, school.id)}
-                        entityLabel={`l'école « ${school.name} »`}
+                        entityLabel={ts.entityLabel(school.name)}
                       />
                     </div>
                   </TableCell>

@@ -2,6 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useActionState, useEffect } from "react";
+import { useT } from "@/components/locale-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,7 @@ type AdminDeleteButtonProps = {
 // "Supprimer" pleine largeur des pages d'activité.
 export function AdminDeleteButton({ action, entityLabel }: AdminDeleteButtonProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const t = useT();
 
   useEffect(() => {
     if (state?.success === false) {
@@ -50,8 +52,8 @@ export function AdminDeleteButton({ action, entityLabel }: AdminDeleteButtonProp
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={`Supprimer ${entityLabel}`}
-            title={`Supprimer ${entityLabel}`}
+            aria-label={t.admin.deleteAriaLabel(entityLabel)}
+            title={t.admin.deleteAriaLabel(entityLabel)}
           >
             <Trash2 className="size-4 text-destructive" />
           </Button>
@@ -59,16 +61,14 @@ export function AdminDeleteButton({ action, entityLabel }: AdminDeleteButtonProp
       />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer {entityLabel} ?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Cette action est définitive et ne peut pas être annulée.
-          </AlertDialogDescription>
+          <AlertDialogTitle>{t.admin.deleteConfirmTitle(entityLabel)}</AlertDialogTitle>
+          <AlertDialogDescription>{t.admin.deleteConfirmDescription}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>{t.admin.cancel}</AlertDialogCancel>
           <form action={formAction}>
             <AlertDialogAction type="submit" variant="destructive" disabled={isPending}>
-              {isPending ? "Suppression..." : "Supprimer"}
+              {isPending ? t.admin.deleting : t.admin.delete}
             </AlertDialogAction>
           </form>
         </AlertDialogFooter>

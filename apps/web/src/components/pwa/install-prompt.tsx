@@ -2,6 +2,7 @@
 
 import { Download, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useT } from "@/components/locale-provider";
 import { InstallOptions } from "@/components/pwa/install-options";
 import { useInstallPrompt } from "@/components/pwa/install-prompt-provider";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export function InstallPrompt({ hasActivities }: InstallPromptProps) {
   const mounted = useMounted();
   const { standalone } = useInstallPrompt();
   const [dismissed, setDismissed] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     setDismissed(localStorage.getItem(DISMISS_KEY) === "1");
@@ -44,15 +46,15 @@ export function InstallPrompt({ hasActivities }: InstallPromptProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Download className="size-4 text-primary" aria-hidden />
-          Installer THERMIK
+          {t.pwa.installTitle}
         </CardTitle>
         <CardAction>
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label="Fermer"
-            title="Fermer"
+            aria-label={t.pwa.close}
+            title={t.pwa.close}
             onClick={handleDismiss}
           >
             <X className="size-4" />

@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { signUp } from "./sign-up.service";
+
+const t = getDictionary("fr-FR").validation.signUp;
 
 // Complète sign-up.service.integration.test.ts : vérifie spécifiquement le
 // rôle attribué à l'inscription (docs/admin.md > Rôles — "USER par défaut,
@@ -35,12 +38,15 @@ describe("signUp role assignment (integration)", () => {
   it("defaults a new user to the USER role", async () => {
     const email = uniqueEmail();
 
-    await signUp({
-      name: "Jane Doe",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+      },
+      t,
+    );
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
     expect(user.role).toBe("USER");
@@ -54,13 +60,16 @@ describe("signUp role assignment (integration)", () => {
     // name/email/password sont transmis à auth.api.signUpEmail (voir
     // sign-up.service.ts) — un rôle injecté ici ne peut structurellement pas
     // atteindre la base.
-    await signUp({
-      name: "Jane Doe",
-      email,
-      password: "a-strong-password-12",
-      confirmPassword: "a-strong-password-12",
-      role: "ADMIN",
-    });
+    await signUp(
+      {
+        name: "Jane Doe",
+        email,
+        password: "a-strong-password-12",
+        confirmPassword: "a-strong-password-12",
+        role: "ADMIN",
+      },
+      t,
+    );
 
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
     expect(user.role).toBe("USER");

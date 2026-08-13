@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useT } from "@/components/locale-provider";
 import { SelectClearButton } from "@/components/select-clear-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
-import { SITE_TYPE_LABELS } from "@/lib/reference-labels";
 
 type SiteFormActionState = { success: true } | { success: false; error: string };
 
@@ -35,27 +35,23 @@ type SiteFormProps = {
     formData: FormData,
   ) => Promise<SiteFormActionState>;
   defaultValues?: SiteFormDefaultValues;
-  submitLabel?: string;
+  submitLabel: string;
 };
-
-function formatSiteType(siteType: { code: string }): string {
-  return SITE_TYPE_LABELS[siteType.code] ?? siteType.code;
-}
 
 // Le spot et le type de site proviennent tous les deux d'un référentiel
 // (docs/admin.md > Gestion des sites, "Le type doit provenir du référentiel
 // SiteType, pas d'un champ texte libre") : Select contrôlé pour les deux,
 // même principe que TrainingCampForm (bouton croix de réinitialisation).
-export function SiteForm({
-  spots,
-  siteTypes,
-  action,
-  defaultValues,
-  submitLabel = "Créer le site",
-}: SiteFormProps) {
+export function SiteForm({ spots, siteTypes, action, defaultValues, submitLabel }: SiteFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
   const [spotId, setSpotId] = useState(defaultValues?.spotId ?? "");
   const [siteTypeId, setSiteTypeId] = useState(defaultValues?.siteTypeId ?? "");
+  const t = useT();
+  const ts = t.sites;
+
+  function formatSiteType(siteType: { code: string }): string {
+    return t.referenceLabels.siteType[siteType.code] ?? siteType.code;
+  }
 
   useEffect(() => {
     if (state?.success === false) {
@@ -66,12 +62,12 @@ export function SiteForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="label">Nom</Label>
+        <Label htmlFor="label">{ts.nameLabel}</Label>
         <Input id="label" name="label" defaultValue={defaultValues?.label} required />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="spotId">Spot</Label>
+        <Label htmlFor="spotId">{ts.spotLabel}</Label>
         <div className="flex items-center gap-1.5">
           <Select
             name="spotId"
@@ -80,9 +76,9 @@ export function SiteForm({
             required
           >
             <SelectTrigger id="spotId" className="w-full flex-1">
-              <SelectValue placeholder="Choisir un spot">
+              <SelectValue placeholder={ts.chooseSpot}>
                 {(value: string | null) =>
-                  spots.find((spot) => spot.id === value)?.name ?? "Choisir un spot"
+                  spots.find((spot) => spot.id === value)?.name ?? ts.chooseSpot
                 }
               </SelectValue>
             </SelectTrigger>
@@ -94,12 +90,12 @@ export function SiteForm({
               ))}
             </SelectContent>
           </Select>
-          {spotId && <SelectClearButton onClear={() => setSpotId("")} label="Effacer le spot" />}
+          {spotId && <SelectClearButton onClear={() => setSpotId("")} label={ts.clearSpot} />}
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="siteTypeId">Type</Label>
+        <Label htmlFor="siteTypeId">{ts.typeLabel}</Label>
         <div className="flex items-center gap-1.5">
           <Select
             name="siteTypeId"
@@ -108,10 +104,10 @@ export function SiteForm({
             required
           >
             <SelectTrigger id="siteTypeId" className="w-full flex-1">
-              <SelectValue placeholder="Choisir un type">
+              <SelectValue placeholder={ts.chooseType}>
                 {(value: string | null) => {
                   const siteType = siteTypes.find((st) => st.id === value);
-                  return siteType ? formatSiteType(siteType) : "Choisir un type";
+                  return siteType ? formatSiteType(siteType) : ts.chooseType;
                 }}
               </SelectValue>
             </SelectTrigger>
@@ -124,14 +120,14 @@ export function SiteForm({
             </SelectContent>
           </Select>
           {siteTypeId && (
-            <SelectClearButton onClear={() => setSiteTypeId("")} label="Effacer le type" />
+            <SelectClearButton onClear={() => setSiteTypeId("")} label={ts.clearType} />
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="latitude">Latitude</Label>
+          <Label htmlFor="latitude">{ts.latitudeLabel}</Label>
           <Input
             id="latitude"
             name="latitude"
@@ -142,7 +138,7 @@ export function SiteForm({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="longitude">Longitude</Label>
+          <Label htmlFor="longitude">{ts.longitudeLabel}</Label>
           <Input
             id="longitude"
             name="longitude"
@@ -156,7 +152,7 @@ export function SiteForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="altitudeM">Altitude (m)</Label>
+          <Label htmlFor="altitudeM">{ts.altitudeLabel}</Label>
           <Input
             id="altitudeM"
             name="altitudeM"
@@ -166,7 +162,7 @@ export function SiteForm({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="orientationDeg">Orientation (°)</Label>
+          <Label htmlFor="orientationDeg">{ts.orientationLabel}</Label>
           <Input
             id="orientationDeg"
             name="orientationDeg"
@@ -179,7 +175,7 @@ export function SiteForm({
       </div>
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
+        {isPending ? t.common.saving : submitLabel}
       </Button>
 
       {state?.success === false && (

@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useLocale, useT } from "@/components/locale-provider";
 import { SelectClearButton } from "@/components/select-clear-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { getFieldErrors } from "@/lib/form-validation";
-import { FLIGHT_TYPE_LABELS, TRAINING_CAMP_TYPE_LABELS } from "@/lib/reference-labels";
+import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import { SiteCombobox, type SiteOption } from "./site-combobox";
 
@@ -63,25 +64,6 @@ type FlightFormProps = {
   onWizardNext?: () => void;
 };
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("fr-FR");
-}
-
-function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
-  const typeLabel =
-    TRAINING_CAMP_TYPE_LABELS[trainingCamp.trainingCampType.code] ??
-    trainingCamp.trainingCampType.code;
-  return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate)} → ${formatDate(trainingCamp.endDate)})`;
-}
-
-// Repli sur le code brut si un code existe en base sans entrée dans le
-// dictionnaire (docs/decisions/003-reference-table-codes.md) : ne doit pas
-// arriver en pratique (ces tables ne sont pas éditables en dehors du seed),
-// mais reste lisible plutôt que silencieusement vide.
-function formatFlightTypeOption(flightType: FlightTypeOption): string {
-  return FLIGHT_TYPE_LABELS[flightType.code] ?? flightType.code;
-}
-
 const WIZARD_STEP_2_REQUIRED_FIELDS = [
   "date",
   "time",
@@ -117,7 +99,7 @@ export function FlightForm({
   defaultValues,
   defaultTakeoffPoint,
   defaultLandingPoint,
-  submitLabel = "Créer le vol",
+  submitLabel,
   wizardStep,
   onWizardBack,
   onWizardNext,
@@ -134,6 +116,24 @@ export function FlightForm({
   // (state?.success === false ci-dessous) et au succès (redirection +
   // toast, voir actions/create-flight.ts).
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [locale] = useLocale();
+  const t = useT();
+  const tf = t.flights;
+
+  function formatTrainingCampOption(trainingCamp: TrainingCampOption): string {
+    const typeLabel =
+      t.referenceLabels.trainingCampType[trainingCamp.trainingCampType.code] ??
+      trainingCamp.trainingCampType.code;
+    return `${typeLabel} — ${trainingCamp.school.name} (${formatDate(trainingCamp.startDate, locale)} → ${formatDate(trainingCamp.endDate, locale)})`;
+  }
+
+  // Repli sur le code brut si un code existe en base sans entrée dans le
+  // dictionnaire (docs/decisions/003-reference-table-codes.md) : ne doit pas
+  // arriver en pratique (ces tables ne sont pas éditables en dehors du seed),
+  // mais reste lisible plutôt que silencieusement vide.
+  function formatFlightTypeOption(flightType: FlightTypeOption): string {
+    return t.referenceLabels.flightType[flightType.code] ?? flightType.code;
+  }
 
   useEffect(() => {
     if (state?.success === false) {
@@ -145,7 +145,7 @@ export function FlightForm({
     const form = formRef.current;
     if (!form) return;
 
-    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS);
+    const errors = getFieldErrors(form, WIZARD_STEP_2_REQUIRED_FIELDS, t.common);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -165,7 +165,7 @@ export function FlightForm({
         const flightDate = new Date(dateValue);
         if (flightDate < selectedCamp.startDate || flightDate > selectedCamp.endDate) {
           setFieldErrors({
-            date: "Doit être comprise dans l'intervalle du stage sélectionné (ou retirez le stage associé).",
+            date: tf.dateOutsideTrainingCampField,
           });
           return;
         }
@@ -183,7 +183,7 @@ export function FlightForm({
   // (wizardStep absent : /flights/new, /activities/[id]/edit inchangés).
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!wizardStep) return;
-    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS);
+    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS, t.common);
     if (Object.keys(errors).length > 0) {
       event.preventDefault();
       setFieldErrors(errors);
@@ -193,12 +193,12 @@ export function FlightForm({
   return (
     <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
       {!wizardStep && (
-        <h2 className="text-lg font-medium tracking-tight text-foreground">Détails</h2>
+        <h2 className="text-lg font-medium tracking-tight text-foreground">{tf.detailsHeading}</h2>
       )}
       <div className={cn(wizardStep === 3 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex gap-3">
           <div className="flex flex-1 flex-col gap-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{tf.dateLabel}</Label>
             <Input
               id="date"
               name="date"
@@ -211,7 +211,7 @@ export function FlightForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="time">Heure</Label>
+            <Label htmlFor="time">{tf.timeLabel}</Label>
             <Input
               id="time"
               name="time"
@@ -227,8 +227,8 @@ export function FlightForm({
         <SiteCombobox
           type="TAKEOFF"
           name="takeoffPointId"
-          label="Décollage"
-          placeholder="Rechercher un décollage..."
+          label={tf.takeoffLabel}
+          placeholder={tf.takeoffPlaceholder}
           defaultSite={defaultTakeoffPoint}
           error={fieldErrors.takeoffPointId}
         />
@@ -236,15 +236,15 @@ export function FlightForm({
         <SiteCombobox
           type="LANDING"
           name="landingPointId"
-          label="Atterrissage"
-          placeholder="Rechercher un atterrissage..."
+          label={tf.landingLabel}
+          placeholder={tf.landingPlaceholder}
           defaultSite={defaultLandingPoint}
           error={fieldErrors.landingPointId}
         />
 
         {trainingCamps.length > 0 && (
           <div className="flex flex-col gap-2">
-            <Label htmlFor="trainingCampId">Stage associé (optionnel)</Label>
+            <Label htmlFor="trainingCampId">{tf.trainingCampLabel}</Label>
             <div className="flex items-center gap-1.5">
               <Select
                 name="trainingCampId"
@@ -252,15 +252,15 @@ export function FlightForm({
                 onValueChange={(value) => setTrainingCampId(value ?? "")}
               >
                 <SelectTrigger id="trainingCampId" className="w-full flex-1">
-                  <SelectValue placeholder="Aucun">
+                  <SelectValue placeholder={tf.none}>
                     {(value: string) => {
                       const trainingCamp = trainingCamps.find((tc) => tc.id === value);
-                      return trainingCamp ? formatTrainingCampOption(trainingCamp) : "Aucun";
+                      return trainingCamp ? formatTrainingCampOption(trainingCamp) : tf.none;
                     }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucun</SelectItem>
+                  <SelectItem value="">{tf.none}</SelectItem>
                   {trainingCamps.map((trainingCamp) => (
                     <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
                       {formatTrainingCampOption(trainingCamp)}
@@ -271,7 +271,7 @@ export function FlightForm({
               {trainingCampId && (
                 <SelectClearButton
                   onClear={() => setTrainingCampId("")}
-                  label="Effacer le stage associé"
+                  label={tf.clearTrainingCamp}
                 />
               )}
             </div>
@@ -279,7 +279,7 @@ export function FlightForm({
         )}
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="durationMin">Durée (min)</Label>
+          <Label htmlFor="durationMin">{tf.durationLabel}</Label>
           <Input
             id="durationMin"
             name="durationMin"
@@ -295,7 +295,7 @@ export function FlightForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="flightTypeId">Type de vol</Label>
+          <Label htmlFor="flightTypeId">{tf.flightTypeLabel}</Label>
           <div className="flex items-center gap-1.5">
             <Select
               name="flightTypeId"
@@ -308,12 +308,10 @@ export function FlightForm({
                 className="w-full flex-1"
                 aria-invalid={!!fieldErrors.flightTypeId}
               >
-                <SelectValue placeholder="Choisir un type de vol">
+                <SelectValue placeholder={tf.chooseFlightType}>
                   {(value: string | null) => {
                     const flightType = flightTypes.find((ft) => ft.id === value);
-                    return flightType
-                      ? formatFlightTypeOption(flightType)
-                      : "Choisir un type de vol";
+                    return flightType ? formatFlightTypeOption(flightType) : tf.chooseFlightType;
                   }}
                 </SelectValue>
               </SelectTrigger>
@@ -326,10 +324,7 @@ export function FlightForm({
               </SelectContent>
             </Select>
             {flightTypeId && (
-              <SelectClearButton
-                onClear={() => setFlightTypeId("")}
-                label="Effacer le type de vol"
-              />
+              <SelectClearButton onClear={() => setFlightTypeId("")} label={tf.clearFlightType} />
             )}
           </div>
           {fieldErrors.flightTypeId && (
@@ -339,11 +334,13 @@ export function FlightForm({
       </div>
 
       {!wizardStep && (
-        <h2 className="text-lg font-medium tracking-tight text-foreground">Observations</h2>
+        <h2 className="text-lg font-medium tracking-tight text-foreground">
+          {tf.observationsHeading}
+        </h2>
       )}
       <div className={cn(wizardStep === 2 ? "hidden" : "flex flex-col gap-4")}>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="observations">Observations</Label>
+          <Label htmlFor="observations">{tf.observationsLabel}</Label>
           <Textarea
             id="observations"
             name="observations"
@@ -357,7 +354,7 @@ export function FlightForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="improvementPoints">Points d&apos;amélioration</Label>
+          <Label htmlFor="improvementPoints">{tf.improvementPointsLabel}</Label>
           <Textarea
             id="improvementPoints"
             name="improvementPoints"
@@ -374,7 +371,7 @@ export function FlightForm({
       {wizardStep ? (
         <div className="mt-2 flex items-center justify-between gap-2">
           <Button type="button" variant="outline" onClick={onWizardBack}>
-            Précédent
+            {tf.previous}
           </Button>
           {/* key distinct sur les deux boutons : sans ça, passer de l'étape 2
           à 3 fait muter le même nœud DOM de type="button" à type="submit"
@@ -386,17 +383,17 @@ export function FlightForm({
           plus visible sur TrainingCampForm, où aucun champ n'est requis. */}
           {wizardStep === 2 ? (
             <Button key="next" type="button" onClick={handleWizardNext}>
-              Suivant
+              {tf.next}
             </Button>
           ) : (
             <Button key="submit" type="submit" disabled={isPending}>
-              {isPending ? "Enregistrement..." : submitLabel}
+              {isPending ? t.common.saving : (submitLabel ?? tf.createFlight)}
             </Button>
           )}
         </div>
       ) : (
         <Button type="submit" className="mt-2" disabled={isPending}>
-          {isPending ? "Enregistrement..." : submitLabel}
+          {isPending ? t.common.saving : (submitLabel ?? tf.createFlight)}
         </Button>
       )}
 

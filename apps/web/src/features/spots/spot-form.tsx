@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,15 +23,17 @@ type SpotFormProps = {
     formData: FormData,
   ) => Promise<SpotFormActionState>;
   defaultValues?: SpotFormDefaultValues;
-  submitLabel?: string;
+  submitLabel: string;
 };
 
 // Formulaire admin simple (pas d'assistant multi-étapes, contrairement aux
 // formulaires d'activité) : utilisé en création (/admin/spots/new) et en
 // modification (/admin/spots/[id]/edit), action et defaultValues varient
 // selon l'appelant — même principe que FlightForm/TrainingCampForm.
-export function SpotForm({ action, defaultValues, submitLabel = "Créer le spot" }: SpotFormProps) {
+export function SpotForm({ action, defaultValues, submitLabel }: SpotFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const t = useT();
+  const ts = t.spots;
 
   useEffect(() => {
     if (state?.success === false) {
@@ -41,17 +44,17 @@ export function SpotForm({ action, defaultValues, submitLabel = "Créer le spot"
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Nom</Label>
+        <Label htmlFor="name">{ts.nameLabel}</Label>
         <Input id="name" name="name" defaultValue={defaultValues?.name} required />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="region">Région</Label>
+        <Label htmlFor="region">{ts.regionLabel}</Label>
         <Input id="region" name="region" defaultValue={defaultValues?.region} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="countryCode">Pays (code ISO, ex. FR)</Label>
+        <Label htmlFor="countryCode">{ts.countryLabel}</Label>
         <Input
           id="countryCode"
           name="countryCode"
@@ -62,7 +65,7 @@ export function SpotForm({ action, defaultValues, submitLabel = "Créer le spot"
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="latitude">Latitude</Label>
+          <Label htmlFor="latitude">{ts.latitudeLabel}</Label>
           <Input
             id="latitude"
             name="latitude"
@@ -72,7 +75,7 @@ export function SpotForm({ action, defaultValues, submitLabel = "Créer le spot"
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="longitude">Longitude</Label>
+          <Label htmlFor="longitude">{ts.longitudeLabel}</Label>
           <Input
             id="longitude"
             name="longitude"
@@ -84,7 +87,7 @@ export function SpotForm({ action, defaultValues, submitLabel = "Créer le spot"
       </div>
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
+        {isPending ? t.common.saving : submitLabel}
       </Button>
 
       {state?.success === false && (

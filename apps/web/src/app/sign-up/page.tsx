@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VersionBadge } from "@/components/version-badge";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { toSafeRedirectPath } from "@/lib/safe-redirect";
 import { isSignUpInviteCodeRequired } from "@/lib/signup-invite-code";
+import { getDictionary } from "@/messages";
 import { SignUpForm } from "./sign-up-form";
 
 export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">) {
@@ -16,10 +19,12 @@ export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">
   // afficher l'étape "code" que si SIGNUP_INVITE_CODE est réellement
   // configuré, sinon l'inscription reste directe comme avant.
   const inviteCodeRequired = isSignUpInviteCodeRequired();
+  const t = getDictionary(await getLocale());
 
   return (
     <div className="relative flex min-h-svh w-full flex-col items-center justify-center px-4 py-8">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <LocaleToggle />
         <ThemeToggle />
       </div>
 
@@ -37,7 +42,8 @@ export default async function SignUpPage({ searchParams }: PageProps<"/sign-up">
             </h1>
           </Link>
           <p className="text-sm text-muted-foreground">
-            Créer un compte pour commencer <br />à suivre votre progression.
+            {t.auth.signUpTagline1} <br />
+            {t.auth.signUpTagline2}
           </p>
         </div>
         <SignUpForm redirectTo={redirectTo} inviteCodeRequired={inviteCodeRequired} />

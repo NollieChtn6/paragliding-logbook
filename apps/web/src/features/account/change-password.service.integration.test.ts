@@ -2,7 +2,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { auth } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
+import { getDictionary } from "@/messages";
 import { changePassword } from "./change-password.service";
+
+const t = getDictionary("fr-FR").validation.changePassword;
 
 // Fixtures propres à ce test, indépendantes du seed dev.
 let userId: string;
@@ -61,11 +64,15 @@ describe("changePassword (integration)", () => {
     });
 
     await expect(
-      changePassword(headers, {
-        currentPassword: "definitely-the-wrong-password",
-        newPassword: "a-new-password-1234",
-        confirmPassword: "a-new-password-1234",
-      }),
+      changePassword(
+        headers,
+        {
+          currentPassword: "definitely-the-wrong-password",
+          newPassword: "a-new-password-1234",
+          confirmPassword: "a-new-password-1234",
+        },
+        t,
+      ),
     ).rejects.toThrow();
 
     const accountAfter = await prisma.account.findFirstOrThrow({
@@ -81,11 +88,15 @@ describe("changePassword (integration)", () => {
     });
     const newPassword = "a-successfully-changed-password-1234";
 
-    await changePassword(headers, {
-      currentPassword: INITIAL_PASSWORD,
-      newPassword,
-      confirmPassword: newPassword,
-    });
+    await changePassword(
+      headers,
+      {
+        currentPassword: INITIAL_PASSWORD,
+        newPassword,
+        confirmPassword: newPassword,
+      },
+      t,
+    );
 
     const accountAfter = await prisma.account.findFirstOrThrow({
       where: { userId, providerId: "credential" },

@@ -5,7 +5,9 @@ import { ZodError } from "zod";
 import { ActivityNotFoundError } from "@/features/activities";
 import { updateFlight } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 
 export type UpdateFlightActionState = { success: true } | { success: false; error: string };
 
@@ -24,21 +26,22 @@ export async function updateFlightAction(
   // intercepter (proxy.ts protège déjà /activities/:path*, mais une Server
   // Function doit toujours vérifier par elle-même, cf. src/proxy.ts).
   const user = await requireCurrentUser();
+  const t = getDictionary(await getLocale());
 
   try {
-    await updateFlight(user.id, activityId, Object.fromEntries(formData));
+    await updateFlight(user.id, activityId, Object.fromEntries(formData), t.validation.flight);
   } catch (error) {
     if (error instanceof ActivityNotFoundError) {
       notFound();
     }
     if (error instanceof ZodError) {
-      return { success: false, error: error.issues[0]?.message ?? "Formulaire invalide." };
+      return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
     }
-    return { success: false, error: "Erreur lors de la modification du vol." };
+    return { success: false, error: t.toast.flightUpdateError };
   }
 
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter. Vers le détail
   // modifié plutôt que /activities, pour confirmer visuellement le résultat.
-  redirect(withToast(`/activities/${activityId}`, "Vol modifié."));
+  redirect(withToast(`/activities/${activityId}`, t.toast.flightUpdated));
 }

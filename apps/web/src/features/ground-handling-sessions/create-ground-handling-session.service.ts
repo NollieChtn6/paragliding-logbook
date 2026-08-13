@@ -1,14 +1,19 @@
 import { ZodError, type ZodIssue } from "zod";
 import { prisma } from "@/lib/prisma";
 import { groundHandlingSchema } from "@/lib/validations/ground-handling";
+import type { Messages } from "@/messages";
 
 const GROUND_HANDLING_ACTIVITY_TYPE_CODE = "GROUND_HANDLING";
 
 // Même structure que createFlight/createTrainingCamp : couche métier
 // indépendante de l'UI, Activity toujours créée avant sa spécialisation dans
 // la même transaction (docs/decisions/001-activity-model.md).
-export async function createGroundHandlingSession(userId: string, rawInput: unknown) {
-  const input = groundHandlingSchema.parse(rawInput);
+export async function createGroundHandlingSession(
+  userId: string,
+  rawInput: unknown,
+  t: Messages["validation"]["groundHandling"],
+) {
+  const input = groundHandlingSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
     const activityType = await tx.activityType.findUniqueOrThrow({
@@ -30,7 +35,7 @@ export async function createGroundHandlingSession(userId: string, rawInput: unkn
         const issue: ZodIssue = {
           code: "custom",
           path: ["trainingCampId"],
-          message: "Ce stage n'existe pas ou ne vous appartient pas.",
+          message: t.trainingCampNotFound,
         };
         throw new ZodError([issue]);
       }
@@ -43,7 +48,7 @@ export async function createGroundHandlingSession(userId: string, rawInput: unkn
         const issue: ZodIssue = {
           code: "custom",
           path: ["date"],
-          message: "La date de la séance doit être comprise dans l'intervalle du stage.",
+          message: t.dateOutsideTrainingCamp,
         };
         throw new ZodError([issue]);
       }

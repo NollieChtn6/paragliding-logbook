@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { signInAction } from "@/actions/sign-in";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ type SignInFormProps = {
 export function SignInForm({ redirectTo }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(signInAction, null);
   const [showPassword, setShowPassword] = useState(false);
+  const t = useT().auth.signIn;
 
   useEffect(() => {
     if (state?.success === false) {
@@ -32,26 +34,26 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
       <input type="hidden" name="redirectTo" value={redirectTo} />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" placeholder="email@exemple.fr" required />
+        <Label htmlFor="email">{t.emailLabel}</Label>
+        <Input id="email" name="email" type="email" placeholder={t.emailPlaceholder} required />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="password">Mot de passe</Label>
+        <Label htmlFor="password">{t.passwordLabel}</Label>
         <div className="relative">
           <Input
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Votre mot de passe"
+            placeholder={t.passwordPlaceholder}
             className="pr-9"
             required
           />
           <button
             type="button"
             onClick={() => setShowPassword((value) => !value)}
-            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-            title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            aria-label={showPassword ? t.hidePassword : t.showPassword}
+            title={showPassword ? t.hidePassword : t.showPassword}
             className="absolute inset-y-0 right-0 flex w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           >
             {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -60,7 +62,7 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
       </div>
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Connexion..." : "Se connecter"}
+        {isPending ? t.submitting : t.submit}
       </Button>
 
       {state?.success === false && (
@@ -70,9 +72,9 @@ export function SignInForm({ redirectTo }: SignInFormProps) {
       )}
 
       <p className="text-center text-sm text-muted-foreground">
-        Pas encore de compte ?{" "}
+        {t.noAccount}{" "}
         <Link href={signUpHref} className="font-medium text-primary hover:underline">
-          Créer un compte
+          {t.createAccount}
         </Link>
       </p>
     </form>

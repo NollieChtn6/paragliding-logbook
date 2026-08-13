@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,17 +28,15 @@ type SchoolFormProps = {
     formData: FormData,
   ) => Promise<SchoolFormActionState>;
   defaultValues?: SchoolFormDefaultValues;
-  submitLabel?: string;
+  submitLabel: string;
 };
 
 // Même principe que SiteForm : formulaire admin simple, sans assistant
 // multi-étapes.
-export function SchoolForm({
-  action,
-  defaultValues,
-  submitLabel = "Créer l'école",
-}: SchoolFormProps) {
+export function SchoolForm({ action, defaultValues, submitLabel }: SchoolFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const t = useT();
+  const ts = t.schools;
 
   // N'initialise le combobox que si l'école a déjà une adresse "complète"
   // au sens BAN (avec coordonnées) : les écoles du seed n'ont ni latitude
@@ -71,27 +70,28 @@ export function SchoolForm({
     }
   }, [state]);
 
+  const legacyAddressExtra =
+    defaultValues?.postalCode || defaultValues?.city
+      ? ` (${[defaultValues.postalCode, defaultValues.city].filter(Boolean).join(" ")})`
+      : "";
+
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Nom</Label>
+        <Label htmlFor="name">{ts.nameLabel}</Label>
         <Input id="name" name="name" defaultValue={defaultValues?.name} required />
       </div>
 
       <AddressCombobox name="address" defaultValue={initialAddress} onSelect={setSelectedAddress} />
       {legacyAddress && (
         <p className="text-sm text-muted-foreground">
-          Adresse actuelle en base : {legacyAddress}
-          {defaultValues?.postalCode || defaultValues?.city
-            ? ` (${[defaultValues.postalCode, defaultValues.city].filter(Boolean).join(" ")})`
-            : ""}
-          . Recherchez-la ci-dessus pour la lier à une adresse BAN.
+          {ts.currentAddress(legacyAddress, legacyAddressExtra)}
         </p>
       )}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="postalCode">Code postal</Label>
+          <Label htmlFor="postalCode">{ts.postalCodeLabel}</Label>
           <Input
             id="postalCode"
             name="postalCode"
@@ -101,7 +101,7 @@ export function SchoolForm({
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="city">Ville</Label>
+          <Label htmlFor="city">{ts.cityLabel}</Label>
           <Input
             id="city"
             name="city"
@@ -120,7 +120,7 @@ export function SchoolForm({
       <input type="hidden" name="longitude" value={selectedAddress?.longitude ?? ""} />
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="website">Site web</Label>
+        <Label htmlFor="website">{ts.websiteLabel}</Label>
         <Input
           id="website"
           name="website"
@@ -131,7 +131,7 @@ export function SchoolForm({
       </div>
 
       <Button type="submit" className="mt-2" disabled={isPending}>
-        {isPending ? "Enregistrement..." : submitLabel}
+        {isPending ? t.common.saving : submitLabel}
       </Button>
 
       {state?.success === false && (

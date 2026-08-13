@@ -4,12 +4,15 @@ import { deleteSite } from "@/features/sites";
 import { requireAdmin } from "@/lib/current-user";
 import { ReferenceDataInUseError } from "@/lib/reference-data-in-use.error";
 import { withToast } from "@/lib/toast-redirect";
+import { getDictionary } from "@/messages";
 import { deleteSiteAction } from "./delete-site";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/features/sites", () => ({ deleteSite: vi.fn() }));
 vi.mock("@/lib/current-user", () => ({ requireAdmin: vi.fn() }));
+vi.mock("@/lib/i18n/get-locale", () => ({ getLocale: vi.fn().mockResolvedValue("fr-FR") }));
 
+const t = getDictionary("fr-FR");
 const ADMIN_USER = { id: "admin-id", role: "ADMIN" };
 const SITE_ID = "site-id";
 
@@ -32,8 +35,8 @@ describe("deleteSiteAction", () => {
 
     await deleteSiteAction(SITE_ID, null, new FormData());
 
-    expect(deleteSite).toHaveBeenCalledWith(SITE_ID);
-    expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", "Site supprimé."));
+    expect(deleteSite).toHaveBeenCalledWith(SITE_ID, t.toast.siteInUse);
+    expect(redirect).toHaveBeenCalledWith(withToast("/admin/sites", t.toast.siteDeleted));
   });
 
   it("maps a ReferenceDataInUseError to its own message", async () => {
@@ -52,7 +55,7 @@ describe("deleteSiteAction", () => {
 
     const result = await deleteSiteAction(SITE_ID, null, new FormData());
 
-    expect(result).toEqual({ success: false, error: "Erreur lors de la suppression." });
+    expect(result).toEqual({ success: false, error: t.toast.deleteError });
     expect(redirect).not.toHaveBeenCalled();
   });
 });
