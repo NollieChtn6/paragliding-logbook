@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-13T05:03:17Z",
+  "title": "Design System: THERMIK",
+  "extensions": {
+    "colorMeta": {
+      "altitude-blue": {
+        "role": "primary",
+        "displayName": "Altitude Blue",
+        "canonical": "#2563eb",
+        "tonalRamp": [
+          "oklch(20% 0.09 260)",
+          "oklch(30% 0.13 260)",
+          "oklch(40% 0.17 260)",
+          "oklch(50% 0.21 260)",
+          "oklch(55% 0.21 260)",
+          "oklch(70% 0.14 260)",
+          "oklch(85% 0.07 260)",
+          "oklch(95% 0.02 260)"
+        ],
+        "note": "Identical hex in light and dark mode by explicit product decision — the one color that never retunes with theme."
+      },
+      "thermal-amber": {
+        "role": "secondary",
+        "displayName": "Thermal Amber",
+        "canonical": "#f59e0b",
+        "tonalRamp": [
+          "oklch(20% 0.06 70)",
+          "oklch(32% 0.1 70)",
+          "oklch(45% 0.14 70)",
+          "oklch(60% 0.18 70)",
+          "oklch(75% 0.18 70)",
+          "oklch(85% 0.13 70)",
+          "oklch(92% 0.07 70)",
+          "oklch(97% 0.02 70)"
+        ],
+        "note": "Named after the rising warm-air thermals paragliders climb on — the product's own namesake. Identical hex in light and dark mode."
+      },
+      "landing-green": {
+        "role": "status-success",
+        "displayName": "Landing Green",
+        "canonical": "#16a34a",
+        "tonalRamp": [
+          "oklch(18% 0.05 150)",
+          "oklch(28% 0.08 150)",
+          "oklch(38% 0.11 150)",
+          "oklch(50% 0.14 150)",
+          "oklch(60% 0.15 150)",
+          "oklch(75% 0.12 150)",
+          "oklch(88% 0.06 150)",
+          "oklch(96% 0.02 150)"
+        ],
+        "note": "Success only. Same hue family as the decorative Ambient Arc background, but semantically distinct — never interchange the two."
+      },
+      "signal-red": {
+        "role": "status-destructive",
+        "displayName": "Signal Red",
+        "canonical": "#dc2626",
+        "tonalRamp": [
+          "oklch(20% 0.07 25)",
+          "oklch(30% 0.12 25)",
+          "oklch(42% 0.17 25)",
+          "oklch(55% 0.21 25)",
+          "oklch(63% 0.21 25)",
+          "oklch(78% 0.14 25)",
+          "oklch(90% 0.07 25)",
+          "oklch(97% 0.02 25)"
+        ],
+        "note": "Applied as a ~10% tint (bg-destructive/10) in most UI, not as a solid fill — see the Soft Status Rule."
+      },
+      "cloud-white": {
+        "role": "background",
+        "displayName": "Cloud White",
+        "canonical": "#f8fafc",
+        "tonalRamp": [
+          "oklch(15% 0.02 260)",
+          "oklch(28% 0.02 260)",
+          "oklch(45% 0.015 260)",
+          "oklch(65% 0.01 260)",
+          "oklch(80% 0.008 260)",
+          "oklch(90% 0.006 260)",
+          "oklch(96% 0.004 260)",
+          "oklch(98% 0.002 260)"
+        ],
+        "note": "Page background in light mode. In dark mode this exact role is served by Night Sky (#0f172a) — background and ink swap across themes rather than being retuned independently."
+      },
+      "pure-white": {
+        "role": "surface",
+        "displayName": "Pure White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(11% 0.02 260)",
+          "oklch(25% 0.015 260)",
+          "oklch(42% 0.012 260)",
+          "oklch(60% 0.008 260)",
+          "oklch(75% 0.006 260)",
+          "oklch(88% 0.004 260)",
+          "oklch(96% 0.002 260)",
+          "oklch(100% 0 0)"
+        ],
+        "note": "Card/popover surface in light mode; Deep Slate (#111827) serves the same role in dark mode."
+      },
+      "ink": {
+        "role": "text",
+        "displayName": "Ink",
+        "canonical": "#0f172a",
+        "tonalRamp": [
+          "oklch(15% 0.03 260)",
+          "oklch(28% 0.025 260)",
+          "oklch(42% 0.02 260)",
+          "oklch(58% 0.015 260)",
+          "oklch(72% 0.01 260)",
+          "oklch(84% 0.006 260)",
+          "oklch(93% 0.003 260)",
+          "oklch(98% 0.001 260)"
+        ],
+        "note": "Primary text in light mode; the same hex reversed serves as the dark-mode background (Night Sky)."
+      },
+      "slate": {
+        "role": "text-muted",
+        "displayName": "Slate",
+        "canonical": "#64748b",
+        "tonalRamp": [
+          "oklch(20% 0.02 250)",
+          "oklch(32% 0.02 250)",
+          "oklch(45% 0.025 250)",
+          "oklch(55% 0.03 250)",
+          "oklch(68% 0.025 250)",
+          "oklch(80% 0.015 250)",
+          "oklch(90% 0.008 250)",
+          "oklch(96% 0.003 250)"
+        ],
+        "note": "Muted/secondary text in light mode; Mist (#cbd5e1) serves the same role in dark mode."
+      },
+      "haze": {
+        "role": "border",
+        "displayName": "Haze",
+        "canonical": "#e2e8f0",
+        "tonalRamp": [
+          "oklch(20% 0.015 250)",
+          "oklch(30% 0.015 250)",
+          "oklch(42% 0.015 250)",
+          "oklch(55% 0.012 250)",
+          "oklch(70% 0.01 250)",
+          "oklch(85% 0.006 250)",
+          "oklch(93% 0.003 250)",
+          "oklch(97% 0.001 250)"
+        ],
+        "note": "Hairline border/divider in light mode; Dusk Border (#334155) serves the same role in dark mode."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The single emphasized number on a stat tile (flight count, total airtime). Bolder than Headline despite being smaller — role over raw size."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title, one per screen (PageHeader h1)."
+      },
+      "title": { "displayName": "Title", "purpose": "Card and section titles." },
+      "body": { "displayName": "Body", "purpose": "Running text, form labels, list content." },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Secondary/metadata text — same size as Body, distinguished by muted color only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "resting",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Cards, activity rows, empty states — default state for anything sitting on the page."
+      },
+      {
+        "name": "floating",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "Select/combobox popups and dropdown menus, paired with a ring-1 ring-foreground/10 hairline instead of a heavier shadow."
+      },
+      {
+        "name": "overlay",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Sheets and drawers — the deepest layer in the system."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-press",
+        "value": "translateY(1px)",
+        "purpose": "The system's one tactile flourish: every button nudges down 1px on active/press."
+      }
+    ],
+    "breakpoints": [{ "name": "md", "value": "768px" }]
+  },
+  "components": [
+    {
+      "name": "Button Primary",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default call-to-action button.",
+      "html": "<button class=\"ds-btn-primary\">Enregistrer</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px; gap: 6px; border-radius: 10px; border: 1px solid transparent; background: var(--primary, #2563eb); color: var(--primary-foreground, #f8fafc); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary, #2563eb), transparent 20%); } .ds-btn-primary:focus-visible { outline: none; border-color: var(--ring, #2563eb); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #2563eb), transparent 50%); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Button Destructive",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Destructive action button — soft-tinted, never a solid fill.",
+      "html": "<button class=\"ds-btn-destructive\">Supprimer</button>",
+      "css": ".ds-btn-destructive { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 10px; gap: 6px; border-radius: 10px; border: 1px solid transparent; background: color-mix(in oklch, var(--destructive, #dc2626), transparent 90%); color: var(--destructive, #dc2626); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; } .ds-btn-destructive:hover { background: color-mix(in oklch, var(--destructive, #dc2626), transparent 80%); } .ds-btn-destructive:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Default content container — near-flat, softly rounded.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Vol du 12 août</div><div class=\"ds-card-body\">Site du Pic — 34 min</div></div>",
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 24px; padding: 24px; border-radius: 18px; border: 1px solid var(--border, #e2e8f0); background: var(--card, #ffffff); color: var(--card-foreground, #0f172a); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); } .ds-card-title { font-size: 16px; font-weight: 500; line-height: 1.375; } .ds-card-body { font-size: 14px; color: var(--muted-foreground, #64748b); }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text field — transparent fill, hairline border, single shared focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Nom du site\" />",
+      "css": ".ds-input { height: 32px; width: 100%; min-width: 0; border-radius: 10px; border: 1px solid var(--input, #e2e8f0); background: transparent; padding: 4px 10px; font-size: 14px; color: var(--foreground, #0f172a); outline: none; transition: border-color 0.15s ease; } .ds-input::placeholder { color: color-mix(in oklch, var(--muted-foreground, #64748b), transparent 40%); } .ds-input:focus-visible { border-color: var(--ring, #2563eb); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, #2563eb), transparent 50%); } .ds-input[aria-invalid='true'] { border-color: var(--destructive, #dc2626); box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive, #dc2626), transparent 80%); }"
+    },
+    {
+      "name": "Stat Card",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Signature dashboard tile: tinted icon badge, one emphasized number, one label.",
+      "html": "<div class=\"ds-stat-card\"><span class=\"ds-stat-icon\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.7.8c-.5.6-.4 1.5.3 1.9L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 6.2c.4.7 1.3.8 1.9.3l.8-.7c.4-.3.6-.8.5-1.3Z\"/></svg></span><div class=\"ds-stat-value\">42</div><div class=\"ds-stat-label\">Vols enregistrés</div></div>",
+      "css": ".ds-stat-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 18px; border: 1px solid var(--border, #e2e8f0); background: var(--card, #ffffff); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); } .ds-stat-icon { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: color-mix(in oklch, var(--primary, #2563eb), transparent 90%); color: var(--primary, #2563eb); } .ds-stat-value { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; color: var(--foreground, #0f172a); } .ds-stat-label { font-size: 14px; color: var(--muted-foreground, #64748b); }"
+    },
+    {
+      "name": "Tinted Icon Badge",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "The system's most-repeated motif: a softly tinted square housing a single Lucide icon. Reused for activity types, stat icons, and any icon needing a colored container.",
+      "html": "<span class=\"ds-icon-badge\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-1 .1-1.3.5l-.7.8c-.5.6-.4 1.5.3 1.9L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 6.2c.4.7 1.3.8 1.9.3l.8-.7c.4-.3.6-.8.5-1.3Z\"/></svg></span>",
+      "css": ".ds-icon-badge { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 14px; background: color-mix(in oklch, var(--primary, #2563eb), transparent 90%); color: var(--primary, #2563eb); flex: none; }"
+    },
+    {
+      "name": "Desktop Nav Item",
+      "kind": "nav",
+      "refersTo": "card",
+      "description": "Sidebar navigation link, default and active states.",
+      "html": "<a class=\"ds-nav-item ds-nav-item--active\" href=\"#\" aria-current=\"page\">Activités</a><a class=\"ds-nav-item\" href=\"#\">Statistiques</a>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 10px; border-radius: 14px; padding: 8px 12px; font-size: 14px; color: var(--muted-foreground, #64748b); text-decoration: none; transition: background-color 0.15s ease, color 0.15s ease; } .ds-nav-item:hover { background: var(--sidebar-accent, #f1f5f9); color: var(--sidebar-accent-foreground, #0f172a); } .ds-nav-item--active { background: color-mix(in oklch, var(--primary, #2563eb), transparent 90%); color: var(--primary, #2563eb); font-weight: 500; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Ciel et Altitude (Sky & Altitude)",
+    "overview": "THERMIK is a paragliding pilot's personal logbook, filled in on a phone right after landing — often outdoors, in daylight, sometimes with cold hands. The system reads as open sky rather than cockpit instrumentation: one calm blue, one warm amber accent named after the very thermals pilots chase, and a background that is never louder than the activity it records. docs/ui-directions.md names the ambition directly — ciel, altitude, nature, sérénité, progression, carnet personnel, simplicité — and explicitly rules out \"sport extrême\" energy, financial-dashboard density, saturated color, and heavy visual effects (glassmorphism, gradients, neon). The implementation holds that line: shadows are almost absent, destructive actions stay in a soft tint rather than alarm-red, and the one piece of decoration in the whole system — three overlapping green radial gradients fixed behind every authenticated screen — reads as a distant mountain silhouette at dusk, not an effect.\n\nPrimary and accent are the only colors that stay identical across light and dark mode — a deliberate anchor, confirmed in globals.css's own comment, so the sky and the sun never change character with the time of day the pilot happens to be logging a flight.",
+    "keyCharacteristics": [
+      "One calm accent pair (sky blue + thermal amber), never more than one saturated color live on screen at once.",
+      "Near-flat elevation: shadow-sm at most on resting surfaces, reserved shadows for things that float (menus, sheets).",
+      "Soft, generous rounding that scales with a surface's size, never sharp, never fully circular.",
+      "Status colors (success, destructive) stay muted and tinted rather than solid and alarming.",
+      "A single fixed, self-hosted variable font — no CDN dependency, no font-loading flash."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Never more than one of Altitude Blue or Thermal Amber is the dominant color on a given screen; the other, if present, stays confined to a single small accent (an icon, a badge).",
+        "section": "colors"
+      },
+      {
+        "name": "The Soft Status Rule",
+        "body": "Success and destructive states are always applied as a ~10-15% tint (bg-{color}/10) with full-strength text/icon color, never as a solid alarm-colored fill — status should register calmly, not urgently.",
+        "section": "colors"
+      },
+      {
+        "name": "The Color-Not-Size Rule",
+        "body": "Secondary text (Label) is never shrunk to signal lower importance — it drops to text-muted-foreground at the same text-sm size as Body. Hierarchy comes from weight and color, not from a shrinking type scale.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ambient-Only Rule",
+        "body": "Shadows exist only to lift something that is actually floating above the page (a popup, a sheet). Static, in-flow content never gets a shadow heavier than shadow-sm.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep primary (Altitude Blue) and accent (Thermal Amber) identical across light and dark mode — they are the one deliberate constant.",
+      "Do apply the Tinted Icon Badge pattern (bg-{color}/10-15 text-{color}) for any new icon that needs a colored container, rather than a solid fill.",
+      "Do keep status colors (success, destructive) soft-tinted, never solid/alarming, per the Soft Status Rule.",
+      "Do reuse the single ring-3 ring-{color}/50 + solid border focus treatment for any new interactive control.",
+      "Do keep new content inside the max-w-3xl single-column shell; build desktop by adapting existing components, not by introducing a separate wide-screen layout."
+    ],
+    "donts": [
+      "Don't introduce a second saturated accent color; the One Accent Rule caps the system at Altitude Blue + Thermal Amber.",
+      "Don't add gradients, glassmorphism, or neon effects — explicitly rejected in docs/ui-directions.md, and absent from every screen shipped so far (the Ambient Arc's soft radial fade is the one intentional exception, not a precedent for more).",
+      "Don't add a shadow to static, in-flow content (cards, rows) heavier than shadow-sm — depth is reserved for genuinely floating surfaces.",
+      "Don't reuse the Ambient Arc's decorative green as if it were the success semantic token, or vice versa — they are deliberately distinct despite the shared hue family.",
+      "Don't load a font from Google Fonts or any other CDN — Plus Jakarta Sans is self-hosted by explicit decision.",
+      "Don't design toward a \"sport extrême\" or financial-dashboard aesthetic — high-density metrics, aggressive color, or urgency cues work against the calm, personal-logbook character this system commits to."
+    ]
+  }
+}

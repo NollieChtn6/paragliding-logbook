@@ -182,6 +182,16 @@ const messages = {
       "Ce spot a encore des sites ou des séances de gonflage associés : supprimez-les d'abord.",
     flightCreated: "Vol créé.",
     flightUpdated: "Vol modifié.",
+    // Remplace flightCreated/trainingCampCreated/groundHandlingSessionCreated
+    // quand l'activité créée est la toute première du carnet — voir
+    // features/activities/activity-milestone.ts.
+    firstActivityCreated: "Première activité enregistrée. Bienvenue dans votre carnet.",
+    // Composés avec le nombre au moment de l'affichage (ex. "10 vols
+    // enregistrés.") plutôt que des phrases figées — voir
+    // features/flights/flight-milestone.ts et lib/flight-milestone-message.ts.
+    // Toujours pluriel : les paliers commencent à 10.
+    flightCountMilestoneSuffix: "vols enregistrés.",
+    flightHoursMilestoneSuffix: "heures de vol au total.",
     flightCreateError: "Erreur lors de la création du vol.",
     flightUpdateError: "Erreur lors de la modification du vol.",
     groundHandlingSessionCreated: "Séance créée.",
