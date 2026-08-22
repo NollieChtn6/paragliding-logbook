@@ -215,7 +215,11 @@ export function GroundHandlingSessionForm({
                   <SelectItem value="">{tg.none}</SelectItem>
                   {trainingCamps.map((trainingCamp) => (
                     <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
-                      {formatTrainingCampOption(trainingCamp)}
+                      {/* whitespace-normal : voir flight-form.tsx, même
+                      correctif pour la même liste de stages. */}
+                      <span className="whitespace-normal">
+                        {formatTrainingCampOption(trainingCamp)}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

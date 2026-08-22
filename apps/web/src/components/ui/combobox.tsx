@@ -35,11 +35,15 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
   return (
     <ComboboxPrimitive.Clear
       data-slot="combobox-clear"
-      render={<InputGroupButton variant="ghost" size="icon-xs" />}
+      // icon-sm (32px) + icône explicitement size-4 (16px) : aligné sur
+      // SelectClearButton (select-clear-button.tsx, bouton croix "vider le
+      // champ" utilisé ailleurs dans les mêmes formulaires), qui rendait
+      // sensiblement plus petit et moins visible avec le size-xs précédent.
+      render={<InputGroupButton variant="ghost" size="icon-sm" />}
       className={cn(className)}
       {...props}
     >
-      <XIcon className="pointer-events-none" />
+      <XIcon className="pointer-events-none size-4" />
     </ComboboxPrimitive.Clear>
   );
 }

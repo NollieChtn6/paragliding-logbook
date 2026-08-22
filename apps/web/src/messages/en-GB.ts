@@ -20,6 +20,9 @@ const messages: Messages = {
     loading: "Loading",
     at: "at",
     requiredField: "This field is required.",
+    close: "Close",
+    closeNotification: "Close notification",
+    pagination: "Pagination",
     invalidField: "This value is not valid.",
   },
   referenceLabels: {
