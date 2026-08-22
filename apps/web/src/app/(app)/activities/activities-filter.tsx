@@ -252,7 +252,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
       seule page (demande explicite) : Précédent/Suivant désactivés selon
       la position plutôt que le bloc masqué entièrement. */}
       {filteredActivities.length > 0 && (
-        <Pagination>
+        <Pagination aria-label={t.common.pagination}>
           <PaginationContent>
             <PaginationItem>
               <Button

@@ -18,6 +18,9 @@ const messages = {
     loading: "Chargement",
     at: "à",
     requiredField: "Ce champ est obligatoire.",
+    close: "Fermer",
+    closeNotification: "Fermer la notification",
+    pagination: "Pagination",
     invalidField: "Cette valeur n'est pas valide.",
   },
   referenceLabels: {

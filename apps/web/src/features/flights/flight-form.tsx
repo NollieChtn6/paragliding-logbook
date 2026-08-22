@@ -263,7 +263,16 @@ export function FlightForm({
                   <SelectItem value="">{tf.none}</SelectItem>
                   {trainingCamps.map((trainingCamp) => (
                     <SelectItem key={trainingCamp.id} value={trainingCamp.id}>
-                      {formatTrainingCampOption(trainingCamp)}
+                      {/* whitespace-normal : contrecarre le whitespace-nowrap
+                      hérité de SelectItem (ui/select.tsx) pour ce champ
+                      seulement. Le libellé (école + dates) doit rester
+                      lisible en entier pour distinguer deux stages du même
+                      type/école — une coupure silencieuse (pas d'ellipsis,
+                      popup en overflow-x-hidden) masquait justement les
+                      dates, la seule information qui les différencie. */}
+                      <span className="whitespace-normal">
+                        {formatTrainingCampOption(trainingCamp)}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

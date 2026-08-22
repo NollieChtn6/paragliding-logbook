@@ -10,6 +10,7 @@ import {
   XIcon,
 } from "lucide-react";
 import type * as React from "react";
+import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -172,6 +173,7 @@ function ToastIcon({ type }: { type: string | undefined }) {
 
 function ToastList() {
   const { toasts } = ToastPrimitive.useToastManager();
+  const t = useT();
 
   return toasts.map((toastItem) => (
     <Toast key={toastItem.id} toast={toastItem}>
@@ -182,7 +184,11 @@ function ToastList() {
           <ToastDescription />
         </div>
         <ToastAction />
-        <ToastClose />
+        {/* aria-label surchargé ici plutôt que dans ToastClose : la valeur
+        par défaut du composant (ligne ~124) reste un repli non traduit
+        (pas de contexte de locale garanti pour tout appelant), seul ce
+        point de rendu réel connaît la locale courante. */}
+        <ToastClose aria-label={t.common.closeNotification} />
       </ToastContent>
     </Toast>
   ));

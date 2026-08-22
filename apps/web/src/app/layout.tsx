@@ -32,6 +32,14 @@ export const metadata: Metadata = {
   // MobileBottomNav) — aurait fait passer du contenu sous l'encoche/l'île
   // dynamique sans qu'on l'ait demandé (docs/decisions/008).
   appleWebApp: { title: "THERMIK", statusBarStyle: "default" },
+  icons: {
+    // rel="apple-touch-startup-image" (app/apple-splash/route.tsx) : repli
+    // pour l'écran de lancement iOS sur les versions antérieures à iOS 15.4,
+    // qui ne dérivent pas encore leur propre écran de lancement de
+    // manifest.ts. Aucune media query par appareil (voir le commentaire de
+    // apple-splash/route.tsx) : une seule image sert de repli universel.
+    other: [{ rel: "apple-touch-startup-image", url: "/apple-splash" }],
+  },
 };
 
 export const viewport: Viewport = {

@@ -7,7 +7,7 @@
 //
 // CACHE_NAME à incrémenter manuellement à chaque modification de ce fichier
 // (purge automatique des anciens caches dans "activate" ci-dessous).
-const CACHE_NAME = "thermik-shell-v1";
+const CACHE_NAME = "thermik-shell-v2";
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
@@ -50,20 +50,45 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Reste (assets statiques _next/static, icônes...) : cache d'abord,
-  // réseau en repli avec mise en cache opportuniste de la réponse.
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      if (cached) {
-        return cached;
-      }
-      return fetch(request).then((response) => {
-        if (response.ok) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+  // Assets statiques immuables (_next/static, icônes, manifest) : seuls ceux-là
+  // passent en cache d'abord, réseau en repli avec mise en cache opportuniste.
+  if (isStaticAsset(url.pathname)) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) {
+          return cached;
         }
-        return response;
-      });
-    }),
-  );
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          }
+          return response;
+        });
+      }),
+    );
+    return;
+  }
+
+  // Reste (requêtes RSC de prefetch/navigation client vers une page comme
+  // /activities, qui partage le même chemin que la page elle-même) : jamais
+  // intercepté. Un cache-first ici resservirait une liste d'activités périmée
+  // juste après une création/modification — laissé au réseau par défaut.
 });
+
+// _next/static/* : fichiers de build hashés par contenu, sûrs en cache
+// d'abord. Icônes/manifest générés par convention Next.js (app/icon.tsx,
+// apple-icon.tsx, manifest.ts...) : chemins fixes, changent rarement, aucun
+// ne coïncide avec une route applicative (docs/decisions listent les routes
+// (app)/(admin)/(auth), aucune ne commence par ces préfixes).
+const STATIC_ASSET_PATTERNS = [
+  /^\/_next\/static\//,
+  /^\/favicon\.ico$/,
+  /^\/icon(-512|-maskable)?$/,
+  /^\/apple-icon$/,
+  /^\/manifest\.webmanifest$/,
+];
+
+function isStaticAsset(pathname) {
+  return STATIC_ASSET_PATTERNS.some((pattern) => pattern.test(pathname));
+}
