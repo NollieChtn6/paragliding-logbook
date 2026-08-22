@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.9.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.8.2...paragliding-logbook-v1.9.0) (2026-08-13)
+
+
+### Features
+
+* **i18n:** add French/English language support across the app ([da70478](https://github.com/NollieChtn6/paragliding-logbook/commit/da704783b96c48e96b291ce749037fa9cc0a2d1e))
+* **i18n:** add French/English language support across the app ([041630a](https://github.com/NollieChtn6/paragliding-logbook/commit/041630a8ee48210f0470a3392e5a8ac143cfb865))
+* **profile:** add optional city field with BAN autocomplete, rename "Nom" to "Prénom" ([74445dc](https://github.com/NollieChtn6/paragliding-logbook/commit/74445dc2e732eb2ed56291b7d0051b43f1b73b86))
+* **profile:** add optional city field with BAN autocomplete, rename "Nom" to "Prénom" ([333db6b](https://github.com/NollieChtn6/paragliding-logbook/commit/333db6babe4edcab1dd8bb03185f7191d3573690))
+
 ## [1.8.2](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.8.1...paragliding-logbook-v1.8.2) (2026-08-12)
 
 
