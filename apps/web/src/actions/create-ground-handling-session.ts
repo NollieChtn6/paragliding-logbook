@@ -2,9 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
+import { countActivities, getActivityMilestone } from "@/features/activities";
 import { createGroundHandlingSession } from "@/features/ground-handling-sessions";
 import { requireCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { getMilestoneToastMessage } from "@/lib/milestone-message";
 import { withToast } from "@/lib/toast-redirect";
 import { getDictionary } from "@/messages";
 
@@ -23,6 +25,9 @@ export async function createGroundHandlingSessionAction(
   const user = await requireCurrentUser();
   const t = getDictionary(await getLocale());
 
+  // Capturé avant la création — voir actions/create-flight.ts.
+  const previousActivityCount = await countActivities(user.id);
+
   try {
     await createGroundHandlingSession(
       user.id,
@@ -36,7 +41,12 @@ export async function createGroundHandlingSessionAction(
     return { success: false, error: t.toast.groundHandlingSessionCreateError };
   }
 
+  const milestone = getActivityMilestone(previousActivityCount);
+  const message = milestone
+    ? getMilestoneToastMessage(milestone, t.toast)
+    : t.toast.groundHandlingSessionCreated;
+
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect(withToast("/activities", t.toast.groundHandlingSessionCreated));
+  redirect(withToast("/activities", message));
 }
