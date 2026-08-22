@@ -2,9 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
+import { countActivities, getActivityMilestone } from "@/features/activities";
 import { createTrainingCamp } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { getMilestoneToastMessage } from "@/lib/milestone-message";
 import { withToast } from "@/lib/toast-redirect";
 import { getDictionary } from "@/messages";
 
@@ -21,6 +23,9 @@ export async function createTrainingCampAction(
   const user = await requireCurrentUser();
   const t = getDictionary(await getLocale());
 
+  // Capturé avant la création — voir actions/create-flight.ts.
+  const previousActivityCount = await countActivities(user.id);
+
   try {
     await createTrainingCamp(user.id, Object.fromEntries(formData), t.validation.trainingCamp);
   } catch (error) {
@@ -30,7 +35,12 @@ export async function createTrainingCampAction(
     return { success: false, error: t.toast.trainingCampCreateError };
   }
 
+  const milestone = getActivityMilestone(previousActivityCount);
+  const message = milestone
+    ? getMilestoneToastMessage(milestone, t.toast)
+    : t.toast.trainingCampCreated;
+
   // Hors du try/catch : redirect() lève une erreur interne spéciale que le
   // catch générique ci-dessus ne doit pas intercepter.
-  redirect(withToast("/activities", t.toast.trainingCampCreated));
+  redirect(withToast("/activities", message));
 }
