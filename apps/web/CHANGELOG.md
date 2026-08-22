@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.10.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.9.0...paragliding-logbook-v1.10.0) (2026-08-22)
+
+
+### Features
+
+* **activities:** celebrate progression milestones in creation toasts ([9f7b480](https://github.com/NollieChtn6/paragliding-logbook/commit/9f7b480b8bc0eaaac7a4be765d0035be151f4bc2))
+* **activities:** celebrate progression milestones in creation toasts ([1807c44](https://github.com/NollieChtn6/paragliding-logbook/commit/1807c44610f5547baf0d94653e01f0a3ce7a457b))
+
 ## [1.9.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.8.2...paragliding-logbook-v1.9.0) (2026-08-13)
 
 
