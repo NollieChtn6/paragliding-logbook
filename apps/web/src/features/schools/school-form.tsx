@@ -66,9 +66,9 @@ export function SchoolForm({ action, defaultValues, submitLabel }: SchoolFormPro
 
   useEffect(() => {
     if (state?.success === false) {
-      toast.add({ title: state.error, type: "error" });
+      toast.add({ title: state.error, description: t.common.retryReassurance, type: "error" });
     }
-  }, [state]);
+  }, [state, t]);
 
   const legacyAddressExtra =
     defaultValues?.postalCode || defaultValues?.city

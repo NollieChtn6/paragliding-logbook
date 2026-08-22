@@ -24,6 +24,8 @@ const messages: Messages = {
     closeNotification: "Close notification",
     pagination: "Pagination",
     invalidField: "This value is not valid.",
+    retryReassurance: "Your information is still in the form — you can try again.",
+    deleteRetryReassurance: "Nothing was deleted — you can try again.",
   },
   referenceLabels: {
     activityType: {

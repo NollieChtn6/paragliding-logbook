@@ -44,16 +44,17 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const t = useT().account;
+  const common = useT().common;
 
   useEffect(() => {
     if (state?.success === false) {
-      toast.add({ title: state.error, type: "error" });
+      toast.add({ title: state.error, description: common.retryReassurance, type: "error" });
     }
     if (state?.success === true) {
       toast.add({ title: t.changePasswordSuccess, type: "success" });
       formRef.current?.reset();
     }
-  }, [state, t]);
+  }, [state, t, common]);
 
   const newPasswordFieldType = showNewPassword ? "text" : "password";
   const toggleNewPasswordVisibility = () => setShowNewPassword((value) => !value);

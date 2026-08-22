@@ -37,9 +37,9 @@ export function SpotForm({ action, defaultValues, submitLabel }: SpotFormProps) 
 
   useEffect(() => {
     if (state?.success === false) {
-      toast.add({ title: state.error, type: "error" });
+      toast.add({ title: state.error, description: t.common.retryReassurance, type: "error" });
     }
-  }, [state]);
+  }, [state, t]);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
