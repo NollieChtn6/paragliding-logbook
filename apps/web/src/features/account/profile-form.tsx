@@ -29,7 +29,7 @@ export function ProfileForm({ name, city }: ProfileFormProps) {
 
   useEffect(() => {
     if (state?.success === false) {
-      toast.add({ title: state.error, type: "error" });
+      toast.add({ title: state.error, description: t.common.retryReassurance, type: "error" });
     }
     if (state?.success === true) {
       toast.add({ title: t.toast.profileUpdateSuccess, type: "success" });
