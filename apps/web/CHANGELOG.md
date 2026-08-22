@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.11.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.10.0...paragliding-logbook-v1.11.0) (2026-08-22)
+
+
+### Features
+
+* **pwa:** add on-brand iOS launch screen ([6d125f5](https://github.com/NollieChtn6/paragliding-logbook/commit/6d125f5fdf84b99b576556a36f8ef091e422da68))
+
+
+### Bug Fixes
+
+* address mobile field-testing feedback (cache, i18n, UI consistency) ([400ebce](https://github.com/NollieChtn6/paragliding-logbook/commit/400ebce99a0b0f4f27c4d752e31e615c40cd887b))
+* **flights:** show full training camp label in flight/ground-handling pickers ([341fa9c](https://github.com/NollieChtn6/paragliding-logbook/commit/341fa9c28ab6f0db396d5a074f6703682a194d42))
+* **i18n:** translate remaining shadcn primitive strings ([8f8d32a](https://github.com/NollieChtn6/paragliding-logbook/commit/8f8d32a7a549d66b35f618b6335e621e8beeff99))
+* **pwa:** scope service worker cache-first strategy to static assets only ([2c5aa02](https://github.com/NollieChtn6/paragliding-logbook/commit/2c5aa029b6127350e161c76a411a05c3b193a7ed))
+* **ui:** harmonize clear-field button sizing ([e932d1d](https://github.com/NollieChtn6/paragliding-logbook/commit/e932d1d2c6b14ffae6cee3a4b85ec4af00d623f3))
+
 ## [1.10.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.9.0...paragliding-logbook-v1.10.0) (2026-08-22)
 
 
