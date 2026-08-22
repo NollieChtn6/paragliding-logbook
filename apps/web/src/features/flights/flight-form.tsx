@@ -137,9 +137,9 @@ export function FlightForm({
 
   useEffect(() => {
     if (state?.success === false) {
-      toast.add({ title: state.error, type: "error" });
+      toast.add({ title: state.error, description: t.common.retryReassurance, type: "error" });
     }
-  }, [state]);
+  }, [state, t]);
 
   function handleWizardNext() {
     const form = formRef.current;

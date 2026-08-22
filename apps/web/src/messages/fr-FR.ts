@@ -22,6 +22,15 @@ const messages = {
     closeNotification: "Fermer la notification",
     pagination: "Pagination",
     invalidField: "Cette valeur n'est pas valide.",
+    // Description affichée sous le titre d'un toast d'erreur de
+    // sauvegarde (voir *-form.tsx) : le formulaire reste monté et son
+    // contenu n'est jamais réinitialisé après un échec, cette phrase est
+    // donc toujours vraie plutôt qu'une formule de politesse générique.
+    retryReassurance: "Vos informations sont toujours dans le formulaire, vous pouvez réessayer.",
+    // Même principe pour un échec de suppression (voir
+    // delete-activity-button.tsx/admin-delete-button.tsx) : une suppression
+    // qui échoue laisse l'élément intact, jamais à moitié supprimé.
+    deleteRetryReassurance: "Rien n'a été supprimé, vous pouvez réessayer.",
   },
   referenceLabels: {
     // Record<string, string> explicite (pas d'inférence d'objet à clés

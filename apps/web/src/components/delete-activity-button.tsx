@@ -36,12 +36,13 @@ export function DeleteActivityButton({
     null,
   );
   const t = useT().activities;
+  const common = useT().common;
 
   useEffect(() => {
     if (state?.success === false) {
-      toast.add({ title: state.error, type: "error" });
+      toast.add({ title: state.error, description: common.deleteRetryReassurance, type: "error" });
     }
-  }, [state]);
+  }, [state, common]);
 
   return (
     <AlertDialog>
