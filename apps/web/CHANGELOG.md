@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.11.0...paragliding-logbook-v1.11.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **ux:** reassure users that nothing is lost on save/delete failures ([3c3ca6a](https://github.com/NollieChtn6/paragliding-logbook/commit/3c3ca6acd2915a301978e16967a0d04fc0a9bddf))
+* **ux:** reassure users that nothing is lost on save/delete failures ([cdb18ea](https://github.com/NollieChtn6/paragliding-logbook/commit/cdb18eafb98a915250945e515cf3ccfd5c7a3203))
+
 ## [1.11.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.10.0...paragliding-logbook-v1.11.0) (2026-08-22)
 
 
