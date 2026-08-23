@@ -365,15 +365,24 @@ const messages = {
     recentActivities: "Activités récentes",
     totalCount: (count: number) => `${count} au total`,
     seeAll: "Voir tout",
-    emptyTitle: "Aucune activité enregistrée pour l'instant",
-    emptyDescription: "Vos vols, stages et séances de gonflage apparaîtront ici.",
+    // Distinct de activities.emptyTitle/emptyDescription : ici, c'est le
+    // tout premier écran qu'un nouvel utilisateur voit (avant même la
+    // moindre activité) — orientation vers la première action plutôt que
+    // simple constat d'absence.
+    emptyTitle: "Votre carnet commence ici",
+    emptyDescription:
+      "Enregistrez votre premier vol, stage ou séance de gonflage pour voir votre progression prendre forme.",
     addActivity: "Ajouter une activité",
   },
   activities: {
     pageTitle: "Activités",
     newActivity: "Nouvelle activité",
-    emptyTitle: "Aucune activité enregistrée pour l'instant",
-    emptyDescription: "Vos vols, stages et séances de gonflage apparaîtront ici.",
+    // Distinct de dashboard.emptyTitle/emptyDescription : ici, l'utilisateur
+    // vient de choisir de consulter son historique complet (pas le premier
+    // écran vu) — décrit ce que fait cette liste plutôt que de ré-accueillir.
+    emptyTitle: "Rien à afficher pour l'instant",
+    emptyDescription:
+      "Chaque activité que vous enregistrez apparaît ici, classée de la plus récente à la plus ancienne.",
     addActivity: "Ajouter une activité",
     count: { one: "{n} activité", other: "{n} activités" },
     backToActivities: "Retour aux activités",
