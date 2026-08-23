@@ -140,6 +140,7 @@ Au-delà du périmètre fonctionnel MVP décrit plus haut, ce qui est réellemen
 
 - **Authentification** : Better Auth (email + mot de passe, hash Argon2), inscription publique protégée par code d'invitation, rate limiting sur connexion/inscription, changement de mot de passe et de profil.
 - **Référentiels partagés admin** : CRUD complet spots/sites/écoles, suppression toujours bloquée si l'entité est encore référencée (jamais de suppression en cascade silencieuse) — voir `docs/admin.md`.
+- **Reconnaissance de la progression** : la première activité jamais enregistrée, les paliers de nombre de vols (10/25/50/100/250/500/1000) et les paliers d'heures de vol cumulées reçoivent un message dédié plutôt que la confirmation générique — sert directement le positionnement du produit (rendre la progression mesurable automatiquement).
 - **PWA** : application installable, service worker minimal avec page de repli hors-ligne.
 - **Internationalisation** : interface disponible en français et anglais.
 - **Contrainte de sécurité durable** : le `userId` n'est jamais fourni par le client, toujours résolu côté serveur depuis la session (voir CLAUDE.md).
