@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.2](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.11.1...paragliding-logbook-v1.11.2) (2026-08-23)
+
+
+### Bug Fixes
+
+* **ux:** differentiate dashboard and activities-list empty state copy ([7e4e7c1](https://github.com/NollieChtn6/paragliding-logbook/commit/7e4e7c11470090ffb7e82d8b3e9166547500adda))
+* **ux:** differentiate dashboard and activities-list empty state copy ([0f2dd2e](https://github.com/NollieChtn6/paragliding-logbook/commit/0f2dd2e659a7337e0a9492c0dbdfdd406237c600))
+
 ## [1.11.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.11.0...paragliding-logbook-v1.11.1) (2026-08-22)
 
 
