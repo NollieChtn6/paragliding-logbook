@@ -1,0 +1,32 @@
+name: Auto-merge PRs to main
+
+# Arme le merge automatique sur toute PR ciblant main dès son ouverture (ou
+# sa mise à jour) : une fois "Quality checks" au vert (obligatoire, voir
+# ci.yml + protection de branche classique sur main), GitHub la merge de
+# lui-même, sans intervention manuelle. Volontairement restreint à main —
+# develop reste gated manuellement (workflow Git, CLAUDE.md), ce workflow ne
+# se déclenche jamais dessus.
+#
+# Complète le job "auto-merge-release-pr" de release.yml, qui n'arme
+# l'auto-merge que sur la PR ouverte par Release Please elle-même : celui-ci
+# couvre toute autre PR vers main, notamment les PR de synchronisation
+# develop -> main ouvertes manuellement.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [main]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  auto-merge:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh pr merge "${{ github.event.pull_request.number }}" --merge --auto
