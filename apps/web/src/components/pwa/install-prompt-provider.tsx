@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { useT } from "@/components/locale-provider";
+import { toast } from "@/components/ui/toast";
 
 // beforeinstallprompt n'est pas dans le lib.dom.d.ts de TypeScript (API
 // encore non standardisée) — type minimal local, juste ce qu'on utilise.
@@ -28,6 +30,7 @@ const InstallPromptContext = createContext<InstallPromptContextValue | null>(nul
 export function InstallPromptProvider({ children }: { children: ReactNode }) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [standalone, setStandalone] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     setStandalone(window.matchMedia("(display-mode: standalone)").matches);
@@ -49,8 +52,20 @@ export function InstallPromptProvider({ children }: { children: ReactNode }) {
       return;
     }
     await deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+    const { outcome } = await deferredPrompt.userChoice;
     setDeferredPrompt(null);
+
+    // L'onglet en cours ne bascule pas lui-même en mode standalone après
+    // acceptation (l'app installée est une fenêtre distincte) : sans ce
+    // toast, accepter l'installation ne donnait jusqu'ici aucun retour, la
+    // carte/le bouton restant affichés tels quels.
+    if (outcome === "accepted") {
+      toast.add({
+        title: t.pwa.installSuccessTitle,
+        description: t.pwa.installSuccessDescription,
+        type: "success",
+      });
+    }
   }
 
   return (

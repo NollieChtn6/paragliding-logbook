@@ -617,9 +617,19 @@ const messages = {
   },
   pwa: {
     installTitle: "Installer THERMIK",
+    // Ancrée sur le vrai contexte d'usage (docs/PRODUCT.md > Contexte
+    // d'utilisation : saisie juste après un vol, souvent depuis le terrain)
+    // plutôt que le boilerplate PWA générique ("comme une application
+    // native") — la promesse concrète, pas la mécanique.
     installDescription:
-      "Ajoutez THERMIK à votre écran d'accueil pour un accès rapide, comme une application native.",
+      "Ajoutez THERMIK à votre écran d'accueil pour l'ouvrir en un geste juste après un vol, sans chercher un onglet.",
     installButton: "Installer",
+    // Confirmation affichée quand le navigateur rapporte outcome ===
+    // "accepted" (install-prompt-provider.tsx) : jusqu'ici, accepter
+    // l'installation ne donnait aucun retour, l'onglet en cours restant
+    // affiché tel quel (pas de rechargement automatique).
+    installSuccessTitle: "THERMIK est installé",
+    installSuccessDescription: "Retrouvez-le sur votre écran d'accueil.",
     qrDescription:
       "Scannez ce code avec votre téléphone pour ouvrir THERMIK, puis ajoutez-le à l'écran d'accueil (menu Partager sur iOS, « Installer l'application » sur Android).",
     qrCodeTitle: "Scanner pour ouvrir THERMIK sur votre téléphone",

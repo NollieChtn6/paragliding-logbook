@@ -590,8 +590,11 @@ const messages: Messages = {
   },
   pwa: {
     installTitle: "Install THERMIK",
-    installDescription: "Add THERMIK to your home screen for quick access, just like a native app.",
+    installDescription:
+      "Add THERMIK to your home screen to open it in one tap right after a flight, no tab-hunting required.",
     installButton: "Install",
+    installSuccessTitle: "THERMIK is installed",
+    installSuccessDescription: "Find it on your home screen.",
     qrDescription:
       "Scan this code with your phone to open THERMIK, then add it to your home screen (Share menu on iOS, “Install app” on Android).",
     qrCodeTitle: "Scan to open THERMIK on your phone",
