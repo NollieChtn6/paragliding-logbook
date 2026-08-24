@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.12.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.11.2...paragliding-logbook-v1.12.0) (2026-08-24)
+
+
+### Features
+
+* **pwa:** give the install prompt product voice and a success confirmation ([5569024](https://github.com/NollieChtn6/paragliding-logbook/commit/5569024b301aace4d89c3b9e08ef032bda177c1f))
+* **pwa:** give the install prompt product voice and a success confirmation ([c7fabeb](https://github.com/NollieChtn6/paragliding-logbook/commit/c7fabebc9e00aa29696b7ef11a74fa7dcef57f4a))
+
 ## [1.11.2](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.11.1...paragliding-logbook-v1.11.2) (2026-08-23)
 
 
