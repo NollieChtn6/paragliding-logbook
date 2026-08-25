@@ -163,6 +163,7 @@ Relations :
 - appartient à une Activity
 - appartient à une School
 - appartient à un TrainingCampType
+- peut appartenir à un QualificationType (brevet obtenu pendant le stage)
 
 Champs :
 
@@ -170,7 +171,14 @@ Champs :
 - endDate
 - observations (optionnel)
 - summary (optionnel)
-- certification (optionnel)
+
+`qualificationTypeId` (optionnel) remplace l'ancien champ `certification`
+(texte libre) : référence structurée vers `QualificationType`, affichage
+résolu via `referenceLabels.qualificationType` plutôt qu'un texte saisi à la
+main. Champ d'affichage propre au stage uniquement — sélectionner un brevet
+ici ne crée jamais automatiquement de `Qualification` personnelle dans
+`/qualifications` (décision explicite, pour ne pas dupliquer silencieusement
+une donnée entre les deux endroits).
 
 ---
 
@@ -393,6 +401,8 @@ TrainingCamp 1,N GroundHandlingSession
 School 1,N TrainingCamp
 
 TrainingCampType 1,N TrainingCamp
+
+QualificationType 0..1,N TrainingCamp
 
 User 1,N Qualification
 

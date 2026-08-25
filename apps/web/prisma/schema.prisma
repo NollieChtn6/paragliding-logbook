@@ -266,26 +266,36 @@ model Flight {
 /// règles applicatives (docs/domain-model.md), non exprimables nativement en Prisma.
 /// trainingCampTypeId remplace l'ancien champ campType (texte libre) : table
 /// de référence TrainingCampType (docs/decisions/003-reference-table-codes.md).
+/// qualificationTypeId remplace l'ancien champ certification (texte libre,
+/// issue #171 follow-up) : référence structurée vers QualificationType,
+/// affichage résolu via referenceLabels.qualificationType plutôt qu'un texte
+/// saisi à la main. Ne crée jamais automatiquement de Qualification
+/// personnelle dans la liste /qualifications du pilote — c'est un champ
+/// d'affichage propre au stage, pas un raccourci de création (décision
+/// explicite, pour ne pas dupliquer silencieusement une donnée entre les
+/// deux endroits).
 model TrainingCamp {
-  id                 String   @id @default(uuid()) @db.Uuid
-  activityId         String   @unique @db.Uuid
-  schoolId           String   @db.Uuid
-  trainingCampTypeId String   @db.Uuid
-  startDate          DateTime
-  endDate            DateTime
-  observations       String?
-  summary            String?
-  certification      String?
+  id                  String   @id @default(uuid()) @db.Uuid
+  activityId          String   @unique @db.Uuid
+  schoolId            String   @db.Uuid
+  trainingCampTypeId  String   @db.Uuid
+  qualificationTypeId String?  @db.Uuid
+  startDate           DateTime
+  endDate             DateTime
+  observations        String?
+  summary             String?
 
   activity               Activity                @relation(fields: [activityId], references: [id], onDelete: Cascade)
   school                 School                  @relation(fields: [schoolId], references: [id])
   trainingCampType       TrainingCampType        @relation(fields: [trainingCampTypeId], references: [id])
+  qualificationType      QualificationType?      @relation(fields: [qualificationTypeId], references: [id])
   flights                Flight[]
   groundHandlingSessions GroundHandlingSession[]
   qualifications         Qualification[]
 
   @@index([schoolId])
   @@index([trainingCampTypeId])
+  @@index([qualificationTypeId])
 }
 
 /// Référentiel des types de stage (table, pas un enum : extensible sans
@@ -340,6 +350,7 @@ model QualificationType {
   code String @unique
 
   qualifications Qualification[]
+  trainingCamps  TrainingCamp[]
 }
 
 /// Brevet ou qualification de pilotage obtenu par un pilote (issue #171).

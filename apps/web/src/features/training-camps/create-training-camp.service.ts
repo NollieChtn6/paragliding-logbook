@@ -34,6 +34,22 @@ export async function createTrainingCamp(
       throw new ZodError([issue]);
     }
 
+    // QualificationType est aussi une donnée de référence partagée, même
+    // traitement — optionnel, donc vérifié seulement si renseigné.
+    if (input.qualificationTypeId) {
+      const qualificationType = await tx.qualificationType.findUnique({
+        where: { id: input.qualificationTypeId },
+      });
+      if (!qualificationType) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["qualificationTypeId"],
+          message: t.certificationNotFound,
+        };
+        throw new ZodError([issue]);
+      }
+    }
+
     const activity = await tx.activity.create({
       data: {
         userId,
@@ -46,11 +62,11 @@ export async function createTrainingCamp(
         activityId: activity.id,
         schoolId: input.schoolId,
         trainingCampTypeId: input.trainingCampTypeId,
+        qualificationTypeId: input.qualificationTypeId,
         startDate: input.startDate,
         endDate: input.endDate,
         observations: input.observations,
         summary: input.summary,
-        certification: input.certification,
       },
     });
   });

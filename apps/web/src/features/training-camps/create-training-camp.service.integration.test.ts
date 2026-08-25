@@ -9,6 +9,7 @@ const t = getDictionary("fr-FR").validation.trainingCamp;
 let userId: string;
 let schoolId: string;
 let trainingCampTypeId: string;
+let qualificationTypeId: string;
 
 const validTrainingCampInput = {
   startDate: "2025-01-10",
@@ -18,7 +19,7 @@ const validTrainingCampInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, school, trainingCampType] = await Promise.all([
+  const [user, school, trainingCampType, qualificationType] = await Promise.all([
     prisma.user.create({
       data: {
         email: `integration-test-tc-${suffix}@paragliding-logbook.local`,
@@ -29,10 +30,16 @@ beforeAll(async () => {
       data: { name: `Integration Test School ${suffix}` },
     }),
     prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
+    prisma.qualificationType.upsert({
+      where: { code: "INITIATION" },
+      update: {},
+      create: { code: "INITIATION" },
+    }),
   ]);
   userId = user.id;
   schoolId = school.id;
   trainingCampTypeId = trainingCampType.id;
+  qualificationTypeId = qualificationType.id;
 });
 
 afterAll(async () => {
@@ -55,6 +62,7 @@ describe("createTrainingCamp (integration)", () => {
           ...validTrainingCampInput,
           schoolId,
           trainingCampTypeId,
+          qualificationTypeId,
           observations: "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
         },
         t,
@@ -78,6 +86,7 @@ describe("createTrainingCamp (integration)", () => {
       });
       expect(trainingCamp.schoolId).toBe(schoolId);
       expect(trainingCamp.trainingCampTypeId).toBe(trainingCampTypeId);
+      expect(trainingCamp.qualificationTypeId).toBe(qualificationTypeId);
       expect(trainingCamp.observations).toBe(
         "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
       );
@@ -116,6 +125,21 @@ describe("createTrainingCamp (integration)", () => {
           ...validTrainingCampInput,
           schoolId,
           trainingCampTypeId: crypto.randomUUID(),
+        },
+        t,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the qualification type does not exist", async () => {
+    await expect(
+      createTrainingCamp(
+        userId,
+        {
+          ...validTrainingCampInput,
+          schoolId,
+          trainingCampTypeId,
+          qualificationTypeId: crypto.randomUUID(),
         },
         t,
       ),

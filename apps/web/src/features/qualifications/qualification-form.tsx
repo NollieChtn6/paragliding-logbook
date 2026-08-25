@@ -47,6 +47,15 @@ function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+// Même comparaison (chaîne de jour ISO) que le refine côté serveur
+// (qualificationSchema, lib/validations/qualification.ts) : bloque la
+// sélection d'une date future directement dans le sélecteur natif du
+// navigateur, sans attendre un aller-retour serveur pour le signaler
+// (critique /impeccable, P1).
+function todayInputValue(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 // Formulaire simple (pas d'assistant multi-étapes, à la différence de
 // FlightForm/TrainingCampForm) : peu de champs, tous visibles d'un coup, même
 // principe que SchoolForm/SiteForm. Utilisé en création (/qualifications/new)
@@ -119,6 +128,7 @@ export function QualificationForm({
           defaultValue={
             defaultValues?.obtainedDate ? toDateInputValue(defaultValues.obtainedDate) : undefined
           }
+          max={todayInputValue()}
           required
         />
       </div>

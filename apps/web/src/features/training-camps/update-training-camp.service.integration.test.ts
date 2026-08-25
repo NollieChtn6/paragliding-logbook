@@ -13,6 +13,7 @@ let otherUserId: string;
 let schoolId: string;
 let trainingCampTypeId: string;
 let otherTrainingCampTypeId: string;
+let qualificationTypeId: string;
 let trainingCampId: string;
 let activityId: string;
 
@@ -24,28 +25,35 @@ const validTrainingCampInput = {
 beforeAll(async () => {
   const suffix = crypto.randomUUID();
 
-  const [user, otherUser, school, trainingCampType, otherTrainingCampType] = await Promise.all([
-    prisma.user.create({
-      data: {
-        email: `update-tc-${suffix}@paragliding-logbook.local`,
-        name: "Update Training Camp Test User",
-      },
-    }),
-    prisma.user.create({
-      data: {
-        email: `update-tc-other-${suffix}@paragliding-logbook.local`,
-        name: "Other User",
-      },
-    }),
-    prisma.school.create({ data: { name: `Update Training Camp Test School ${suffix}` } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
-    prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INITIATION" } }),
-  ]);
+  const [user, otherUser, school, trainingCampType, otherTrainingCampType, qualificationType] =
+    await Promise.all([
+      prisma.user.create({
+        data: {
+          email: `update-tc-${suffix}@paragliding-logbook.local`,
+          name: "Update Training Camp Test User",
+        },
+      }),
+      prisma.user.create({
+        data: {
+          email: `update-tc-other-${suffix}@paragliding-logbook.local`,
+          name: "Other User",
+        },
+      }),
+      prisma.school.create({ data: { name: `Update Training Camp Test School ${suffix}` } }),
+      prisma.trainingCampType.findUniqueOrThrow({ where: { code: "AUTONOMY" } }),
+      prisma.trainingCampType.findUniqueOrThrow({ where: { code: "INITIATION" } }),
+      prisma.qualificationType.upsert({
+        where: { code: "PILOT" },
+        update: {},
+        create: { code: "PILOT" },
+      }),
+    ]);
   userId = user.id;
   otherUserId = otherUser.id;
   schoolId = school.id;
   trainingCampTypeId = trainingCampType.id;
   otherTrainingCampTypeId = otherTrainingCampType.id;
+  qualificationTypeId = qualificationType.id;
 
   const trainingCamp = await createTrainingCamp(
     userId,
@@ -81,7 +89,7 @@ describe("updateTrainingCamp (integration)", () => {
         trainingCampTypeId: otherTrainingCampTypeId,
         observations: "Observations mises à jour.",
         summary: "Bilan mis à jour.",
-        certification: "Brevet de pilote",
+        qualificationTypeId,
       },
       t,
     );
@@ -90,7 +98,7 @@ describe("updateTrainingCamp (integration)", () => {
     expect(updated.trainingCampTypeId).toBe(otherTrainingCampTypeId);
     expect(updated.observations).toBe("Observations mises à jour.");
     expect(updated.summary).toBe("Bilan mis à jour.");
-    expect(updated.certification).toBe("Brevet de pilote");
+    expect(updated.qualificationTypeId).toBe(qualificationTypeId);
   });
 
   it("clears an optional field when it is omitted from the input", async () => {
@@ -107,7 +115,7 @@ describe("updateTrainingCamp (integration)", () => {
 
     expect(updated.observations).toBeNull();
     expect(updated.summary).toBeNull();
-    expect(updated.certification).toBeNull();
+    expect(updated.qualificationTypeId).toBeNull();
   });
 
   it("fails with invalid data", async () => {
@@ -136,6 +144,22 @@ describe("updateTrainingCamp (integration)", () => {
           ...validTrainingCampInput,
           schoolId,
           trainingCampTypeId: crypto.randomUUID(),
+        },
+        t,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the qualification type does not exist", async () => {
+    await expect(
+      updateTrainingCamp(
+        userId,
+        activityId,
+        {
+          ...validTrainingCampInput,
+          schoolId,
+          trainingCampTypeId,
+          qualificationTypeId: crypto.randomUUID(),
         },
         t,
       ),

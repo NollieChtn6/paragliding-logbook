@@ -1,19 +1,11 @@
-import { Pencil, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { deleteQualificationAction } from "@/actions/delete-qualification";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { listQualifications } from "@/features/qualifications";
-import { QualificationDeleteButton } from "@/features/qualifications/qualification-delete-button";
+import { QualificationCard } from "@/features/qualifications/qualification-card";
 import { requireCurrentUser } from "@/lib/current-user";
 import { formatDate } from "@/lib/format-date";
 import { getLocale } from "@/lib/i18n/get-locale";
@@ -64,60 +56,21 @@ export default async function QualificationsPage() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tq.colType}</TableHead>
-                <TableHead>{tq.colObtainedDate}</TableHead>
-                <TableHead>{tq.colSchool}</TableHead>
-                <TableHead className="text-right">{tq.colActions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {qualifications.map((qualification) => {
-                const typeLabel = formatQualificationType(qualification.qualificationType);
-                return (
-                  <TableRow key={qualification.id}>
-                    <TableCell>
-                      <Link
-                        href={`/qualifications/${qualification.id}/edit`}
-                        className="font-medium text-foreground hover:underline"
-                      >
-                        {typeLabel}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDate(qualification.obtainedDate, locale)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {qualification.school?.name ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          nativeButton={false}
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={tq.editQualification}
-                          title={tq.editQualification}
-                          render={
-                            <Link href={`/qualifications/${qualification.id}/edit`}>
-                              <Pencil className="size-4" aria-hidden />
-                            </Link>
-                          }
-                        />
-                        <QualificationDeleteButton
-                          action={deleteQualificationAction.bind(null, qualification.id)}
-                          entityLabel={tq.entityLabel(typeLabel)}
-                        />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+        <div className="flex flex-col gap-2">
+          {qualifications.map((qualification) => {
+            const typeLabel = formatQualificationType(qualification.qualificationType);
+            return (
+              <QualificationCard
+                key={qualification.id}
+                href={`/qualifications/${qualification.id}/edit`}
+                typeLabel={typeLabel}
+                school={qualification.school?.name ?? null}
+                obtainedDateLabel={formatDate(qualification.obtainedDate, locale)}
+                deleteAction={deleteQualificationAction.bind(null, qualification.id)}
+                deleteEntityLabel={tq.entityLabel(typeLabel)}
+              />
+            );
+          })}
         </div>
       )}
     </div>
