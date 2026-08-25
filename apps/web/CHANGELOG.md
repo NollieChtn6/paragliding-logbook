@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.13.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.12.2...paragliding-logbook-v1.13.0) (2026-08-25)
+
+
+### Features
+
+* **icons:** replace emoji glyph with a drawn paraglider wing mark ([21fb71a](https://github.com/NollieChtn6/paragliding-logbook/commit/21fb71ae9d8402b3793cbf6d6a10aac0e638167c))
+* **icons:** replace emoji glyph with a drawn paraglider wing mark ([bdd2c47](https://github.com/NollieChtn6/paragliding-logbook/commit/bdd2c477e1105a6efa98d6559ab0ded7e6aef4bd))
+* **progression:** add dedicated Progression view ([39a0d23](https://github.com/NollieChtn6/paragliding-logbook/commit/39a0d238ad7c75d712c65161b41d1de831166052))
+* **progression:** add dedicated Progression view ([0baf927](https://github.com/NollieChtn6/paragliding-logbook/commit/0baf927ee3ac9d9ff659ae492f7f5833e1e5fbc6))
+
 ## [1.12.2](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.12.1...paragliding-logbook-v1.12.2) (2026-08-25)
 
 
