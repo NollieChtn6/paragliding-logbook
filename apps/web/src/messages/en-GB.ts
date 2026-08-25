@@ -421,6 +421,17 @@ const messages: Messages = {
     cancel: "Cancel",
     deleting: "Deleting...",
   },
+  progression: {
+    pageTitle: "Progression",
+    subtitle: "Your evolution over time",
+    flightCountTrendTitle: "Cumulative flight count",
+    flightHoursTrendTitle: "Cumulative flight time",
+    notEnoughDataForTrend: "Not enough data yet for a trend.",
+    milestonesTitle: "Milestones reached",
+    noMilestonesYet: "No milestone reached yet.",
+    emptyTitle: "Your progression will take shape here",
+    emptyDescription: "Log your first flights to see trends and milestones appear.",
+  },
   flights: {
     newFlight: "New flight",
     detailsHeading: "Details",
@@ -521,6 +532,7 @@ const messages: Messages = {
   shell: {
     navHome: "Home",
     navActivities: "Activities",
+    navProgression: "Progression",
     navAdd: "Add",
     securitySettings: "Security settings",
     switchToLightTheme: "Switch to light theme",

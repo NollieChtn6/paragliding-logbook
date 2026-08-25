@@ -1,8 +1,11 @@
 // Chiffres ronds plutôt qu'une formule (ex. puissances de 2) : ce sont les
 // paliers qu'un pilote reconnaît spontanément dans son propre carnet, pas un
-// calcul arbitraire.
-const FLIGHT_COUNT_MILESTONES = [10, 25, 50, 100, 250, 500, 1000] as const;
-const FLIGHT_HOURS_MILESTONES = [10, 25, 50, 100, 250, 500, 1000] as const;
+// calcul arbitraire. Exportés (pas de const privée) : réutilisés tels quels
+// par flight-milestone-history.ts, seule source de vérité sur "quels
+// paliers existent" pour le toast (le plus haut franchi) comme pour
+// l'historique (tous les paliers franchis).
+export const FLIGHT_COUNT_MILESTONES = [10, 25, 50, 100, 250, 500, 1000] as const;
+export const FLIGHT_HOURS_MILESTONES = [10, 25, 50, 100, 250, 500, 1000] as const;
 
 export type FlightMilestone =
   | { kind: "flight-count"; count: number }
