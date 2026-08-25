@@ -83,7 +83,19 @@ export default async function Home() {
         </div>
       )}
 
-      <InstallPrompt hasActivities={stats.totalActivityCount > 0} />
+      {/* order-1 md:order-none (critique dashboard, item P1) : sur mobile,
+      une seule colonne défilée au pouce, la carte d'installation PWA (icône
+      + titre + QR + 2 lignes de texte) s'intercalait entre les stats et la
+      vraie raison de la visite (confirmer que l'activité vient d'être
+      enregistrée), à l'encontre de la promesse "en un coup d'œil" du
+      sous-titre — repoussée après la liste. Sur desktop (>= md), la mise en
+      page en deux zones (stats+prompt qui défilent naturellement, liste
+      d'activités qui défile dans son propre conteneur borné) n'a pas ce
+      problème : order-none y restaure l'ordre du DOM, entre les stats et la
+      liste. */}
+      <div className="order-1 md:order-none">
+        <InstallPrompt hasActivities={stats.totalActivityCount > 0} />
+      </div>
 
       <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
         <div className="flex items-center justify-between">
