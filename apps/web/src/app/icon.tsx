@@ -1,15 +1,14 @@
 import { ImageResponse } from "next/og";
+import { ParagliderWingGlyph } from "@/lib/icon-glyph";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
 // Favicon complémentaire de favicon.ico (conservé tel quel) : convention de
 // fichier App Router, câble automatiquement <link rel="icon"> (voir
-// layout.tsx, aucun champ metadata.icons à ajouter à la main). Glyphe 🪂
-// repris tel quel de la marque déjà utilisée dans l'UI (connexion,
-// inscription, AppShell/AdminShell, DesktopSidebar) plutôt qu'un logo dédié
-// (docs/decisions/008) — fontSize volontairement généreux pour rester lisible
-// à cette taille.
+// layout.tsx, aucun champ metadata.icons à ajouter à la main). Glyphe
+// dessiné (docs/decisions/009), pas l'emoji 🪂 encore utilisé ailleurs dans
+// l'UI (connexion, inscription, AppShell/AdminShell, DesktopSidebar).
 export default function Icon() {
   return new ImageResponse(
     <div
@@ -20,10 +19,9 @@ export default function Icon() {
         alignItems: "center",
         justifyContent: "center",
         background: "#2563eb",
-        fontSize: 24,
       }}
     >
-      🪂
+      <ParagliderWingGlyph size={22} color="#f8fafc" />
     </div>,
     { ...size },
   );

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ParagliderWingGlyph } from "@/lib/icon-glyph";
 
 // Écran de lancement iOS (rel="apple-touch-startup-image", câblé dans
 // layout.tsx > metadata.icons.other) : Android/Chrome dérive déjà son propre
@@ -45,10 +46,9 @@ export async function GET() {
           // marque de DesktopSidebar/AppShell (bg-gradient-to-br
           // from-primary to-accent).
           backgroundImage: "linear-gradient(135deg, #2563eb, #f59e0b)",
-          fontSize: 108,
         }}
       >
-        🪂
+        <ParagliderWingGlyph size={100} color="#f8fafc" />
       </div>
       <div
         style={{
