@@ -44,42 +44,58 @@ export default async function Home() {
 
       {/* Masquée tant qu'il n'y a aucune activité (audit UX, item U4) :
       une grille de 6 stats à zéro/tirets avant la moindre saisie n'apporte
-      rien, l'EmptyState ci-dessous suffit à guider un nouvel utilisateur. */}
+      rien, l'EmptyState ci-dessous suffit à guider un nouvel utilisateur.
+      Chaque groupe de tuiles (vol/gonflage/stage) est en plus masqué
+      indépendamment (critique dashboard, item P2) : un utilisateur qui n'a
+      par exemple encore jamais fait de vol n'a aucune raison de voir 3
+      tuiles à "0"/"—" à côté de ses vraies statistiques de gonflage — même
+      logique que le masquage global, appliquée par catégorie plutôt que
+      tout-ou-rien. */}
       {stats.totalActivityCount > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <StatCard icon={Plane} label={t.dashboard.statFlights} value={stats.flightCount} />
-          <StatCard
-            icon={Hourglass}
-            label={t.dashboard.statTotalFlightTime}
-            value={formatDurationMinutes(stats.totalFlightMinutes)}
-          />
-          <StatCard
-            icon={Clock3}
-            label={t.dashboard.statAverageFlightTime}
-            value={
-              stats.averageFlightMinutes === null
-                ? "—"
-                : t.dashboard.minutesSuffix(stats.averageFlightMinutes)
-            }
-          />
-          <StatCard
-            icon={Wind}
-            label={t.dashboard.statGroundHandlingSessions}
-            value={stats.groundHandlingSessionCount}
-            tone="accent"
-          />
-          <StatCard
-            icon={Hourglass}
-            label={t.dashboard.statTotalGroundHandlingTime}
-            value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
-            tone="accent"
-          />
-          <StatCard
-            icon={GraduationCap}
-            label={t.dashboard.statTrainingCamps}
-            value={stats.trainingCampCount}
-            tone="accent"
-          />
+          {stats.flightCount > 0 && (
+            <>
+              <StatCard icon={Plane} label={t.dashboard.statFlights} value={stats.flightCount} />
+              <StatCard
+                icon={Hourglass}
+                label={t.dashboard.statTotalFlightTime}
+                value={formatDurationMinutes(stats.totalFlightMinutes)}
+              />
+              <StatCard
+                icon={Clock3}
+                label={t.dashboard.statAverageFlightTime}
+                value={
+                  stats.averageFlightMinutes === null
+                    ? "—"
+                    : t.dashboard.minutesSuffix(stats.averageFlightMinutes)
+                }
+              />
+            </>
+          )}
+          {stats.groundHandlingSessionCount > 0 && (
+            <>
+              <StatCard
+                icon={Wind}
+                label={t.dashboard.statGroundHandlingSessions}
+                value={stats.groundHandlingSessionCount}
+                tone="accent"
+              />
+              <StatCard
+                icon={Hourglass}
+                label={t.dashboard.statTotalGroundHandlingTime}
+                value={formatDurationMinutes(stats.totalGroundHandlingMinutes)}
+                tone="accent"
+              />
+            </>
+          )}
+          {stats.trainingCampCount > 0 && (
+            <StatCard
+              icon={GraduationCap}
+              label={t.dashboard.statTrainingCamps}
+              value={stats.trainingCampCount}
+              tone="accent"
+            />
+          )}
         </div>
       )}
 
