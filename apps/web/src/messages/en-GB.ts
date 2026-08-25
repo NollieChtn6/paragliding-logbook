@@ -355,6 +355,8 @@ const messages: Messages = {
   activities: {
     pageTitle: "Activities",
     newActivity: "New activity",
+    searchPlaceholder: "Search a site...",
+    duplicate: "Duplicate",
     emptyTitle: "Nothing to show yet",
     emptyDescription: "Every activity you log appears here, sorted from most recent to oldest.",
     addActivity: "Add an activity",

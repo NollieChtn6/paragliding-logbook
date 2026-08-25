@@ -1,6 +1,6 @@
 "use client";
 
-import { ListFilter } from "lucide-react";
+import { ListFilter, Search } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ActivityCard, type ActivityCardType } from "@/components/activity-card";
@@ -65,6 +65,7 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
   const [selectedTypes, setSelectedTypes] = useState<Set<ActivityCardType>>(new Set());
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const t = useT();
   const ta = t.activities;
@@ -75,25 +76,33 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
     GROUND_HANDLING: ta.filterGroundHandling,
   };
 
-  const hasActiveFilters = selectedTypes.size > 0 || dateFrom !== "" || dateTo !== "";
+  const hasActiveFilters =
+    selectedTypes.size > 0 || dateFrom !== "" || dateTo !== "" || search !== "";
 
-  const filteredActivities = useMemo(
-    () =>
-      activities.filter((activity) => {
-        if (selectedTypes.size > 0 && !selectedTypes.has(activity.type)) {
-          return false;
-        }
-        const day = toDayString(activity.date);
-        if (dateFrom && day < dateFrom) {
-          return false;
-        }
-        if (dateTo && day > dateTo) {
-          return false;
-        }
-        return true;
-      }),
-    [activities, selectedTypes, dateFrom, dateTo],
-  );
+  // Recherche sur "location" (site/spot pour vol/gonflage, école pour un
+  // stage — voir getActivitySummary, features/activities/activity-summary.ts)
+  // : c'est l'information que le pilote a le plus de chances de se rappeler
+  // sans se souvenir de la date exacte ("mes vols depuis Chamonix"). Filtrage
+  // entièrement client, comme les filtres type/date existants.
+  const filteredActivities = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    return activities.filter((activity) => {
+      if (selectedTypes.size > 0 && !selectedTypes.has(activity.type)) {
+        return false;
+      }
+      const day = toDayString(activity.date);
+      if (dateFrom && day < dateFrom) {
+        return false;
+      }
+      if (dateTo && day > dateTo) {
+        return false;
+      }
+      if (normalizedSearch && !activity.location.toLowerCase().includes(normalizedSearch)) {
+        return false;
+      }
+      return true;
+    });
+  }, [activities, selectedTypes, dateFrom, dateTo, search]);
 
   const pageCount = Math.max(1, Math.ceil(filteredActivities.length / PAGE_SIZE));
   const paginatedActivities = filteredActivities.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -129,10 +138,16 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
     setPage(1);
   }
 
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
+
   function resetFilters() {
     setSelectedTypes(new Set());
     setDateFrom("");
     setDateTo("");
+    setSearch("");
     setPage(1);
   }
 
@@ -155,6 +170,21 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
           />
         }
       />
+
+      <div className="relative">
+        <Search
+          className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => handleSearchChange(event.target.value)}
+          placeholder={ta.searchPlaceholder}
+          aria-label={ta.searchPlaceholder}
+          className="pl-8"
+        />
+      </div>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-wrap items-end gap-3">
@@ -242,6 +272,15 @@ export function ActivitiesFilter({ activities }: ActivitiesFilterProps) {
                 title={activity.title}
                 location={activity.location}
                 dateInfo={activity.dateInfo}
+                // Dupliquer un vol pour en logger un nouveau plus vite
+                // (même site, même type) : seul type d'activité couvert pour
+                // l'instant, /flights/new est la seule route de création
+                // directe (stage/gonflage ne se créent que via l'assistant
+                // /activities/new).
+                duplicateHref={
+                  activity.type === "FLIGHT" ? `/flights/new?from=${activity.id}` : undefined
+                }
+                duplicateLabel={ta.duplicate}
               />
             ))}
           </div>

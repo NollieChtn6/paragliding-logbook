@@ -380,6 +380,8 @@ const messages = {
   activities: {
     pageTitle: "Activités",
     newActivity: "Nouvelle activité",
+    searchPlaceholder: "Rechercher un site...",
+    duplicate: "Dupliquer",
     // Distinct de dashboard.emptyTitle/emptyDescription : ici, l'utilisateur
     // vient de choisir de consulter son historique complet (pas le premier
     // écran vu) — décrit ce que fait cette liste plutôt que de ré-accueillir.
