@@ -298,6 +298,66 @@ Champs :
 
 ---
 
+### Qualification
+
+Brevet ou qualification de pilotage obtenu par un pilote (issue #171). À la
+différence de `Flight`/`TrainingCamp`/`GroundHandlingSession`, ce n'est
+**pas** une spécialisation d'`Activity` : rattachée directement à `User`,
+elle n'apparaît pas dans la timeline `/activities` (un brevet est un statut
+acquis, pas une session de pratique datée).
+
+Relations :
+
+- appartient à un User
+- appartient à un QualificationType
+- peut appartenir à une School (école qui l'a délivré)
+- peut appartenir à un TrainingCamp (stage au cours duquel il a été obtenu)
+
+Champs :
+
+- obtainedDate (date sans heure)
+- notes (optionnel)
+- createdAt
+- updatedAt
+
+Suppression d'une School ou d'un TrainingCamp référencé : dissociation
+(`onDelete: SetNull`), jamais suppression ni blocage — `schoolId` et
+`trainingCampId` sont optionnels, même principe que
+`Flight.trainingCampId`/`GroundHandlingSession.trainingCampId` (perdre le
+lien ne doit jamais faire perdre le brevet déjà enregistré).
+
+---
+
+### QualificationType
+
+Référentiel des types de brevet/qualification de pilotage (table, pas un
+enum : extensible sans migration, même principe qu'`ActivityType`/
+`SiteType`/`FlightType`/`TrainingCampType`).
+
+Champs :
+
+- id
+- code (unique)
+
+Pas de `label`, même principe que les autres tables de référence
+ci-dessus. Alimenté par un seed dédié (`prisma/seed-qualification-types.ts`,
+exécutable indépendamment du seed principal via
+`pnpm --filter web prisma:seed:qualification-types`, pour pouvoir peupler
+preview et production séparément), pas par le seed principal ni par une
+interface admin.
+
+Valeurs initiales :
+
+- INITIATION
+- PILOT
+- CONFIRMED_PILOT
+- TANDEM
+- SIV
+- INSTRUCTOR
+- OTHER
+
+---
+
 ## Relations
 
 User 1,N Activity
@@ -333,3 +393,11 @@ TrainingCamp 1,N GroundHandlingSession
 School 1,N TrainingCamp
 
 TrainingCampType 1,N TrainingCamp
+
+User 1,N Qualification
+
+QualificationType 1,N Qualification
+
+School 0..1,N Qualification
+
+TrainingCamp 0..1,N Qualification

@@ -32,9 +32,10 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  activities Activity[]
-  sessions   Session[]
-  accounts   Account[]
+  activities     Activity[]
+  sessions       Session[]
+  accounts       Account[]
+  qualifications Qualification[]
 }
 
 /// Modèles Better Auth (voir apps/web/src/lib/auth.ts). Noms de champs et
@@ -220,7 +221,8 @@ model School {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  trainingCamps TrainingCamp[]
+  trainingCamps  TrainingCamp[]
+  qualifications Qualification[]
 }
 
 /// Spécialisation Vol (ADR 002, docs/decisions/002-site-point-model.md ;
@@ -280,6 +282,7 @@ model TrainingCamp {
   trainingCampType       TrainingCampType        @relation(fields: [trainingCampTypeId], references: [id])
   flights                Flight[]
   groundHandlingSessions GroundHandlingSession[]
+  qualifications         Qualification[]
 
   @@index([schoolId])
   @@index([trainingCampTypeId])
@@ -320,5 +323,53 @@ model GroundHandlingSession {
   trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
 
   @@index([spotId])
+  @@index([trainingCampId])
+}
+
+/// Référentiel des types de brevet/qualification de pilotage (table, pas un
+/// enum : extensible sans migration, même principe qu'ActivityType/SiteType/
+/// FlightType/TrainingCampType, docs/decisions/003-reference-table-codes.md).
+/// Pas de label : affichage via referenceLabels.qualificationType
+/// (src/messages/fr-FR.ts, en-GB.ts). Liste fermée alimentée par un seed
+/// dédié (prisma/seed-qualification-types.ts), pas par le seed principal ni
+/// par une interface admin (décision explicite, cf. issue #171). Valeurs
+/// initiales : INITIATION, PILOT, CONFIRMED_PILOT, TANDEM, SIV, INSTRUCTOR,
+/// OTHER.
+model QualificationType {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+
+  qualifications Qualification[]
+}
+
+/// Brevet ou qualification de pilotage obtenu par un pilote (issue #171).
+/// À la différence de Flight/TrainingCamp/GroundHandlingSession, ce n'est
+/// PAS une spécialisation d'Activity (décision explicite : un brevet est un
+/// statut acquis, pas une session de pratique datée, et n'apparaît donc pas
+/// dans la timeline /activities) — premier modèle métier à référencer User
+/// directement. schoolId/trainingCampId optionnels : un brevet peut avoir
+/// été obtenu hors de toute école ou stage suivi dans l'application.
+/// trainingCampId en onDelete: SetNull (même principe que
+/// Flight.trainingCampId/GroundHandlingSession.trainingCampId) : supprimer
+/// un stage ne doit pas faire perdre un brevet déjà enregistré.
+model Qualification {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @db.Uuid
+  qualificationTypeId String   @db.Uuid
+  obtainedDate        DateTime @db.Date
+  schoolId            String?  @db.Uuid
+  trainingCampId      String?  @db.Uuid
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qualificationType QualificationType @relation(fields: [qualificationTypeId], references: [id])
+  school            School?           @relation(fields: [schoolId], references: [id])
+  trainingCamp      TrainingCamp?     @relation(fields: [trainingCampId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([qualificationTypeId])
+  @@index([schoolId])
   @@index([trainingCampId])
 }
