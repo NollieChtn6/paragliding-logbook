@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.12.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.12.0...paragliding-logbook-v1.12.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **activities:** default the new-activity date field to today ([84cb174](https://github.com/NollieChtn6/paragliding-logbook/commit/84cb174f4bae4736b8ceb3cf7ba2f799ec406ac1))
+* **activities:** default the new-activity date field to today ([d711f2c](https://github.com/NollieChtn6/paragliding-logbook/commit/d711f2c9210881cd2dc78fe3957adaabd675878d))
+* **dashboard:** hide zero-value stat tiles per activity category ([b71df03](https://github.com/NollieChtn6/paragliding-logbook/commit/b71df03a23d90a397a807d8c389a21cdf79c174e))
+* **dashboard:** hide zero-value stat tiles per activity category ([0538eef](https://github.com/NollieChtn6/paragliding-logbook/commit/0538eefea85398814c265d5bd9acc4d25a809039))
+* **dashboard:** move install prompt below the activity list on mobile ([6eb56be](https://github.com/NollieChtn6/paragliding-logbook/commit/6eb56bef4e6ad4ff1bcbcbd4dcd4370f590840c0))
+* **dashboard:** move install prompt below the activity list on mobile ([91f0fef](https://github.com/NollieChtn6/paragliding-logbook/commit/91f0fefed006117b7ab1a2046dbdb0dc198e6a8d))
+* **dashboard:** shorten empty-state description for readability ([641e6c1](https://github.com/NollieChtn6/paragliding-logbook/commit/641e6c188588dd2c78d0d7fc8d24bb78036322fd))
+* **dashboard:** shorten empty-state description for readability ([7537cec](https://github.com/NollieChtn6/paragliding-logbook/commit/7537cecf34da8a6a499cfe7d679ca52039406817))
+* **pwa:** remove redundant border on the QR-code swatch ([d346f50](https://github.com/NollieChtn6/paragliding-logbook/commit/d346f509eae362e2d3f60ecb134116c37b2c590c))
+* **pwa:** remove redundant border on the QR-code swatch ([0edb963](https://github.com/NollieChtn6/paragliding-logbook/commit/0edb963e3e79201374f467d4816ad51cced203b9))
+
 ## [1.12.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.11.2...paragliding-logbook-v1.12.0) (2026-08-24)
 
 
