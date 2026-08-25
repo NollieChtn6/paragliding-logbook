@@ -18,7 +18,12 @@ export function InstallQrCode() {
   }
 
   return (
-    <div className="flex-none rounded-xl border border-border bg-white p-3">
+    // Pas de border ici (critique dashboard, detector "nested-cards") :
+    // ce swatch vit déjà à l'intérieur du Card d'InstallPrompt/
+    // InstallSettingsCard, qui porte sa propre bordure — un second contour
+    // imbriqué était redondant. Le fond blanc fixe (contraste QR) suffit à
+    // distinguer le swatch du fond du Card.
+    <div className="flex-none rounded-xl bg-white p-3">
       <QRCodeSVG
         value={window.location.origin}
         size={112}
