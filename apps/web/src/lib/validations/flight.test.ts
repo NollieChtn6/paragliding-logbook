@@ -56,14 +56,29 @@ describe.each(["fr-FR", "en-GB"] as const)("flightSchema (%s)", (locale) => {
     }
   });
 
-  it("rejects a date in the future", () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+  it("rejects a date clearly in the future", () => {
+    const farFuture = new Date();
+    farFuture.setDate(farFuture.getDate() + 2);
     const result = schema.safeParse({
       ...validFlight,
-      date: tomorrow.toISOString().slice(0, 10),
+      date: farFuture.toISOString().slice(0, 10),
     });
     expect(result.success).toBe(false);
+  });
+
+  // Reproduit le bug de fuseau horaire : la date/heure est stockée en UTC
+  // littéral (voir le commentaire au-dessus de flightSchema), donc un pilote
+  // à l'est de UTC saisissant l'heure locale réelle d'un vol récent obtient
+  // une valeur qui se lit comme "en avance" sur l'UTC réel. Tant que l'écart
+  // reste dans la marge de tolérance du contrôle, ce n'est plus rejeté.
+  it("accepts a flight time that reads as a few hours ahead of real UTC now", () => {
+    const withinTolerance = new Date(Date.now() + 6 * 60 * 60 * 1000);
+    const result = schema.safeParse({
+      ...validFlight,
+      date: withinTolerance.toISOString().slice(0, 10),
+      time: withinTolerance.toISOString().slice(11, 16),
+    });
+    expect(result.success).toBe(true);
   });
 
   it("rejects a malformed time with a user-friendly message", () => {
