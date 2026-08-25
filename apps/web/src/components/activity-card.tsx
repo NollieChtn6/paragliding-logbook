@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import { GraduationCap, Plane, Wind } from "lucide-react";
+import { Copy, GraduationCap, Plane, Wind } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export type ActivityCardType = "FLIGHT" | "TRAINING_CAMP" | "GROUND_HANDLING";
@@ -38,31 +39,55 @@ type ActivityCardProps = {
   // seule ligne de sous-titre.
   location: string;
   dateInfo: string;
+  // Action rapide "Dupliquer" (liste /activities uniquement, jamais le
+  // widget dashboard) : absent = pas de bouton, comportement inchangé.
+  // Rendu en dehors du <Link> principal (jamais imbriqué : deux éléments
+  // interactifs cliquables l'un dans l'autre ne sont pas un HTML valide).
+  duplicateHref?: string;
+  duplicateLabel?: string;
 };
 
 // Ligne de liste réutilisée par /activities et le dashboard (activités
 // récentes). Le glyphe par type vient de activity.activityType.code — pas
 // de dépendance à getActivitySummary (qui ne renvoie que du texte),
 // l'appelant a toujours l'Activity complète sous la main.
-export function ActivityCard({ href, type, title, location, dateInfo }: ActivityCardProps) {
+export function ActivityCard({
+  href,
+  type,
+  title,
+  location,
+  dateInfo,
+  duplicateHref,
+  duplicateLabel,
+}: ActivityCardProps) {
   const { icon: Icon, className } = ACTIVITY_TYPE_STYLE[type];
 
   return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5"
-    >
-      <span
-        className={cn("flex size-9 flex-none items-center justify-center rounded-xl", className)}
-        aria-hidden
-      >
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-foreground">{title}</span>
-        <span className="block truncate text-sm text-muted-foreground">{location}</span>
-        <span className="block truncate text-sm text-muted-foreground">{dateInfo}</span>
-      </span>
-    </Link>
+    <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5">
+      <Link href={href} className="flex min-w-0 flex-1 items-center gap-3">
+        <span
+          className={cn("flex size-9 flex-none items-center justify-center rounded-xl", className)}
+          aria-hidden
+        >
+          <Icon className="size-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-foreground">{title}</span>
+          <span className="block truncate text-sm text-muted-foreground">{location}</span>
+          <span className="block truncate text-sm text-muted-foreground">{dateInfo}</span>
+        </span>
+      </Link>
+      {duplicateHref && (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          nativeButton={false}
+          aria-label={duplicateLabel}
+          render={<Link href={duplicateHref} />}
+        >
+          <Copy className="size-4" />
+        </Button>
+      )}
+    </div>
   );
 }
