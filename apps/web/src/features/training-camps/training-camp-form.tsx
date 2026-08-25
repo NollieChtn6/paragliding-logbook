@@ -25,16 +25,18 @@ type TrainingCampFormDefaultValues = {
   endDate?: Date;
   schoolId?: string;
   trainingCampTypeId?: string;
+  qualificationTypeId?: string;
   observations?: string;
   summary?: string;
-  certification?: string;
 };
 
 type TrainingCampTypeOption = { id: string; code: string };
+type QualificationTypeOption = { id: string; code: string };
 
 type TrainingCampFormProps = {
   schools: { id: string; name: string }[];
   trainingCampTypes: TrainingCampTypeOption[];
+  qualificationTypes: QualificationTypeOption[];
   action: (
     prevState: TrainingCampFormActionState | null,
     formData: FormData,
@@ -64,6 +66,7 @@ function toDateInputValue(date: Date): string {
 export function TrainingCampForm({
   schools,
   trainingCampTypes,
+  qualificationTypes,
   action,
   defaultValues,
   submitLabel,
@@ -79,6 +82,9 @@ export function TrainingCampForm({
   const [trainingCampTypeId, setTrainingCampTypeId] = useState(
     defaultValues?.trainingCampTypeId ?? "",
   );
+  const [qualificationTypeId, setQualificationTypeId] = useState(
+    defaultValues?.qualificationTypeId ?? "",
+  );
   // Erreurs de validation affichées en ligne sous chaque champ : voir
   // flight-form.tsx pour la justification (toasts réservés à la
   // soumission/succès).
@@ -88,6 +94,10 @@ export function TrainingCampForm({
 
   function formatTrainingCampTypeOption(trainingCampType: TrainingCampTypeOption): string {
     return t.referenceLabels.trainingCampType[trainingCampType.code] ?? trainingCampType.code;
+  }
+
+  function formatQualificationTypeOption(qualificationType: QualificationTypeOption): string {
+    return t.referenceLabels.qualificationType[qualificationType.code] ?? qualificationType.code;
   }
 
   useEffect(() => {
@@ -283,12 +293,38 @@ export function TrainingCampForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="certification">{tc.certificationLabel}</Label>
-          <Input
-            id="certification"
-            name="certification"
-            defaultValue={defaultValues?.certification}
-          />
+          <Label htmlFor="qualificationTypeId">{tc.certificationLabel}</Label>
+          <div className="flex items-center gap-1.5">
+            <Select
+              name="qualificationTypeId"
+              value={qualificationTypeId}
+              onValueChange={(value) => setQualificationTypeId(value ?? "")}
+            >
+              <SelectTrigger id="qualificationTypeId" className="w-full flex-1">
+                <SelectValue placeholder={tc.chooseCertification}>
+                  {(value: string | null) => {
+                    const qualificationType = qualificationTypes.find((qt) => qt.id === value);
+                    return qualificationType
+                      ? formatQualificationTypeOption(qualificationType)
+                      : tc.chooseCertification;
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {qualificationTypes.map((qualificationType) => (
+                  <SelectItem key={qualificationType.id} value={qualificationType.id}>
+                    {formatQualificationTypeOption(qualificationType)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {qualificationTypeId && (
+              <SelectClearButton
+                onClear={() => setQualificationTypeId("")}
+                label={tc.clearCertification}
+              />
+            )}
+          </div>
         </div>
       </div>
 

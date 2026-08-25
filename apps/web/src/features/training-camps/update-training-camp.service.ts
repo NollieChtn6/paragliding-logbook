@@ -37,6 +37,22 @@ export async function updateTrainingCamp(
       throw new ZodError([issue]);
     }
 
+    // QualificationType est aussi une donnée de référence partagée, même
+    // traitement que dans createTrainingCamp ci-dessus.
+    if (input.qualificationTypeId) {
+      const qualificationType = await tx.qualificationType.findUnique({
+        where: { id: input.qualificationTypeId },
+      });
+      if (!qualificationType) {
+        const issue: ZodIssue = {
+          code: "custom",
+          path: ["qualificationTypeId"],
+          message: t.certificationNotFound,
+        };
+        throw new ZodError([issue]);
+      }
+    }
+
     return tx.trainingCamp.update({
       where: { activityId },
       data: {
@@ -46,10 +62,10 @@ export async function updateTrainingCamp(
         endDate: input.endDate,
         // ?? null : un update Prisma ignore les champs undefined au lieu de
         // les effacer, contrairement à create — nécessaire pour permettre de
-        // vider les observations/le bilan/la certification.
+        // vider les observations/le bilan/le brevet obtenu.
         observations: input.observations ?? null,
         summary: input.summary ?? null,
-        certification: input.certification ?? null,
+        qualificationTypeId: input.qualificationTypeId ?? null,
       },
     });
   });

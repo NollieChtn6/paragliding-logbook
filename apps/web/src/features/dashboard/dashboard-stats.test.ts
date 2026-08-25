@@ -104,7 +104,8 @@ function trainingCampActivity(id: string): ActivityWithDetails {
       endDate: new Date("2025-07-05"),
       observations: null,
       summary: null,
-      certification: null,
+      qualificationTypeId: null,
+      qualificationType: null,
       school: {
         id: "school-1",
         name: "École de test",

@@ -73,9 +73,10 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
   }
 
   if (activity.trainingCamp) {
-    const [schools, trainingCampTypes] = await Promise.all([
+    const [schools, trainingCampTypes, qualificationTypes] = await Promise.all([
       prisma.school.findMany({ select: { id: true, name: true } }),
       prisma.trainingCampType.findMany({ select: { id: true, code: true } }),
+      prisma.qualificationType.findMany({ select: { id: true, code: true } }),
     ]);
 
     return (
@@ -93,15 +94,16 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
         <TrainingCampForm
           schools={schools}
           trainingCampTypes={trainingCampTypes}
+          qualificationTypes={qualificationTypes}
           action={updateTrainingCampAction.bind(null, activity.id)}
           defaultValues={{
             startDate: activity.trainingCamp.startDate,
             endDate: activity.trainingCamp.endDate,
             schoolId: activity.trainingCamp.schoolId,
             trainingCampTypeId: activity.trainingCamp.trainingCampTypeId,
+            qualificationTypeId: activity.trainingCamp.qualificationTypeId ?? undefined,
             observations: activity.trainingCamp.observations ?? undefined,
             summary: activity.trainingCamp.summary ?? undefined,
-            certification: activity.trainingCamp.certification ?? undefined,
           }}
           submitLabel={t.trainingCamps.editCamp}
         />
