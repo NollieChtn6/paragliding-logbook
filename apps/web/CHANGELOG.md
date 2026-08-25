@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.16.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.15.0...paragliding-logbook-v1.16.0) (2026-08-25)
+
+
+### Features
+
+* **qualifications:** polish the list, harden dates, and link stages to brevets ([8f19762](https://github.com/NollieChtn6/paragliding-logbook/commit/8f19762e57816339f0dedf25e892685a1f4b6070))
+* **qualifications:** polish the list, harden dates, and link stages to brevets ([2738c5b](https://github.com/NollieChtn6/paragliding-logbook/commit/2738c5b20d078e4252006a648f849f9e7977463a))
+* **qualifications:** promote brevets to the primary navigation ([b30c728](https://github.com/NollieChtn6/paragliding-logbook/commit/b30c7289cd790e2026d947fdd2bb67568f596c7d))
+* **qualifications:** promote brevets to the primary navigation ([f180ae7](https://github.com/NollieChtn6/paragliding-logbook/commit/f180ae711069cee45097418dab511f13657a3d30))
+
 ## [1.15.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.14.0...paragliding-logbook-v1.15.0) (2026-08-25)
 
 
