@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { LeaveFormButton } from "@/components/leave-form-button";
+import { listEquipment, selectEquipmentOptions } from "@/features/equipment";
 import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/i18n/get-locale";
@@ -7,8 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { getDictionary } from "@/messages";
 import { NewActivityForm } from "./new-activity-form";
 
-// La liste des types d'activité, sites et écoles doit toujours refléter
-// l'état actuel de la base, pas un instantané figé au build.
+// La liste des types d'activité, sites, écoles et matériel doit toujours
+// refléter l'état actuel de la base, pas un instantané figé au build.
 export const dynamic = "force-dynamic";
 
 export default async function NewActivityPage() {
@@ -20,6 +21,7 @@ export default async function NewActivityPage() {
     qualificationTypes,
     schools,
     trainingCamps,
+    equipment,
   ] = await Promise.all([
     prisma.activityType.findMany({ select: { code: true } }),
     prisma.flightType.findMany({ select: { id: true, code: true } }),
@@ -27,6 +29,7 @@ export default async function NewActivityPage() {
     prisma.qualificationType.findMany({ select: { id: true, code: true } }),
     prisma.school.findMany({ select: { id: true, name: true } }),
     listTrainingCamps(user.id),
+    listEquipment(user.id),
   ]);
 
   const t = getDictionary(await getLocale());
@@ -41,6 +44,9 @@ export default async function NewActivityPage() {
         qualificationTypes={qualificationTypes}
         schools={schools}
         trainingCamps={trainingCamps}
+        wings={selectEquipmentOptions(equipment, "WING")}
+        harnesses={selectEquipmentOptions(equipment, "HARNESS")}
+        reserves={selectEquipmentOptions(equipment, "RESERVE")}
       />
     </div>
   );

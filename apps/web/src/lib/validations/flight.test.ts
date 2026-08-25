@@ -48,6 +48,32 @@ describe.each(["fr-FR", "en-GB"] as const)("flightSchema (%s)", (locale) => {
     }
   });
 
+  it("accepts optional wingId, harnessId and reserveId", () => {
+    const result = schema.safeParse({
+      ...validFlight,
+      wingId: "880e8400-e29b-41d4-a716-446655440003",
+      harnessId: "990e8400-e29b-41d4-a716-446655440004",
+      reserveId: "aa0e8400-e29b-41d4-a716-446655440005",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("treats an empty wingId as absent", () => {
+    const result = schema.safeParse({ ...validFlight, wingId: "" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.wingId).toBeUndefined();
+    }
+  });
+
+  it("rejects a malformed reserveId with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validFlight, reserveId: "not-a-uuid" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(t.reserveInvalid);
+    }
+  });
+
   it("rejects empty observations with a user-friendly message", () => {
     const result = schema.safeParse({ ...validFlight, observations: "" });
     expect(result.success).toBe(false);

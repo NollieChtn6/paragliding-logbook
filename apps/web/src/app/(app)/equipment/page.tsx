@@ -1,0 +1,94 @@
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { deleteEquipmentAction } from "@/actions/delete-equipment";
+import { EmptyState } from "@/components/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { getEquipmentUsageMinutes, listEquipment } from "@/features/equipment";
+import { EquipmentCard } from "@/features/equipment/equipment-card";
+import { requireCurrentUser } from "@/lib/current-user";
+import { formatDurationMinutes } from "@/lib/format-duration";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/messages";
+
+// La liste doit toujours refléter l'état actuel de la base, pas un
+// instantané figé au build (même principe que /qualifications).
+export const dynamic = "force-dynamic";
+
+export default async function EquipmentPage() {
+  const user = await requireCurrentUser();
+  const equipment = await listEquipment(user.id);
+  const locale = await getLocale();
+  const t = getDictionary(locale);
+  const te = t.equipment;
+
+  function formatEquipmentType(equipmentType: { code: string }): string {
+    return t.referenceLabels.equipmentType[equipmentType.code] ?? equipmentType.code;
+  }
+
+  function formatStatus(status: "ACTIVE" | "SOLD" | "RETIRED"): string | undefined {
+    if (status === "SOLD") return te.statusSold;
+    if (status === "RETIRED") return te.statusRetired;
+    return undefined;
+  }
+
+  // Volume d'usage jamais stocké, toujours recalculé (ADR 010) : un appel
+  // par élément affiché, voir get-equipment-usage.service.ts.
+  const usageMinutesByEquipmentId = new Map(
+    await Promise.all(
+      equipment.map(async (item) => [item.id, await getEquipmentUsageMinutes(item)] as const),
+    ),
+  );
+
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={te.pageTitle}
+        actions={
+          <Button
+            nativeButton={false}
+            render={
+              <Link href="/equipment/new">
+                <Plus className="size-4" aria-hidden />
+                {te.newEquipment}
+              </Link>
+            }
+          />
+        }
+      />
+
+      {equipment.length === 0 ? (
+        <EmptyState
+          title={te.emptyTitle}
+          description={te.emptyDescription}
+          action={
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link href="/equipment/new">{te.addEquipmentButton}</Link>}
+            />
+          }
+        />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {equipment.map((item) => {
+            const entityLabel = te.entityLabel(`${item.brand} ${item.model}`);
+            return (
+              <EquipmentCard
+                key={item.id}
+                href={`/equipment/${item.id}/edit`}
+                brand={item.brand}
+                model={item.model}
+                typeLabel={formatEquipmentType(item.equipmentType)}
+                usageLabel={`${te.usageLabel} : ${formatDurationMinutes(usageMinutesByEquipmentId.get(item.id) ?? 0)}`}
+                statusLabel={formatStatus(item.status)}
+                deleteAction={deleteEquipmentAction.bind(null, item.id)}
+                deleteEntityLabel={entityLabel}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

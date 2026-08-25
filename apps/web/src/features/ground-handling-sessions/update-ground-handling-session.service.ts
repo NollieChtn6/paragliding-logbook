@@ -15,6 +15,32 @@ export async function updateGroundHandlingSession(
   const input = groundHandlingSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
+    // Voir create-ground-handling-session.service.ts pour le détail du
+    // raisonnement.
+    async function verifyEquipment(
+      equipmentId: string | undefined,
+      expectedTypeCode: "WING" | "HARNESS",
+      fieldPath: "wingId" | "harnessId",
+      notFoundMessage: string,
+      wrongTypeMessage: string,
+    ) {
+      if (!equipmentId) {
+        return;
+      }
+      const equipment = await tx.equipment.findFirst({
+        where: { id: equipmentId, userId },
+        include: { equipmentType: true },
+      });
+      if (!equipment) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: notFoundMessage };
+        throw new ZodError([issue]);
+      }
+      if (equipment.equipmentType.code !== expectedTypeCode) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: wrongTypeMessage };
+        throw new ZodError([issue]);
+      }
+    }
+
     const activity = await tx.activity.findFirst({ where: { id: activityId, userId } });
     if (!activity) {
       throw new ActivityNotFoundError();
@@ -51,6 +77,17 @@ export async function updateGroundHandlingSession(
       }
     }
 
+    await Promise.all([
+      verifyEquipment(input.wingId, "WING", "wingId", t.wingNotFound, t.wingWrongType),
+      verifyEquipment(
+        input.harnessId,
+        "HARNESS",
+        "harnessId",
+        t.harnessNotFound,
+        t.harnessWrongType,
+      ),
+    ]);
+
     return tx.groundHandlingSession.update({
       where: { activityId },
       data: {
@@ -64,6 +101,8 @@ export async function updateGroundHandlingSession(
         exercises: input.exercises,
         difficulties: input.difficulties ?? null,
         feeling: input.feeling ?? null,
+        wingId: input.wingId ?? null,
+        harnessId: input.harnessId ?? null,
       },
     });
   });

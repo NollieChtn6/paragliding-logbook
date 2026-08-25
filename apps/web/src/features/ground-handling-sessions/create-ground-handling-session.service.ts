@@ -16,6 +16,33 @@ export async function createGroundHandlingSession(
   const input = groundHandlingSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
+    // wingId/harnessId : optionnels, doivent référencer un Equipment
+    // appartenant à userId ET du bon EquipmentType — même principe que
+    // create-flight.service.ts (voir son commentaire pour le détail).
+    async function verifyEquipment(
+      equipmentId: string | undefined,
+      expectedTypeCode: "WING" | "HARNESS",
+      fieldPath: "wingId" | "harnessId",
+      notFoundMessage: string,
+      wrongTypeMessage: string,
+    ) {
+      if (!equipmentId) {
+        return;
+      }
+      const equipment = await tx.equipment.findFirst({
+        where: { id: equipmentId, userId },
+        include: { equipmentType: true },
+      });
+      if (!equipment) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: notFoundMessage };
+        throw new ZodError([issue]);
+      }
+      if (equipment.equipmentType.code !== expectedTypeCode) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: wrongTypeMessage };
+        throw new ZodError([issue]);
+      }
+    }
+
     const activityType = await tx.activityType.findUniqueOrThrow({
       where: { code: GROUND_HANDLING_ACTIVITY_TYPE_CODE },
     });
@@ -54,6 +81,17 @@ export async function createGroundHandlingSession(
       }
     }
 
+    await Promise.all([
+      verifyEquipment(input.wingId, "WING", "wingId", t.wingNotFound, t.wingWrongType),
+      verifyEquipment(
+        input.harnessId,
+        "HARNESS",
+        "harnessId",
+        t.harnessNotFound,
+        t.harnessWrongType,
+      ),
+    ]);
+
     const activity = await tx.activity.create({
       data: {
         userId,
@@ -71,6 +109,8 @@ export async function createGroundHandlingSession(
         exercises: input.exercises,
         difficulties: input.difficulties,
         feeling: input.feeling,
+        wingId: input.wingId,
+        harnessId: input.harnessId,
       },
     });
   });
