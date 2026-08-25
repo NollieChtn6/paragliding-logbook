@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.15.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.14.0...paragliding-logbook-v1.15.0) (2026-08-25)
+
+
+### Features
+
+* **qualifications:** add a shortcut to it from the Progression page ([6404fac](https://github.com/NollieChtn6/paragliding-logbook/commit/6404facf124b07bad6777608574c3f46a1cb66ea))
+* **qualifications:** track pilot brevets and qualifications ([19b1fe4](https://github.com/NollieChtn6/paragliding-logbook/commit/19b1fe4d3523e472a2af325d1a836c3e2285a7bc))
+* **qualifications:** track pilot brevets and qualifications ([ed9cfc9](https://github.com/NollieChtn6/paragliding-logbook/commit/ed9cfc96f58e5d3ae5f37f174e987e00a7b0792d))
+
 ## [1.14.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.13.0...paragliding-logbook-v1.14.0) (2026-08-25)
 
 
