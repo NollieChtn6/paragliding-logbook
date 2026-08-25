@@ -55,7 +55,7 @@ components:
     textColor: "{colors.cloud-white}"
     rounded: "{rounded.lg}"
     padding: "0 10px"
-    height: "32px"
+    height: "44px"
   button-primary-hover:
     backgroundColor: "{colors.altitude-blue}"
   button-destructive:
@@ -63,7 +63,7 @@ components:
     textColor: "{colors.signal-red}"
     rounded: "{rounded.lg}"
     padding: "0 10px"
-    height: "32px"
+    height: "44px"
   card:
     backgroundColor: "{colors.pure-white}"
     textColor: "{colors.ink}"
@@ -74,7 +74,7 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.lg}"
     padding: "4px 10px"
-    height: "32px"
+    height: "44px"
 ---
 
 # Design System: THERMIK
@@ -181,7 +181,7 @@ Radius scales with a surface's size and importance, derived from a single `--rad
 
 ### Buttons
 
-- **Shape:** `rounded-lg` (10px), 32px height at default size (`h-8`), border-transparent.
+- **Shape:** `rounded-lg` (10px), 44px height at default size (`h-11`, raised from the original 32px for a proper touch target — one-handed, outdoor, field use), border-transparent.
 - **Primary:** `bg-primary` / `text-primary-foreground`, hover deepens to 80% opacity of the same blue (no color-shift, no darken-via-different-hex).
 - **Destructive:** soft-tinted, `bg-destructive/10 text-destructive`, not a solid fill — consistent with the Soft Status Rule.
 - **Outline / Ghost / Secondary / Link:** all share the same shape and press behavior; they differ only in resting background (transparent-with-border, transparent, `bg-secondary`, and no-background-underlined-text respectively).
@@ -197,7 +197,7 @@ Radius scales with a surface's size and importance, derived from a single `--rad
 
 ### Inputs / Fields
 
-- **Style:** `rounded-lg`, 1px `border-input`, transparent background, 32px height, base text size on mobile stepping down to `text-sm` at `md` and above (prevents iOS auto-zoom on focus while staying compact on desktop).
+- **Style:** `rounded-lg`, 1px `border-input`, transparent background, 44px height (`h-11`, raised from the original 32px for a proper touch target), base text size on mobile stepping down to `text-sm` at `md` and above (prevents iOS auto-zoom on focus while staying compact on desktop).
 - **Focus:** same ring treatment as buttons (`ring-3` + solid border in ring color).
 - **Error:** `aria-invalid` swaps the border to `border-destructive` and the ring to a soft `ring-destructive/20` — status stays tinted, never solid, matching the Soft Status Rule.
 - **Disabled:** reduced opacity plus a faint tinted background (`bg-input/50`), never fully hidden affordance.

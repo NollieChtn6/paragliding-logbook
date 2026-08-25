@@ -1,5 +1,6 @@
 import { createFlightAction } from "@/actions/create-flight";
 import { PageHeader } from "@/components/layout/page-header";
+import { LeaveFormButton } from "@/components/leave-form-button";
 import { FlightForm } from "@/features/flights/flight-form";
 import { listTrainingCamps } from "@/features/training-camps";
 import { requireCurrentUser } from "@/lib/current-user";
@@ -21,7 +22,7 @@ export default async function NewFlightPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t.flights.newFlight} />
+      <PageHeader title={t.flights.newFlight} actions={<LeaveFormButton />} />
       <FlightForm
         flightTypes={flightTypes}
         trainingCamps={trainingCamps}

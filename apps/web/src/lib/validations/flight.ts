@@ -57,9 +57,18 @@ export function flightSchema(t: Messages["validation"]["flight"]) {
         ...rest,
         date: new Date(`${rest.date}T${time}:00.000Z`),
       }))
-      // `new Date()` évalué à chaque validation (et non figé au chargement du
-      // module) pour rester correct sur un process serveur longue durée.
-      .refine((data) => data.date <= new Date(), {
+      // Le stockage littéral ci-dessus ne capture aucun fuseau horaire : un
+      // pilote à l'est de UTC (ex. France, UTC+1/+2) qui saisit l'heure
+      // locale réelle d'un vol qu'il vient de faire peut se voir comparé à
+      // une "date future" purement à cause du décalage, alors que le vol a
+      // bien eu lieu. Une marge de tolérance couvrant le décalage le plus
+      // extrême possible (UTC+14) absorbe ce cas sans affaiblir l'objectif
+      // du contrôle, qui est d'attraper une erreur de saisie grossière
+      // (mauvaise année, mauvais mois), pas de valider l'instant à la
+      // seconde près. `Date.now()` évalué à chaque validation (et non figé
+      // au chargement du module) pour rester correct sur un process
+      // serveur longue durée.
+      .refine((data) => data.date.getTime() <= Date.now() + 14 * 60 * 60 * 1000, {
         message: t.dateInFuture,
         path: ["date"],
       })
