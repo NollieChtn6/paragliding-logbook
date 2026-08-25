@@ -62,6 +62,10 @@ type GroundHandlingSessionFormProps = {
 
 const WIZARD_STEP_2_REQUIRED_FIELDS = ["date", "time", "spotId", "durationMin"];
 const WIZARD_STEP_3_REQUIRED_FIELDS = ["exercises"];
+// Hors mode assistant (édition uniquement pour ce formulaire, voir
+// flight-form.tsx pour le détail du raisonnement) : tous les champs
+// affichés sur un seul écran, validés d'un coup à la soumission.
+const ALL_REQUIRED_FIELDS = [...WIZARD_STEP_2_REQUIRED_FIELDS, ...WIZARD_STEP_3_REQUIRED_FIELDS];
 
 // Format attendu par <Input type="date">/<Input type="time">, voir
 // flight-form.tsx.
@@ -167,11 +171,13 @@ export function GroundHandlingSessionForm({
     onWizardNext?.();
   }
 
-  // Voir flight-form.tsx : même traitement à la soumission finale (étape 3)
-  // pour exercises, sans effet en dehors du mode assistant.
+  // Voir flight-form.tsx pour le détail du raisonnement (même bug :
+  // validation navigateur non localisée sans noValidate + handleSubmit).
+  // Étape 3 du mode assistant : seul exercises (l'étape 2 est déjà validée
+  // par handleWizardNext). Hors mode assistant (édition) : tous les champs.
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    if (!wizardStep) return;
-    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS, t.common);
+    const requiredFields = wizardStep === 3 ? WIZARD_STEP_3_REQUIRED_FIELDS : ALL_REQUIRED_FIELDS;
+    const errors = getFieldErrors(event.currentTarget, requiredFields, t.common);
     if (Object.keys(errors).length > 0) {
       event.preventDefault();
       setFieldErrors(errors);
@@ -179,7 +185,14 @@ export function GroundHandlingSessionForm({
   }
 
   return (
-    <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
+    // noValidate : voir flight-form.tsx pour le détail du raisonnement.
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={handleSubmit}
+      noValidate
+      className="flex flex-col gap-4"
+    >
       {!wizardStep && (
         <h2 className="text-lg font-medium tracking-tight text-foreground">{tg.detailsHeading}</h2>
       )}

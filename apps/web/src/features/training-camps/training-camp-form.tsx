@@ -48,6 +48,9 @@ type TrainingCampFormProps = {
 };
 
 const WIZARD_STEP_2_REQUIRED_FIELDS = ["startDate", "endDate", "schoolId", "trainingCampTypeId"];
+// Aucun champ requis à l'étape 3 (observations/bilan/certification, tous
+// facultatifs) : contrairement à FlightForm/GroundHandlingSessionForm, ici
+// ALL_REQUIRED_FIELDS == WIZARD_STEP_2_REQUIRED_FIELDS, pas une union.
 
 // Format attendu par <Input type="date">, voir flight-form.tsx.
 function toDateInputValue(date: Date): string {
@@ -123,8 +126,28 @@ export function TrainingCampForm({
     onWizardNext?.();
   }
 
+  // Voir flight-form.tsx pour le détail du raisonnement (même bug :
+  // validation navigateur non localisée sans noValidate + handleSubmit).
+  // N'intercepte rien en mode assistant : l'étape 2 est déjà validée par
+  // handleWizardNext, et aucun champ n'est requis à l'étape 3.
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    if (wizardStep) return;
+    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_2_REQUIRED_FIELDS, t.common);
+    if (Object.keys(errors).length > 0) {
+      event.preventDefault();
+      setFieldErrors(errors);
+    }
+  }
+
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-4">
+    // noValidate : voir flight-form.tsx pour le détail du raisonnement.
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={handleSubmit}
+      noValidate
+      className="flex flex-col gap-4"
+    >
       {!wizardStep && (
         <h2 className="text-lg font-medium tracking-tight text-foreground">{tc.detailsHeading}</h2>
       )}
