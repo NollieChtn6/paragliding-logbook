@@ -308,11 +308,43 @@ chore/setup-prisma
    - lint
    - typecheck
    - tests
-5. Fusionner dans develop
+5. Fusionner dans develop (validation manuelle explicite, jamais automatique)
 6. Valider
-7. Fusionner develop dans main pour production
+7. Fusionner develop dans main pour production (automatique, voir
+   "Automatisation CI/déploiement" ci-dessous)
 
 Ne jamais travailler directement sur main ou develop.
+
+---
+
+### Automatisation CI/déploiement
+
+Seule l'étape branche -> develop reste une décision manuelle. Tout ce qui
+suit, une fois une PR ouverte vers main, est automatique :
+
+1. **Merge de branche vers develop** : toujours manuel — attendre une
+   validation explicite avant de merger, quelle que soit la branche.
+2. **Merge de develop vers main** : automatique dès que tous les checks
+   passent (workflow `.github/workflows/auto-merge-main.yml`, déclenché sur
+   toute PR ciblant main).
+3. **Après un merge sur main** : Release Please (`.github/workflows/
+   release.yml`) se déclenche automatiquement, calcule la version suivante
+   à partir des commits Conventional Commits, et ouvre sa propre PR de
+   version. Cette PR se merge elle-même automatiquement une fois ses checks
+   au vert (job `auto-merge-release-pr`).
+4. **Après la publication d'une release** : synchronisation automatique de
+   main vers develop (job `sync-develop`) pour rapatrier le bump de version
+   (`package.json`, `.release-please-manifest.json`, `CHANGELOG.md`) —
+   seule source de désynchronisation entre develop et main dans ce workflow,
+   puisque ce commit de version est écrit directement sur main sans passer
+   par develop.
+
+Point technique à connaître avant de modifier un de ces workflows : un
+merge effectué avec le `GITHUB_TOKEN` par défaut d'une Action ne déclenche
+aucun autre workflow (protection anti-boucle infinie de GitHub). Les jobs
+qui doivent enchaîner sur un autre workflow (merge vers main, création de
+release) utilisent donc un PAT dédié (`RELEASE_PLEASE_TOKEN`), jamais le
+token par défaut.
 
 ---
 
