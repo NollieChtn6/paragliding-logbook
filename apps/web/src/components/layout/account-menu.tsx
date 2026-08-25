@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, Menu, Settings, User } from "lucide-react";
+import { Award, ChevronDown, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { signOutAction } from "@/actions/sign-out";
 import { useT } from "@/components/locale-provider";
@@ -70,6 +70,15 @@ export function AccountMenu({ showSecurityLink = true, trigger = "icon" }: Accou
             }
           />
         )}
+        <DropdownMenuItem
+          className="cursor-pointer"
+          render={
+            <Link href="/qualifications" title={t.shell.qualificationsLink}>
+              <Award />
+              {t.shell.qualificationsLink}
+            </Link>
+          }
+        />
         <DropdownMenuItem
           className="cursor-pointer"
           title={t.common.signOut}

@@ -188,6 +188,31 @@ Fonctionnalités :
 
 ---
 
+## Brevets et qualifications 🏅
+
+Informations obligatoires (validées côté Zod) :
+
+- [x] Type de brevet/qualification
+- [x] Date d'obtention (ne peut pas être dans le futur)
+
+Informations optionnelles :
+
+- [x] École ayant délivré le brevet
+- [x] Stage au cours duquel il a été obtenu (limité aux stages de l'utilisateur courant)
+- [x] Notes
+
+Fonctionnalités :
+
+- [x] Modèle `Qualification`/`QualificationType` — rattaché directement à `User`, pas via `Activity` : un brevet n'apparaît pas dans la timeline `/activities` (issue #171)
+- [x] Ajouter un brevet — `/qualifications/new`, service `createQualification` (`src/features/qualifications/`), route protégée (connexion requise)
+- [x] Consulter la liste de ses brevets — `/qualifications`, triée de la plus récente à la plus ancienne
+- [x] Modifier un brevet — `/qualifications/[id]/edit`, service `updateQualification`, vérification de propriété systématique
+- [x] Supprimer un brevet — service `deleteQualification` dédié (pas de passage par `deleteActivity`, `Qualification` n'étant pas une spécialisation d'`Activity`)
+- [x] Référentiel `QualificationType` alimenté par un seed séparé (`prisma/seed-qualification-types.ts`, `pnpm --filter web prisma:seed:qualification-types`), exécutable indépendamment sur preview et production — pas de CRUD admin pour l'instant
+- [x] Accès depuis le menu de compte (`AccountMenu`), pas dans la barre de navigation principale (4 emplacements déjà occupés)
+
+---
+
 ## Dashboard 📊
 
 Page d'accueil (`/`), route protégée (connexion requise), remplace l'ancienne page publique.
