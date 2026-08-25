@@ -12,6 +12,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
+    "prisma:seed:qualification-types": "tsx prisma/seed-qualification-types.ts",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {

@@ -26,6 +26,14 @@ Type d'un stage (initiation, progression, thermique, SIV...), table de référen
 
 Séance de gonflage ou de travail au sol.
 
+### 'Qualification'
+
+Brevet ou qualification de pilotage obtenu par un pilote (issue #171).
+Rattachée directement à `User`, pas via `Activity` : à la différence de
+`Flight`/`TrainingCamp`/`GroundHandlingSession`, un brevet n'est pas une
+session de pratique datée mais un statut acquis, il n'apparaît donc pas
+dans la timeline des activités.
+
 ---
 
 ## Entités principales
@@ -193,6 +201,31 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 
 ---
 
+### Qualification
+
+- id
+- userId — premier modèle métier à référencer `User` directement (pas via `Activity` : ce n'est pas une spécialisation d'`Activity`, voir ci-dessus)
+- qualificationTypeId
+- obtainedDate (date sans heure)
+- schoolId (optionnel) — école ayant délivré le brevet
+- trainingCampId (optionnel) — stage au cours duquel il a été obtenu
+- notes (optionnel)
+- createdAt
+- updatedAt
+
+Suppression d'une `School`/d'un `TrainingCamp` référencé : dissociation (`onDelete: SetNull`, `schoolId`/`trainingCampId` optionnels), jamais suppression ni blocage — même principe que `Flight.trainingCampId`/`GroundHandlingSession.trainingCampId`.
+
+---
+
+### QualificationType
+
+- id
+- code (unique) — `INITIATION`, `PILOT`, `CONFIRMED_PILOT`, `TANDEM`, `SIV`, `INSTRUCTOR`, `OTHER`
+
+Table de référence (pas un enum), même principe qu'`ActivityType`/`SiteType`/`FlightType`/`TrainingCampType` : extensible sans migration. Alimentée par un seed dédié (`prisma/seed-qualification-types.ts`), exécutable indépendamment du seed principal (`pnpm --filter web prisma:seed:qualification-types`) pour peupler preview et production séparément — pas de CRUD applicatif pour l'instant.
+
+---
+
 ## Règles métier
 
 ### Vol
@@ -212,6 +245,13 @@ Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de dupli
 
 - la durée doit être strictement positive ;
 - les exercices travaillés sont obligatoires.
+
+### Qualification
+
+- `qualificationTypeId` doit exister ;
+- `obtainedDate` ne peut pas être dans le futur ;
+- si `schoolId` est renseigné, l'école doit exister ;
+- si `trainingCampId` est renseigné, le stage doit exister et appartenir à l'utilisateur courant.
 
 ### Suppression
 

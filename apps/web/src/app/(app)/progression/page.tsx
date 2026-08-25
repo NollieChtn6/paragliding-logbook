@@ -1,7 +1,9 @@
 import { Award } from "lucide-react";
+import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { TrendChart } from "@/components/trend-chart";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFlightProgression } from "@/features/flights";
 import { requireCurrentUser } from "@/lib/current-user";
@@ -30,7 +32,22 @@ export default async function ProgressionPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={tp.pageTitle} description={tp.subtitle} />
+      <PageHeader
+        title={tp.pageTitle}
+        description={tp.subtitle}
+        actions={
+          <Button
+            nativeButton={false}
+            variant="outline"
+            render={
+              <Link href="/qualifications">
+                <Award className="size-4" aria-hidden />
+                {t.shell.qualificationsLink}
+              </Link>
+            }
+          />
+        }
+      />
 
       {progression.flightCount === 0 ? (
         <EmptyState title={tp.emptyTitle} description={tp.emptyDescription} />
