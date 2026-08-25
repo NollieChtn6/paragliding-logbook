@@ -13,6 +13,8 @@ import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/g
 import { TrainingCampForm } from "@/features/training-camps/training-camp-form";
 import { cn } from "@/lib/utils";
 
+type EquipmentOption = { id: string; brand: string; model: string; size: string | null };
+
 type NewActivityFormProps = {
   activityTypes: { code: string }[];
   flightTypes: { id: string; code: string }[];
@@ -26,6 +28,9 @@ type NewActivityFormProps = {
     endDate: Date;
     school: { name: string };
   }[];
+  wings: EquipmentOption[];
+  harnesses: EquipmentOption[];
+  reserves: EquipmentOption[];
 };
 
 // Les trois types du MVP (Vol, Stage, Gonflage) ont désormais un formulaire —
@@ -73,6 +78,9 @@ export function NewActivityForm({
   qualificationTypes,
   schools,
   trainingCamps,
+  wings,
+  harnesses,
+  reserves,
 }: NewActivityFormProps) {
   const [selectedCode, setSelectedCode] = useState<string>(NO_SELECTION);
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -163,6 +171,9 @@ export function NewActivityForm({
           <FlightForm
             flightTypes={flightTypes}
             trainingCamps={trainingCamps}
+            wings={wings}
+            harnesses={harnesses}
+            reserves={reserves}
             action={createFlightAction}
             wizardStep={wizardStep}
             onWizardBack={step === 3 ? backToStep2 : backToStep1}
@@ -187,6 +198,8 @@ export function NewActivityForm({
         <div hidden={step === 1} className="duration-300 animate-in fade-in-0">
           <GroundHandlingSessionForm
             trainingCamps={trainingCamps}
+            wings={wings}
+            harnesses={harnesses}
             action={createGroundHandlingSessionAction}
             wizardStep={wizardStep}
             onWizardBack={step === 3 ? backToStep2 : backToStep1}

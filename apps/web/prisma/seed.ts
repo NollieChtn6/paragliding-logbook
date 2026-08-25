@@ -54,6 +54,11 @@ const trainingCampTypes = [
   { code: "OTHER" },
 ];
 
+// Catégories de matériel (voile/sellette/secours), même principe que les
+// autres tables de référence ci-dessus (docs/decisions/003-reference-table-codes.md).
+// Labels associés : referenceLabels.equipmentType (src/messages/fr-FR.ts, en-GB.ts).
+const equipmentTypes = [{ code: "WING" }, { code: "HARNESS" }, { code: "RESERVE" }];
+
 // orientationDeg est un cap en degrés (0 = N, 90 = E, 180 = S, 270 = O) —
 // convention déjà en place (docs/decisions/005-flight-takeoff-landing-points.md
 // point 11 : pas de nouvelle refonte de l'orientation dans cette PR), les
@@ -385,6 +390,14 @@ async function main() {
       where: { code: trainingCampType.code },
       update: {},
       create: trainingCampType,
+    });
+  }
+
+  for (const equipmentType of equipmentTypes) {
+    await prisma.equipmentType.upsert({
+      where: { code: equipmentType.code },
+      update: {},
+      create: equipmentType,
     });
   }
 

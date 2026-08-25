@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import {
+  type EquipmentSelectOption,
+  formatEquipmentOption,
+} from "@/features/equipment/select-equipment-options";
 import { getFieldErrors } from "@/lib/form-validation";
 import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
@@ -37,6 +41,8 @@ type GroundHandlingSessionFormDefaultValues = {
   date?: Date;
   trainingCampId?: string;
   durationMin?: number;
+  wingId?: string;
+  harnessId?: string;
   exercises?: string;
   difficulties?: string;
   feeling?: string;
@@ -44,6 +50,13 @@ type GroundHandlingSessionFormDefaultValues = {
 
 type GroundHandlingSessionFormProps = {
   trainingCamps?: TrainingCampOption[];
+  // Matériel ACTIVE de l'utilisateur du bon EquipmentType, plus l'élément
+  // déjà sélectionné en édition même si son statut a changé depuis — voir
+  // flight-form.tsx pour le détail du raisonnement. Pas de champ reserve
+  // ici : un secours ne s'utilise pas pendant une séance de gonflage
+  // (docs/domain-model.md).
+  wings?: EquipmentSelectOption[];
+  harnesses?: EquipmentSelectOption[];
   action: (
     prevState: GroundHandlingSessionFormActionState | null,
     formData: FormData,
@@ -93,6 +106,8 @@ function todayDateInputValue(): string {
 // succès, pas d'état "succès" à afficher ici.
 export function GroundHandlingSessionForm({
   trainingCamps = [],
+  wings = [],
+  harnesses = [],
   action,
   defaultValues,
   defaultSpot,
@@ -106,6 +121,8 @@ export function GroundHandlingSessionForm({
   // Select contrôlé : voir flight-form.tsx pour la justification (bouton
   // croix de réinitialisation).
   const [trainingCampId, setTrainingCampId] = useState(defaultValues?.trainingCampId ?? "");
+  const [wingId, setWingId] = useState(defaultValues?.wingId ?? "");
+  const [harnessId, setHarnessId] = useState(defaultValues?.harnessId ?? "");
   // Erreurs de validation affichées en ligne sous chaque champ : voir
   // flight-form.tsx pour la justification (toasts réservés à la
   // soumission/succès).
@@ -282,6 +299,70 @@ export function GroundHandlingSessionForm({
             <p className="text-sm text-destructive">{fieldErrors.durationMin}</p>
           )}
         </div>
+
+        {wings.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="wingId">{tg.wingLabel}</Label>
+            <div className="flex items-center gap-1.5">
+              <Select
+                name="wingId"
+                value={wingId}
+                onValueChange={(value) => setWingId(value ?? "")}
+              >
+                <SelectTrigger id="wingId" className="w-full flex-1">
+                  <SelectValue placeholder={tg.none}>
+                    {(value: string) => {
+                      const wing = wings.find((w) => w.id === value);
+                      return wing ? formatEquipmentOption(wing) : tg.none;
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{tg.none}</SelectItem>
+                  {wings.map((wing) => (
+                    <SelectItem key={wing.id} value={wing.id}>
+                      {formatEquipmentOption(wing)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {wingId && <SelectClearButton onClear={() => setWingId("")} label={tg.clearWing} />}
+            </div>
+          </div>
+        )}
+
+        {harnesses.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="harnessId">{tg.harnessLabel}</Label>
+            <div className="flex items-center gap-1.5">
+              <Select
+                name="harnessId"
+                value={harnessId}
+                onValueChange={(value) => setHarnessId(value ?? "")}
+              >
+                <SelectTrigger id="harnessId" className="w-full flex-1">
+                  <SelectValue placeholder={tg.none}>
+                    {(value: string) => {
+                      const harness = harnesses.find((h) => h.id === value);
+                      return harness ? formatEquipmentOption(harness) : tg.none;
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{tg.none}</SelectItem>
+                  {harnesses.map((harness) => (
+                    <SelectItem key={harness.id} value={harness.id}>
+                      {formatEquipmentOption(harness)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {harnessId && (
+                <SelectClearButton onClear={() => setHarnessId("")} label={tg.clearHarness} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {!wizardStep && (

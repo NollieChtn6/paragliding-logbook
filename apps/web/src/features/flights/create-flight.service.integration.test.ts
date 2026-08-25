@@ -20,6 +20,9 @@ let trainingCampTypeId: string;
 let schoolId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
+let wingId: string;
+let harnessId: string;
+let otherUserWingId: string;
 
 const validFlightInput = {
   date: "2025-01-15",
@@ -104,6 +107,50 @@ beforeAll(async () => {
   });
   schoolId = school.id;
 
+  const [wingType, harnessType] = await Promise.all([
+    prisma.equipmentType.upsert({ where: { code: "WING" }, update: {}, create: { code: "WING" } }),
+    prisma.equipmentType.upsert({
+      where: { code: "HARNESS" },
+      update: {},
+      create: { code: "HARNESS" },
+    }),
+  ]);
+  const [wing, harness, otherUserWing] = await Promise.all([
+    prisma.equipment.create({
+      data: {
+        userId,
+        equipmentTypeId: wingType.id,
+        brand: "Ozone",
+        model: "Rush 6",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        userId,
+        equipmentTypeId: harnessType.id,
+        brand: "Woody Valley",
+        model: "Wani Light 2",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        userId: otherUserId,
+        equipmentTypeId: wingType.id,
+        brand: "Gin",
+        model: "Explorer",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+  ]);
+  wingId = wing.id;
+  harnessId = harness.id;
+  otherUserWingId = otherUserWing.id;
+
   const trainingCamp = await createTrainingCamp(
     userId,
     {
@@ -140,6 +187,7 @@ afterAll(async () => {
   await prisma.site.deleteMany({ where: { spotId: { in: [spotId, otherSpotId] } } });
   await prisma.spot.deleteMany({ where: { id: { in: [spotId, otherSpotId] } } });
   await prisma.school.delete({ where: { id: schoolId } });
+  await prisma.equipment.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
 });
@@ -203,6 +251,58 @@ describe("createFlight (integration)", () => {
     );
     expect(flight.takeoffPointId).toBe(otherSpotTakeoffPointId);
     expect(flight.landingPointId).toBe(landingPointId);
+  });
+
+  it("accepts a wing and a harness belonging to the current user, with the right equipment type", async () => {
+    const flight = await createFlight(
+      userId,
+      { ...validFlightInput, takeoffPointId, landingPointId, flightTypeId, wingId, harnessId },
+      t,
+    );
+    expect(flight.wingId).toBe(wingId);
+    expect(flight.harnessId).toBe(harnessId);
+  });
+
+  it("fails when the wing does not exist", async () => {
+    await expect(
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+          wingId: crypto.randomUUID(),
+        },
+        t,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the wing belongs to another user", async () => {
+    await expect(
+      createFlight(
+        userId,
+        {
+          ...validFlightInput,
+          takeoffPointId,
+          landingPointId,
+          flightTypeId,
+          wingId: otherUserWingId,
+        },
+        t,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the wing field references equipment of the wrong type", async () => {
+    await expect(
+      createFlight(
+        userId,
+        { ...validFlightInput, takeoffPointId, landingPointId, flightTypeId, wingId: harnessId },
+        t,
+      ),
+    ).rejects.toThrow();
   });
 
   it("fails with invalid data", async () => {

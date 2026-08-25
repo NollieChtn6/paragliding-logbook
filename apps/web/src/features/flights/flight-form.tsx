@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import {
+  type EquipmentSelectOption,
+  formatEquipmentOption,
+} from "@/features/equipment/select-equipment-options";
 import { getFieldErrors } from "@/lib/form-validation";
 import { formatDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
@@ -40,6 +44,9 @@ type FlightFormDefaultValues = {
   trainingCampId?: string;
   durationMin?: number;
   flightTypeId?: string;
+  wingId?: string;
+  harnessId?: string;
+  reserveId?: string;
   observations?: string;
   improvementPoints?: string;
 };
@@ -47,6 +54,14 @@ type FlightFormDefaultValues = {
 type FlightFormProps = {
   flightTypes: FlightTypeOption[];
   trainingCamps?: TrainingCampOption[];
+  // Matériel ACTIVE de l'utilisateur du bon EquipmentType (voir
+  // app/(app)/flights/new/page.tsx), plus l'élément déjà sélectionné en
+  // édition même si son statut a changé depuis (docs/domain-model.md >
+  // Règles métier > Matériel) — cette liste arrive déjà filtrée, le
+  // formulaire ne fait aucun filtrage lui-même.
+  wings?: EquipmentSelectOption[];
+  harnesses?: EquipmentSelectOption[];
+  reserves?: EquipmentSelectOption[];
   action: (
     prevState: FlightFormActionState | null,
     formData: FormData,
@@ -113,6 +128,9 @@ function todayDateInputValue(): string {
 export function FlightForm({
   flightTypes,
   trainingCamps = [],
+  wings = [],
+  harnesses = [],
+  reserves = [],
   action,
   defaultValues,
   defaultTakeoffPoint,
@@ -129,6 +147,9 @@ export function FlightForm({
   // de l'extérieur du composant Select.
   const [trainingCampId, setTrainingCampId] = useState(defaultValues?.trainingCampId ?? "");
   const [flightTypeId, setFlightTypeId] = useState(defaultValues?.flightTypeId ?? "");
+  const [wingId, setWingId] = useState(defaultValues?.wingId ?? "");
+  const [harnessId, setHarnessId] = useState(defaultValues?.harnessId ?? "");
+  const [reserveId, setReserveId] = useState(defaultValues?.reserveId ?? "");
   // Erreurs de validation affichées en ligne sous chaque champ (mode
   // assistant uniquement) — les toasts restent réservés à la soumission
   // (state?.success === false ci-dessous) et au succès (redirection +
@@ -386,6 +407,103 @@ export function FlightForm({
             <p className="text-sm text-destructive">{fieldErrors.flightTypeId}</p>
           )}
         </div>
+
+        {wings.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="wingId">{tf.wingLabel}</Label>
+            <div className="flex items-center gap-1.5">
+              <Select
+                name="wingId"
+                value={wingId}
+                onValueChange={(value) => setWingId(value ?? "")}
+              >
+                <SelectTrigger id="wingId" className="w-full flex-1">
+                  <SelectValue placeholder={tf.none}>
+                    {(value: string) => {
+                      const wing = wings.find((w) => w.id === value);
+                      return wing ? formatEquipmentOption(wing) : tf.none;
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{tf.none}</SelectItem>
+                  {wings.map((wing) => (
+                    <SelectItem key={wing.id} value={wing.id}>
+                      {formatEquipmentOption(wing)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {wingId && <SelectClearButton onClear={() => setWingId("")} label={tf.clearWing} />}
+            </div>
+          </div>
+        )}
+
+        {harnesses.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="harnessId">{tf.harnessLabel}</Label>
+            <div className="flex items-center gap-1.5">
+              <Select
+                name="harnessId"
+                value={harnessId}
+                onValueChange={(value) => setHarnessId(value ?? "")}
+              >
+                <SelectTrigger id="harnessId" className="w-full flex-1">
+                  <SelectValue placeholder={tf.none}>
+                    {(value: string) => {
+                      const harness = harnesses.find((h) => h.id === value);
+                      return harness ? formatEquipmentOption(harness) : tf.none;
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{tf.none}</SelectItem>
+                  {harnesses.map((harness) => (
+                    <SelectItem key={harness.id} value={harness.id}>
+                      {formatEquipmentOption(harness)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {harnessId && (
+                <SelectClearButton onClear={() => setHarnessId("")} label={tf.clearHarness} />
+              )}
+            </div>
+          </div>
+        )}
+
+        {reserves.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="reserveId">{tf.reserveLabel}</Label>
+            <div className="flex items-center gap-1.5">
+              <Select
+                name="reserveId"
+                value={reserveId}
+                onValueChange={(value) => setReserveId(value ?? "")}
+              >
+                <SelectTrigger id="reserveId" className="w-full flex-1">
+                  <SelectValue placeholder={tf.none}>
+                    {(value: string) => {
+                      const reserve = reserves.find((r) => r.id === value);
+                      return reserve ? formatEquipmentOption(reserve) : tf.none;
+                    }}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{tf.none}</SelectItem>
+                  {reserves.map((reserve) => (
+                    <SelectItem key={reserve.id} value={reserve.id}>
+                      {formatEquipmentOption(reserve)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {reserveId && (
+                <SelectClearButton onClear={() => setReserveId("")} label={tf.clearReserve} />
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {!wizardStep && (
