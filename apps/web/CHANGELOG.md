@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.12.2](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.12.1...paragliding-logbook-v1.12.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* **flight:** add cancel button to the flight creation form ([929ff7b](https://github.com/NollieChtn6/paragliding-logbook/commit/929ff7b96f0234645728b9f5993c2b8a8636ec2f))
+* **flight:** add cancel button to the flight creation form ([0a26390](https://github.com/NollieChtn6/paragliding-logbook/commit/0a263901cefb2e574476e4134815f528732b234c))
+* **flight:** localize validation errors outside the wizard flow ([4eb3ab1](https://github.com/NollieChtn6/paragliding-logbook/commit/4eb3ab1e4ef302905c7d57cbe9b8222d390d4362))
+* **flight:** localize validation errors outside the wizard flow ([9b06515](https://github.com/NollieChtn6/paragliding-logbook/commit/9b06515dbef797efd0891dcdd9dbf607f1a5fc02))
+* **flight:** tolerate timezone offset in future-date validation ([b2c9b62](https://github.com/NollieChtn6/paragliding-logbook/commit/b2c9b62644ef825fe646364d73e0dd4f174a940f))
+* **flight:** tolerate timezone offset in future-date validation ([b1659d8](https://github.com/NollieChtn6/paragliding-logbook/commit/b1659d84a4cae3313e4a6daa2919a06af49fbf32))
+* **ui:** raise default control height for touch targets ([815613e](https://github.com/NollieChtn6/paragliding-logbook/commit/815613ecf1498de6c60e4680472fbb03c790ef8c))
+* **ui:** raise default control height for touch targets ([88d1831](https://github.com/NollieChtn6/paragliding-logbook/commit/88d18316719c943837a3cc2df86c79b5eb9a1596))
+* **ui:** soften Select and Combobox highlight to a tint ([cb4bf82](https://github.com/NollieChtn6/paragliding-logbook/commit/cb4bf827d373338f36595bb92772840053ceeb71))
+* **ui:** soften Select and Combobox highlight to a tint ([807114f](https://github.com/NollieChtn6/paragliding-logbook/commit/807114fdd03b40e8481ab85608e95561d337086a))
+
 ## [1.12.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.12.0...paragliding-logbook-v1.12.1) (2026-08-25)
 
 
