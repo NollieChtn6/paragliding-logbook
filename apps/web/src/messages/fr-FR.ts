@@ -370,8 +370,11 @@ const messages = {
     // moindre activité) — orientation vers la première action plutôt que
     // simple constat d'absence.
     emptyTitle: "Votre carnet commence ici",
+    // Scindé en deux phrases courtes plutôt qu'une seule longue (critique
+    // dashboard, item P3 : détecteur "line-length") — même sens, plus facile
+    // à scanner.
     emptyDescription:
-      "Enregistrez votre premier vol, stage ou séance de gonflage pour voir votre progression prendre forme.",
+      "Enregistrez votre premier vol, stage ou séance de gonflage. Votre progression prendra forme au fil de vos activités.",
     addActivity: "Ajouter une activité",
   },
   activities: {

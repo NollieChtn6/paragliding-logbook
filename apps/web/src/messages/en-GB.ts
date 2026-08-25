@@ -349,7 +349,7 @@ const messages: Messages = {
     seeAll: "See all",
     emptyTitle: "Your logbook starts here",
     emptyDescription:
-      "Log your first flight, training camp or ground handling session to see your progress take shape.",
+      "Log your first flight, training camp or ground handling session. Your progress takes shape from there.",
     addActivity: "Add an activity",
   },
   activities: {
