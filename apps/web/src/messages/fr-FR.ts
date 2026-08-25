@@ -450,6 +450,20 @@ const messages = {
     cancel: "Annuler",
     deleting: "Suppression...",
   },
+  progression: {
+    pageTitle: "Progression",
+    subtitle: "Votre évolution dans le temps",
+    flightCountTrendTitle: "Nombre de vols cumulé",
+    flightHoursTrendTitle: "Temps de vol cumulé",
+    // < 2 mois de données actives : une courbe à un seul point n'a rien à
+    // montrer (features/flights/flight-milestone-history.ts).
+    notEnoughDataForTrend: "Pas encore assez de données pour une courbe.",
+    milestonesTitle: "Paliers franchis",
+    noMilestonesYet: "Aucun palier franchi pour l'instant.",
+    emptyTitle: "Votre progression prendra forme ici",
+    emptyDescription:
+      "Enregistrez vos premiers vols pour voir apparaître vos tendances et paliers.",
+  },
   flights: {
     newFlight: "Nouveau vol",
     detailsHeading: "Détails",
@@ -550,6 +564,7 @@ const messages = {
   shell: {
     navHome: "Accueil",
     navActivities: "Activités",
+    navProgression: "Progression",
     navAdd: "Ajouter",
     securitySettings: "Paramètres de sécurité",
     switchToLightTheme: "Passer en thème clair",

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ParagliderWingGlyph } from "@/lib/icon-glyph";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -6,6 +7,8 @@ export const contentType = "image/png";
 // Icône d'écran d'accueil iOS (convention de fichier App Router, câble
 // automatiquement <link rel="apple-touch-icon">) : fond opaque obligatoire,
 // iOS rend toute transparence en noir plein — voir docs/decisions/008.
+// Glyphe dessiné, pas l'emoji encore utilisé ailleurs dans l'UI — voir
+// docs/decisions/009.
 export default function AppleIcon() {
   return new ImageResponse(
     <div
@@ -16,10 +19,9 @@ export default function AppleIcon() {
         alignItems: "center",
         justifyContent: "center",
         background: "#2563eb",
-        fontSize: 110,
       }}
     >
-      🪂
+      <ParagliderWingGlyph size={120} color="#f8fafc" />
     </div>,
     { ...size },
   );
