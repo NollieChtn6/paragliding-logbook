@@ -11,6 +11,14 @@ name: Auto-merge PRs to main
 # l'auto-merge que sur la PR ouverte par Release Please elle-même : celui-ci
 # couvre toute autre PR vers main, notamment les PR de synchronisation
 # develop -> main ouvertes manuellement.
+#
+# token: RELEASE_PLEASE_TOKEN (PAT), pas le GITHUB_TOKEN par défaut — même
+# raison que release.yml (voir son commentaire sur auto-merge-release-pr) :
+# un merge effectué avec le GITHUB_TOKEN par défaut ne déclenche aucun autre
+# workflow. Avec le GITHUB_TOKEN par défaut, le merge automatique d'une PR
+# develop -> main fonctionnait bien, mais le push qui en résultait sur main
+# ne relançait pas Release Please (constaté : la PR #146 a bien été mergée
+# automatiquement, mais aucune nouvelle release n'a été proposée ensuite).
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
@@ -27,6 +35,6 @@ jobs:
     steps:
       - name: Enable auto-merge
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: gh pr merge "${{ github.event.pull_request.number }}" --merge --auto
