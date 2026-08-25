@@ -73,6 +73,16 @@ function toTimeInputValue(date: Date): string {
   return date.toISOString().slice(11, 16);
 }
 
+// Voir flight-form.tsx pour la justification (jour calendaire local, pas
+// toISOString).
+function todayDateInputValue(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // Même principe que FlightForm/TrainingCampForm : utilisé en création
 // (/activities/new) et en modification (/activities/[id]/edit), action et
 // defaultValues varient selon l'appelant. Les actions redirigent en cas de
@@ -112,6 +122,16 @@ export function GroundHandlingSessionForm({
       toast.add({ title: state.error, description: t.common.retryReassurance, type: "error" });
     }
   }, [state, t]);
+
+  // Voir flight-form.tsx pour la justification (valeur imperative après
+  // montage, création uniquement).
+  useEffect(() => {
+    if (defaultValues?.date) return;
+    const dateInput = formRef.current?.elements.namedItem("date");
+    if (dateInput instanceof HTMLInputElement && !dateInput.value) {
+      dateInput.value = todayDateInputValue();
+    }
+  }, [defaultValues?.date]);
 
   function handleWizardNext() {
     const form = formRef.current;
