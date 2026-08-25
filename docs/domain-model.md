@@ -155,11 +155,11 @@ séparé : se déduit de `date` + `durationMin` au besoin, à l'affichage.
 - id
 - schoolId
 - trainingCampTypeId — type de stage, table de référence (`TrainingCampType` : INITIATION, AUTONOMY, ADVANCED, THERMAL, CROSS_COUNTRY, SIV, HIKE_AND_FLY, ACRO_DISCOVERY, ACRO_ADVANCED, SAFETY, OTHER), pas de `label` — voir `TrainingCampType`
+- qualificationTypeId (nullable) — brevet éventuellement obtenu pendant le stage, table de référence `QualificationType` (voir Qualification ci-dessus) ; remplace l'ancien champ `certification` (texte libre) pour que ce brevet soit sélectionné et affiché de façon structurée plutôt que saisi à la main — n'entraîne pas la création automatique d'une `Qualification` personnelle dans `/qualifications`
 - startDate
 - endDate
 - observations (nullable)
 - summary
-- certification (nullable)
 
 Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de duplication sur `TrainingCamp`.
 

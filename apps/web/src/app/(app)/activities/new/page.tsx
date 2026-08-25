@@ -13,15 +13,21 @@ export const dynamic = "force-dynamic";
 
 export default async function NewActivityPage() {
   const user = await requireCurrentUser();
-  const [activityTypes, flightTypes, trainingCampTypes, schools, trainingCamps] = await Promise.all(
-    [
-      prisma.activityType.findMany({ select: { code: true } }),
-      prisma.flightType.findMany({ select: { id: true, code: true } }),
-      prisma.trainingCampType.findMany({ select: { id: true, code: true } }),
-      prisma.school.findMany({ select: { id: true, name: true } }),
-      listTrainingCamps(user.id),
-    ],
-  );
+  const [
+    activityTypes,
+    flightTypes,
+    trainingCampTypes,
+    qualificationTypes,
+    schools,
+    trainingCamps,
+  ] = await Promise.all([
+    prisma.activityType.findMany({ select: { code: true } }),
+    prisma.flightType.findMany({ select: { id: true, code: true } }),
+    prisma.trainingCampType.findMany({ select: { id: true, code: true } }),
+    prisma.qualificationType.findMany({ select: { id: true, code: true } }),
+    prisma.school.findMany({ select: { id: true, name: true } }),
+    listTrainingCamps(user.id),
+  ]);
 
   const t = getDictionary(await getLocale());
 
@@ -32,6 +38,7 @@ export default async function NewActivityPage() {
         activityTypes={activityTypes}
         flightTypes={flightTypes}
         trainingCampTypes={trainingCampTypes}
+        qualificationTypes={qualificationTypes}
         schools={schools}
         trainingCamps={trainingCamps}
       />

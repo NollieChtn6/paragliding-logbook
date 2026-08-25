@@ -18,14 +18,30 @@ describe.each(["fr-FR", "en-GB"] as const)("trainingCampSchema (%s)", (locale) =
     expect(result.success).toBe(true);
   });
 
-  it("accepts optional observations, summary and certification", () => {
+  it("accepts optional observations, summary and qualificationTypeId", () => {
     const result = schema.safeParse({
       ...validTrainingCamp,
       observations: "Groupe de 6 stagiaires, conditions venteuses le 2e jour.",
       summary: "Progression rapide.",
-      certification: "Brevet de pilote",
+      qualificationTypeId: "770e8400-e29b-41d4-a716-446655440002",
     });
     expect(result.success).toBe(true);
+  });
+
+  it("treats an empty qualificationTypeId as absent", () => {
+    const result = schema.safeParse({ ...validTrainingCamp, qualificationTypeId: "" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.qualificationTypeId).toBeUndefined();
+    }
+  });
+
+  it("rejects a malformed qualificationTypeId with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validTrainingCamp, qualificationTypeId: "not-a-uuid" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(t.certificationInvalid);
+    }
   });
 
   it("treats an empty observations as absent", () => {

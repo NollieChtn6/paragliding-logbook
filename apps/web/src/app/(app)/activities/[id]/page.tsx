@@ -325,7 +325,7 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
         <>
           {(activity.trainingCamp.observations ||
             activity.trainingCamp.summary ||
-            activity.trainingCamp.certification) && (
+            activity.trainingCamp.qualificationType) && (
             <Card>
               <CardContent className="flex flex-col gap-4">
                 {activity.trainingCamp.observations && (
@@ -337,10 +337,14 @@ export default async function ActivityDetailPage(props: PageProps<"/activities/[
                 {activity.trainingCamp.summary && (
                   <NoteSection title={ta.summaryTitle} text={activity.trainingCamp.summary} />
                 )}
-                {activity.trainingCamp.certification && (
+                {activity.trainingCamp.qualificationType && (
                   <NoteSection
                     title={ta.certificationTitle}
-                    text={activity.trainingCamp.certification}
+                    text={
+                      t.referenceLabels.qualificationType[
+                        activity.trainingCamp.qualificationType.code
+                      ] ?? activity.trainingCamp.qualificationType.code
+                    }
                   />
                 )}
               </CardContent>

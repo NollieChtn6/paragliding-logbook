@@ -17,6 +17,7 @@ type NewActivityFormProps = {
   activityTypes: { code: string }[];
   flightTypes: { id: string; code: string }[];
   trainingCampTypes: { id: string; code: string }[];
+  qualificationTypes: { id: string; code: string }[];
   schools: { id: string; name: string }[];
   trainingCamps: {
     id: string;
@@ -69,6 +70,7 @@ export function NewActivityForm({
   activityTypes,
   flightTypes,
   trainingCampTypes,
+  qualificationTypes,
   schools,
   trainingCamps,
 }: NewActivityFormProps) {
@@ -173,6 +175,7 @@ export function NewActivityForm({
           <TrainingCampForm
             schools={schools}
             trainingCampTypes={trainingCampTypes}
+            qualificationTypes={qualificationTypes}
             action={createTrainingCampAction}
             wizardStep={wizardStep}
             onWizardBack={step === 3 ? backToStep2 : backToStep1}

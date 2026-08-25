@@ -27,6 +27,7 @@ export const ACTIVITY_WITH_DETAILS_INCLUDE = {
     include: {
       school: true,
       trainingCampType: true,
+      qualificationType: true,
       flights: {
         include: { takeoffPoint: SITE_INCLUDE, landingPoint: SITE_INCLUDE },
         orderBy: { date: "asc" },
