@@ -87,6 +87,20 @@ function toTimeInputValue(date: Date): string {
   return date.toISOString().slice(11, 16);
 }
 
+// Distinct de toDateInputValue ci-dessus : "aujourd'hui" doit rester le jour
+// calendaire local du pilote (getFullYear/Month/Date, pas toISOString) — un
+// vol saisi juste après l'atterrissage en toute fin de soirée ne doit pas se
+// voir proposer la date UTC du lendemain (critique dashboard, item P2 :
+// "minimum de saisie" suppose que le champ le plus fréquent n'a rien à
+// corriger).
+function todayDateInputValue(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // Formulaire de vol partagé (shadcn/ui exclusivement, cf. CLAUDE.md), utilisé
 // par /flights/new, /activities/new (création) et /activities/[id]/edit
 // (modification) — action et defaultValues varient selon l'appelant.
@@ -140,6 +154,20 @@ export function FlightForm({
       toast.add({ title: state.error, description: t.common.retryReassurance, type: "error" });
     }
   }, [state, t]);
+
+  // Valeur imperative (pas defaultValue) : un <input> non contrôlé ne relit
+  // sa prop defaultValue qu'au montage initial, qui doit rester identique
+  // entre rendu serveur et hydratation (sans ça, avertissement d'hydratation
+  // si l'heure du serveur diffère de celle du client). Écrit après montage,
+  // uniquement en création (defaultValues absent) et seulement si l'usager
+  // n'a encore rien saisi.
+  useEffect(() => {
+    if (defaultValues?.date) return;
+    const dateInput = formRef.current?.elements.namedItem("date");
+    if (dateInput instanceof HTMLInputElement && !dateInput.value) {
+      dateInput.value = todayDateInputValue();
+    }
+  }, [defaultValues?.date]);
 
   function handleWizardNext() {
     const form = formRef.current;
