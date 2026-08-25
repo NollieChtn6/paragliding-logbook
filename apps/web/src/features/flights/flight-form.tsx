@@ -73,6 +73,10 @@ const WIZARD_STEP_2_REQUIRED_FIELDS = [
   "flightTypeId",
 ];
 const WIZARD_STEP_3_REQUIRED_FIELDS = ["observations", "improvementPoints"];
+// Hors mode assistant (/flights/new, /activities/[id]/edit) : tous les
+// champs sont affichés sur un seul écran, donc validés d'un coup à la
+// soumission plutôt qu'en deux temps.
+const ALL_REQUIRED_FIELDS = [...WIZARD_STEP_2_REQUIRED_FIELDS, ...WIZARD_STEP_3_REQUIRED_FIELDS];
 
 // Format attendu par <Input type="date">/<Input type="time">. Cohérent avec
 // la lecture : le schéma Zod (flightSchema) combine ces deux chaînes en un
@@ -204,14 +208,17 @@ export function FlightForm({
     onWizardNext?.();
   }
 
-  // Applique le même traitement en ligne à la soumission finale (étape 3) :
-  // sans ça, les champs Observations/Points d'amélioration retomberaient
-  // sur la bulle de validation native du navigateur, incohérent avec
-  // l'étape 2 ci-dessus. N'intercepte rien en dehors du mode assistant
-  // (wizardStep absent : /flights/new, /activities/[id]/edit inchangés).
+  // Applique le même traitement en ligne à la soumission finale : sans ça,
+  // les champs retomberaient sur la bulle de validation native du
+  // navigateur — non localisée (anglaise même sur une app entièrement
+  // française) et sans état aria-invalid persistant pour un lecteur
+  // d'écran. Étape 3 du mode assistant : seuls ses propres champs (l'étape
+  // 2 a déjà été validée par handleWizardNext avant d'avancer). Hors mode
+  // assistant (/flights/new, /activities/[id]/edit) : tous les champs,
+  // puisqu'ils sont tous affichés sur ce même écran.
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    if (!wizardStep) return;
-    const errors = getFieldErrors(event.currentTarget, WIZARD_STEP_3_REQUIRED_FIELDS, t.common);
+    const requiredFields = wizardStep === 3 ? WIZARD_STEP_3_REQUIRED_FIELDS : ALL_REQUIRED_FIELDS;
+    const errors = getFieldErrors(event.currentTarget, requiredFields, t.common);
     if (Object.keys(errors).length > 0) {
       event.preventDefault();
       setFieldErrors(errors);
@@ -219,7 +226,18 @@ export function FlightForm({
   }
 
   return (
-    <form ref={formRef} action={formAction} onSubmit={handleSubmit} className="flex flex-col gap-4">
+    // noValidate : sans ça, la validation native du navigateur intercepte la
+    // soumission avant même que l'événement "submit" (et donc handleSubmit
+    // ci-dessus) ne s'exécute dès qu'un champ required est vide — bulle
+    // anglaise non localisée et aucun aria-invalid persistant. handleSubmit
+    // reproduit ces mêmes contraintes manuellement, de façon localisée.
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={handleSubmit}
+      noValidate
+      className="flex flex-col gap-4"
+    >
       {!wizardStep && (
         <h2 className="text-lg font-medium tracking-tight text-foreground">{tf.detailsHeading}</h2>
       )}
