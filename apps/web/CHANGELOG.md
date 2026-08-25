@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.14.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.13.0...paragliding-logbook-v1.14.0) (2026-08-25)
+
+
+### Features
+
+* **activities:** add site search and flight duplication to the list ([92c2472](https://github.com/NollieChtn6/paragliding-logbook/commit/92c247202bff270ca86222ea414bf9710858dedc))
+* **activities:** add site search and flight duplication to the list ([599252c](https://github.com/NollieChtn6/paragliding-logbook/commit/599252ce191092f005c590f19e07c8a5e6c2587c))
+
+
+### Bug Fixes
+
+* **activities:** localize validation errors on training camp and ground handling edit forms ([0ace0fb](https://github.com/NollieChtn6/paragliding-logbook/commit/0ace0fb9b162a2a98d7e1c7385aa28d3d3efc995))
+* **activities:** localize validation errors on training camp and ground handling edit forms ([92f15c5](https://github.com/NollieChtn6/paragliding-logbook/commit/92f15c50b8617cd681bcef2ebf977a1f6186c6e6))
+
 ## [1.13.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.12.2...paragliding-logbook-v1.13.0) (2026-08-25)
 
 
