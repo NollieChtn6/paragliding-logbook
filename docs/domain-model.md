@@ -26,6 +26,14 @@ Type d'un stage (initiation, progression, thermique, SIV...), table de référen
 
 Séance de gonflage ou de travail au sol.
 
+### 'Equipment'
+
+Élément de matériel personnel d'un pilote — voile, sellette ou secours uniquement pour l'instant (voir `EquipmentType`). Piloté par un statut (`ACTIVE`/`SOLD`/`RETIRED`) plutôt que supprimé, pour conserver l'historique d'usage même après revente ou mise hors service.
+
+### 'EquipmentType'
+
+Catégorie d'un `Equipment` (voile, sellette, secours), table de référence — voir ADR 003 (`docs/decisions/003-reference-table-codes.md`).
+
 ### 'Qualification'
 
 Brevet ou qualification de pilotage obtenu par un pilote (issue #171).
@@ -136,8 +144,13 @@ Donnée de référence partagée (pas de `userId`), au même titre que `Spot`.
 - flightTypeId — type de vol, table de référence (`FlightType` : LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER), pas de `label` — voir `SiteType`
 - observations
 - improvementPoints
+- wingId (optionnel) — `Equipment` de type WING utilisée pour ce vol
+- harnessId (optionnel) — `Equipment` de type HARNESS utilisée pour ce vol
+- reserveId (optionnel) — `Equipment` de type RESERVE emportée pour ce vol
 
 Le rattachement à un utilisateur se fait via l'`Activity` parente (`Activity.userId`), pas de duplication sur `Flight`. Pas de `spotId` ni d'altitudes propres : dérivées de `takeoffPoint`/`landingPoint` (voir `Site`), pour éviter de stocker deux fois la même information physique. Le `Flight` ne référence jamais directement un `Spot` : les spots de décollage et d'atterrissage se déduisent de `takeoffPoint.spot`/`landingPoint.spot`, potentiellement différents (voir ADR 005) — important pour les vols de distance.
+
+`wingId`/`harnessId`/`reserveId` sont trois colonnes nullable distinctes plutôt qu'une relation générique, même principe que `takeoffPointId`/`landingPointId` (voir `Site` ci-dessus) : chacune doit référencer un `Equipment` du bon `EquipmentType` (`wingId` → WING, `harnessId` → HARNESS, `reserveId` → RESERVE), vérifié côté applicatif comme pour `takeoffPointId`/`landingPointId` (voir ADR 005), pas exprimable en contrainte SQL.
 
 `date` porte une heure (saisie via un champ dédié, combinée en un seul
 `DateTime`) en plus du jour : nécessaire pour ordonner plusieurs vols le
@@ -196,8 +209,44 @@ Table de référence (pas un enum), même principe qu'`ActivityType`/`SiteType`/
 - exercises
 - difficulties (optionnel)
 - feeling (optionnel)
+- wingId (optionnel) — `Equipment` de type WING utilisée pendant la séance
+- harnessId (optionnel) — `Equipment` de type HARNESS utilisée pendant la séance
 
 Le rattachement à un utilisateur se fait via l'`Activity` parente, pas de duplication sur `GroundHandlingSession`.
+
+Pas de `reserveId` ici, à la différence de `Flight` : le secours ne s'utilise/s'use pas pendant une séance de gonflage.
+
+---
+
+### Equipment
+
+- id
+- userId — donnée personnelle par pilote, pas un référentiel partagé (à la différence de `Spot`/`Site`/`School`, ADR 004) : chaque pilote gère son propre matériel
+- equipmentTypeId — catégorie (`EquipmentType` : WING, HARNESS, RESERVE)
+- brand — marque, texte libre
+- model — modèle, texte libre
+- size (optionnel) — texte libre : le format varie selon la catégorie (surface en m² pour une voile, lettre S/M/L pour une sellette, plage de poids pour un secours), pas un champ typé unique
+- purchaseDate
+- condition — `NEW` ou `USED`
+- initialUsageMin (optionnel, 0 par défaut) — volume de pratique déjà accumulé avant l'achat ; pertinent uniquement si `condition = USED` (voir Règles métier)
+- status — `ACTIVE`, `SOLD` ou `RETIRED` (défaut `ACTIVE`)
+- createdAt
+- updatedAt
+
+Référencé par `Flight` (`wingId`/`harnessId`/`reserveId`) et `GroundHandlingSession` (`wingId`/`harnessId`) — voir ci-dessus.
+
+Le volume total de pratique d'un `Equipment` (`initialUsageMin` + somme des `durationMin` de tous les `Flight`/`GroundHandlingSession` qui le référencent) n'est **jamais stocké** : toujours calculé à la demande, même principe que les statistiques du tableau de bord (`docs/product.md`) — voir ADR 010 (`docs/decisions/010-equipment-usage-derived.md`).
+
+Jamais supprimé une fois référencé par une activité : suppression bloquée (`ReferenceDataInUseError`), même principe que `Spot`/`Site`/`School` (voir `docs/admin.md`), pour ne jamais perdre l'historique d'usage d'un équipement revendu. `status = SOLD`/`RETIRED` est le moyen prévu de retirer un équipement de la circulation sans perdre son historique.
+
+---
+
+### EquipmentType
+
+- id
+- code (unique) — `WING`, `HARNESS`, `RESERVE`
+
+Table de référence (pas un enum), même principe qu'`ActivityType`/`SiteType`/`FlightType`/`TrainingCampType`/`QualificationType` — voir ADR 003. Pas de `label`, même principe.
 
 ---
 
@@ -253,6 +302,13 @@ Table de référence (pas un enum), même principe qu'`ActivityType`/`SiteType`/
 - si `schoolId` est renseigné, l'école doit exister ;
 - si `trainingCampId` est renseigné, le stage doit exister et appartenir à l'utilisateur courant.
 
+### Matériel
+
+- `initialUsageMin` n'a de sens que si `condition = USED` ; si `condition = NEW`, il vaut 0 ;
+- `wingId`/`harnessId`/`reserveId` (sur `Flight`) et `wingId`/`harnessId` (sur `GroundHandlingSession`) doivent référencer un `Equipment` appartenant à l'utilisateur courant et du bon `EquipmentType` (ex. `wingId` doit pointer vers un `Equipment` de type WING) ;
+- le volume total de pratique d'un `Equipment` n'est jamais stocké, toujours recalculé (voir ci-dessus, ADR 010) ;
+- un `Equipment` référencé par au moins un `Flight`/`GroundHandlingSession` ne peut pas être supprimé (`ReferenceDataInUseError`) ; le retirer de la circulation passe par `status = SOLD`/`RETIRED`, jamais par une suppression.
+
 ### Suppression
 
 Une activité (Vol, Stage ou Gonflage) se supprime en supprimant son `Activity` : la spécialisation associée (`Flight`/`TrainingCamp`/`GroundHandlingSession`) est supprimée en cascade par la base (`onDelete: Cascade` sur la relation vers `Activity`). Un seul service (`deleteActivity`) suffit donc pour les trois types.
@@ -275,7 +331,7 @@ Cas particulier du Stage : les vols et séances de gonflage qui lui sont rattach
 
 ### Plus tard
 
-- Equipment (dont `Flight.equipmentNotes`)
+- Equipment / EquipmentType — modèle défini (voir sections dédiées ci-dessus et ADR 010), non implémenté : reste dans le backlog (`docs/todo.md`, `CLAUDE.md`) jusqu'à demande explicite
 - WeatherObservation
 - IGCTrack
 - FlightStatisticsSnapshot
