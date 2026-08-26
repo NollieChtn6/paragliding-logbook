@@ -1,11 +1,22 @@
-import { Package } from "lucide-react";
+import { Feather, LifeBuoy, type LucideIcon, PersonStanding } from "lucide-react";
 import Link from "next/link";
 import { EquipmentDeleteButton } from "./equipment-delete-button";
+
+// Une icône par type plutôt qu'un pictogramme générique unique : une voile,
+// une sellette et un secours sont trois objets différents, et le secours en
+// particulier porte un enjeu de sécurité qui mérite d'être identifiable au
+// coup d'œil dans la liste, pas seulement au libellé.
+const TYPE_ICONS: Record<"WING" | "HARNESS" | "RESERVE", LucideIcon> = {
+  WING: Feather,
+  HARNESS: PersonStanding,
+  RESERVE: LifeBuoy,
+};
 
 type EquipmentCardProps = {
   href: string;
   brand: string;
   model: string;
+  typeCode: "WING" | "HARNESS" | "RESERVE";
   typeLabel: string;
   usageLabel: string;
   // Affiché uniquement si le matériel n'est plus ACTIVE (voir
@@ -26,6 +37,7 @@ export function EquipmentCard({
   href,
   brand,
   model,
+  typeCode,
   typeLabel,
   usageLabel,
   statusLabel,
@@ -35,6 +47,7 @@ export function EquipmentCard({
   const subtitle = statusLabel
     ? `${typeLabel} · ${usageLabel} · ${statusLabel}`
     : `${typeLabel} · ${usageLabel}`;
+  const TypeIcon = TYPE_ICONS[typeCode];
 
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors hover:bg-accent/5">
@@ -43,7 +56,7 @@ export function EquipmentCard({
           className="flex size-9 flex-none items-center justify-center rounded-xl bg-accent/15 text-accent"
           aria-hidden
         >
-          <Package className="size-4" />
+          <TypeIcon className="size-4" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium text-foreground">
