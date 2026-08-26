@@ -410,9 +410,6 @@ Avant de créer un commit :
 - météo automatique
 - récupération des sites de vol
 - récupération des écoles FFVL
-- gestion du matériel
-- voile
-- sellette
 - statistiques avancées
 - export PDF
 - PWA

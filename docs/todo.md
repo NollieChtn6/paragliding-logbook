@@ -215,6 +215,36 @@ Fonctionnalités :
 
 ---
 
+## Matériel 🎒
+
+Informations obligatoires (validées côté Zod) :
+
+- [x] Catégorie (voile/sellette/secours, `EquipmentType`)
+- [x] Marque
+- [x] Modèle
+- [x] Date d'achat
+- [x] État à l'achat (neuf/occasion)
+
+Informations optionnelles :
+
+- [x] Taille — libellé et placeholder adaptés à la catégorie (surface pour une voile, taille S/M/L pour une sellette, plage de poids pour un secours)
+- [x] Volume de pratique déjà accumulé avant l'achat
+
+Fonctionnalités :
+
+- [x] Modèle `Equipment`/`EquipmentType` — rattaché directement à `User`, donnée personnelle par pilote (pas un référentiel partagé comme `Spot`/`School`)
+- [x] Ajouter un équipement — `/equipment/new`, service `createEquipment` (`src/features/equipment/`), route protégée (connexion requise)
+- [x] Consulter la liste de son matériel — `/equipment`, groupée par catégorie (voile/sellette/secours)
+- [x] Consulter le détail d'un équipement — `/equipment/[id]`, avec ses statistiques dérivées (nombre de vols, nombre de séances de gonflage, volume de pratique total)
+- [x] Modifier un équipement — `/equipment/[id]/edit`, service `updateEquipment`, vérification de propriété systématique
+- [x] Supprimer un équipement — service `deleteEquipment` dédié, bloqué (`ReferenceDataInUseError`) si encore référencé par un vol ou une séance de gonflage, pour ne jamais perdre l'historique d'usage
+- [x] Statut (`ACTIVE`/`SOLD`/`RETIRED`) plutôt que suppression, pour conserver l'historique même après revente ou mise hors service
+- [x] Rattachement aux vols (voile/sellette/secours) et aux séances de gonflage (voile/sellette) — sélecteurs dans `FlightForm`/`GroundHandlingSessionForm`, limités au matériel `ACTIVE` du pilote (plus l'élément déjà sélectionné même si son statut a changé depuis)
+- [x] Volume de pratique total jamais stocké, toujours recalculé (`initialUsageMin` + durées des vols/séances qui le référencent) — ADR 010 (`docs/decisions/010-equipment-usage-derived.md`)
+- [x] Accès depuis la barre de navigation principale (`navEquipment`)
+
+---
+
 ## Dashboard 📊
 
 Page d'accueil (`/`), route protégée (connexion requise), remplace l'ancienne page publique.
@@ -291,7 +321,6 @@ Ces fonctionnalités sont volontairement hors MVP.
 - [ ] Import automatique depuis une application Garmin dédiée (étudier faisabilité/accès aux données en amont)
 - [ ] Carte des spots visités (incluant décollages/atterrissages, tracé des vols)
 - [ ] Météo associée aux vols
-- [ ] Gestion du matériel
 - [ ] Photos associées aux activités
 - [ ] Carnet de progression / objectifs personnels
 - [ ] Suggestions d'amélioration basées sur l'historique
