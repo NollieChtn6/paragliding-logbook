@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.17.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.16.0...paragliding-logbook-v1.17.0) (2026-08-26)
+
+
+### Features
+
+* **equipment:** add detail page and move delete off the list ([297ef42](https://github.com/NollieChtn6/paragliding-logbook/commit/297ef425dc4c69574132c076dc04800c992d8d9a))
+* **equipment:** add detail page, fix dropdown contrast, update backlog docs ([3b54745](https://github.com/NollieChtn6/paragliding-logbook/commit/3b5474540774a75215c83308525f3c6a3c566a9a))
+* **equipment:** add equipment management (voile/sellette/secours) ([5856ecb](https://github.com/NollieChtn6/paragliding-logbook/commit/5856ecbd4a4b253f955bd06702b01756ad4d68c6))
+* **equipment:** add equipment management (voile/sellette/secours) ([6de5fe7](https://github.com/NollieChtn6/paragliding-logbook/commit/6de5fe74e0529f2ce895a0dac996ccaaeb80067d))
+* **equipment:** differentiate icons per type and group list by category ([68ee5d6](https://github.com/NollieChtn6/paragliding-logbook/commit/68ee5d6dd919a84926d5a6411abc4e4e40e19bc3))
+* **equipment:** group form fields and clarify size label by type ([f0832d9](https://github.com/NollieChtn6/paragliding-logbook/commit/f0832d96e08f40d4fa4e03c6ce05223aa8e49fb5))
+
+
+### Bug Fixes
+
+* **equipment:** make delete button's accessible name entity-specific ([fd82dcf](https://github.com/NollieChtn6/paragliding-logbook/commit/fd82dcf3ddaaf5e5a36fb83e002147885dcb6385))
+* **pwa:** never cache-first static assets on dev hostnames ([c564b3f](https://github.com/NollieChtn6/paragliding-logbook/commit/c564b3f59bdf2d141aa83b5abe9562adbe541cda))
+* **ui:** raise select/combobox hover contrast ([1fac0e1](https://github.com/NollieChtn6/paragliding-logbook/commit/1fac0e1126ff342481c6e8dee777c56730d6ae55))
+
 ## [1.16.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.15.0...paragliding-logbook-v1.16.0) (2026-08-25)
 
 
