@@ -77,6 +77,26 @@ export function EquipmentForm({
   );
   const t = useT();
   const te = t.equipment;
+  // "Taille" recouvre trois formats différents selon la catégorie (voir
+  // lib/validations/equipment.ts) : surface en m² pour une voile, S/M/L pour
+  // une sellette, plage de poids pour un secours. Le champ reste un texte
+  // libre unique (pas de sous-schéma par catégorie), mais le libellé/
+  // placeholder s'adapte pour lever l'ambiguïté au moment de la saisie.
+  const equipmentTypeCode = equipmentTypes.find((option) => option.id === equipmentTypeId)?.code;
+
+  function sizeLabel(typeCode: string | undefined): string {
+    if (typeCode === "WING") return te.sizeLabelWing;
+    if (typeCode === "HARNESS") return te.sizeLabelHarness;
+    if (typeCode === "RESERVE") return te.sizeLabelReserve;
+    return te.sizeLabel;
+  }
+
+  function sizePlaceholder(typeCode: string | undefined): string | undefined {
+    if (typeCode === "WING") return te.sizePlaceholderWing;
+    if (typeCode === "HARNESS") return te.sizePlaceholderHarness;
+    if (typeCode === "RESERVE") return te.sizePlaceholderReserve;
+    return undefined;
+  }
 
   function formatEquipmentTypeOption(equipmentType: EquipmentTypeOption): string {
     return t.referenceLabels.equipmentType[equipmentType.code] ?? equipmentType.code;
@@ -89,128 +109,151 @@ export function EquipmentForm({
   }, [state, t]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="equipmentTypeId">{te.typeLabel}</Label>
-        <Select
-          name="equipmentTypeId"
-          value={equipmentTypeId}
-          onValueChange={(value) => setEquipmentTypeId(value ?? "")}
-          required
-        >
-          <SelectTrigger id="equipmentTypeId" className="w-full">
-            <SelectValue placeholder={te.chooseType}>
-              {(value: string | null) => {
-                const equipmentType = equipmentTypes.find((option) => option.id === value);
-                return equipmentType ? formatEquipmentTypeOption(equipmentType) : te.chooseType;
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {equipmentTypes.map((equipmentType) => (
-              <SelectItem key={equipmentType.id} value={equipmentType.id}>
-                {formatEquipmentTypeOption(equipmentType)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <form action={formAction} className="flex flex-col gap-6">
+      <fieldset className="flex flex-col gap-4">
+        <legend className="mb-2 text-sm font-medium text-muted-foreground">
+          {te.identificationSectionLabel}
+        </legend>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="brand">{te.brandLabel}</Label>
-        <Input id="brand" name="brand" defaultValue={defaultValues?.brand} required />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="model">{te.modelLabel}</Label>
-        <Input id="model" name="model" defaultValue={defaultValues?.model} required />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="size">{te.sizeLabel}</Label>
-        <Input id="size" name="size" defaultValue={defaultValues?.size} />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="purchaseDate">{te.purchaseDateLabel}</Label>
-        <Input
-          id="purchaseDate"
-          name="purchaseDate"
-          type="date"
-          defaultValue={
-            defaultValues?.purchaseDate ? toDateInputValue(defaultValues.purchaseDate) : undefined
-          }
-          required
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="condition">{te.conditionLabel}</Label>
-        <Select
-          name="condition"
-          value={condition}
-          onValueChange={(value) => setCondition(value === "USED" ? "USED" : "NEW")}
-          required
-        >
-          <SelectTrigger id="condition" className="w-full">
-            <SelectValue placeholder={te.conditionLabel}>
-              {(value: string | null) => (value === "USED" ? te.conditionUsed : te.conditionNew)}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="NEW">{te.conditionNew}</SelectItem>
-            <SelectItem value="USED">{te.conditionUsed}</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {condition === "USED" && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="initialUsageMin">{te.initialUsageLabel}</Label>
-          <Input
-            id="initialUsageMin"
-            name="initialUsageMin"
-            type="number"
-            min={0}
-            step={1}
-            value={initialUsageMin}
-            onChange={(event) => setInitialUsageMin(event.target.value)}
-          />
-        </div>
-      )}
-
-      {showStatus && (
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="status">{te.statusLabel}</Label>
+          <Label htmlFor="equipmentTypeId">{te.typeLabel}</Label>
           <Select
-            name="status"
-            value={status}
-            onValueChange={(value) => {
-              if (value === "SOLD" || value === "RETIRED" || value === "ACTIVE") {
-                setStatus(value);
-              }
-            }}
+            name="equipmentTypeId"
+            value={equipmentTypeId}
+            onValueChange={(value) => setEquipmentTypeId(value ?? "")}
             required
           >
-            <SelectTrigger id="status" className="w-full">
-              <SelectValue placeholder={te.statusLabel}>
+            <SelectTrigger id="equipmentTypeId" className="w-full">
+              <SelectValue placeholder={te.chooseType}>
                 {(value: string | null) => {
-                  if (value === "SOLD") return te.statusSold;
-                  if (value === "RETIRED") return te.statusRetired;
-                  return te.statusActive;
+                  const equipmentType = equipmentTypes.find((option) => option.id === value);
+                  return equipmentType ? formatEquipmentTypeOption(equipmentType) : te.chooseType;
                 }}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ACTIVE">{te.statusActive}</SelectItem>
-              <SelectItem value="SOLD">{te.statusSold}</SelectItem>
-              <SelectItem value="RETIRED">{te.statusRetired}</SelectItem>
+              {equipmentTypes.map((equipmentType) => (
+                <SelectItem key={equipmentType.id} value={equipmentType.id}>
+                  {formatEquipmentTypeOption(equipmentType)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-      )}
 
-      <Button type="submit" className="mt-2" disabled={isPending}>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="brand">{te.brandLabel}</Label>
+          <Input id="brand" name="brand" defaultValue={defaultValues?.brand} required />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="model">{te.modelLabel}</Label>
+          <Input id="model" name="model" defaultValue={defaultValues?.model} required />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="size">{sizeLabel(equipmentTypeCode)}</Label>
+          <Input
+            id="size"
+            name="size"
+            placeholder={sizePlaceholder(equipmentTypeCode)}
+            defaultValue={defaultValues?.size}
+          />
+        </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-4">
+        <legend className="mb-2 text-sm font-medium text-muted-foreground">
+          {te.historySectionLabel}
+        </legend>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="purchaseDate">{te.purchaseDateLabel}</Label>
+          <Input
+            id="purchaseDate"
+            name="purchaseDate"
+            type="date"
+            defaultValue={
+              defaultValues?.purchaseDate ? toDateInputValue(defaultValues.purchaseDate) : undefined
+            }
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="condition">{te.conditionLabel}</Label>
+          <Select
+            name="condition"
+            value={condition}
+            onValueChange={(value) => setCondition(value === "USED" ? "USED" : "NEW")}
+            required
+          >
+            <SelectTrigger id="condition" className="w-full">
+              <SelectValue placeholder={te.conditionLabel}>
+                {(value: string | null) => (value === "USED" ? te.conditionUsed : te.conditionNew)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="NEW">{te.conditionNew}</SelectItem>
+              <SelectItem value="USED">{te.conditionUsed}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* aria-live sur le conteneur (jamais démonté) plutôt que sur le champ
+            lui-même : un lecteur d'écran doit être notifié quand ce champ
+            apparaît/disparaît suite au choix de "condition" ci-dessus, pas
+            seulement voir un div supplémentaire surgir silencieusement. */}
+        <div aria-live="polite">
+          {condition === "USED" && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="initialUsageMin">{te.initialUsageLabel}</Label>
+              <Input
+                id="initialUsageMin"
+                name="initialUsageMin"
+                type="number"
+                min={0}
+                step={1}
+                value={initialUsageMin}
+                onChange={(event) => setInitialUsageMin(event.target.value)}
+              />
+            </div>
+          )}
+        </div>
+
+        {showStatus && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="status">{te.statusLabel}</Label>
+            <Select
+              name="status"
+              value={status}
+              onValueChange={(value) => {
+                if (value === "SOLD" || value === "RETIRED" || value === "ACTIVE") {
+                  setStatus(value);
+                }
+              }}
+              required
+            >
+              <SelectTrigger id="status" className="w-full">
+                <SelectValue placeholder={te.statusLabel}>
+                  {(value: string | null) => {
+                    if (value === "SOLD") return te.statusSold;
+                    if (value === "RETIRED") return te.statusRetired;
+                    return te.statusActive;
+                  }}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">{te.statusActive}</SelectItem>
+                <SelectItem value="SOLD">{te.statusSold}</SelectItem>
+                <SelectItem value="RETIRED">{te.statusRetired}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </fieldset>
+
+      <Button type="submit" disabled={isPending}>
         {isPending ? t.common.saving : (submitLabel ?? te.createEquipment)}
       </Button>
 
