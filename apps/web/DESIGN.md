@@ -121,7 +121,7 @@ The palette is deliberately narrow: one primary, one secondary accent, two statu
 - **Signal Red** (`#dc2626`): destructive/error. Deliberately soft in application — buttons use `bg-destructive/10 text-destructive` rather than a solid fill; the full-strength hex only appears in borders/rings on invalid form fields.
 
 ### Not yet in active use
-`globals.css` also defines a five-step neutral `chart-1..5` OKLCH scale (light-to-dark greyscale) for future charting. No chart currently renders in the product — treat it as a reserved, not established, pattern; don't invent chart compositions around it.
+`globals.css` also defines a five-step neutral `chart-1..5` OKLCH scale (light-to-dark greyscale), originally reserved for future charting. One chart already exists — `TrendChart` (`/progression`) — but it uses the `primary`/`accent` tone tokens instead, not `chart-1..5`. Treat the scale as still reserved, not established: don't assume new charts should adopt it without checking `TrendChart`'s actual approach first.
 
 ### Named Rules
 
