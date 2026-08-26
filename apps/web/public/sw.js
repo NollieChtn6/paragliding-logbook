@@ -7,7 +7,7 @@
 //
 // CACHE_NAME à incrémenter manuellement à chaque modification de ce fichier
 // (purge automatique des anciens caches dans "activate" ci-dessous).
-const CACHE_NAME = "thermik-shell-v2";
+const CACHE_NAME = "thermik-shell-v3";
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
@@ -24,9 +24,17 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// En dev, les chunks _next/static ne sont pas hashés par contenu comme en
+// production : la même URL sert un contenu différent à chaque modification
+// de code. Un cache-first y resservirait indéfiniment un bundle périmé sans
+// qu'un hard-refresh suffise à le contourner (le SW intercepte la requête
+// avant le réseau) — jamais de cache-first sur ces hôtes de dev.
+const DEV_HOSTNAMES = ["localhost", "127.0.0.1"];
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
+  const isDev = DEV_HOSTNAMES.includes(self.location.hostname);
 
   // Jamais de cache pour les Server Actions (POST) ni les Route Handlers
   // (/api/*, y compris Better Auth) : réponses authentifiées/personnalisées
@@ -52,7 +60,8 @@ self.addEventListener("fetch", (event) => {
 
   // Assets statiques immuables (_next/static, icônes, manifest) : seuls ceux-là
   // passent en cache d'abord, réseau en repli avec mise en cache opportuniste.
-  if (isStaticAsset(url.pathname)) {
+  // Jamais en dev (voir DEV_HOSTNAMES ci-dessus) : laissé au réseau par défaut.
+  if (!isDev && isStaticAsset(url.pathname)) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) {

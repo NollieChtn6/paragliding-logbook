@@ -36,6 +36,7 @@ model User {
   sessions       Session[]
   accounts       Account[]
   qualifications Qualification[]
+  equipment      Equipment[]
 }
 
 /// Modèles Better Auth (voir apps/web/src/lib/auth.ts). Noms de champs et
@@ -237,6 +238,19 @@ model School {
 /// départ). takeoffAltitudeM/landingAltitudeM retirés : redondants avec
 /// takeoffPoint.altitudeM/landingPoint.altitudeM. flightTypeId remplace
 /// l'ancien enum FlightType (ADR 003, docs/decisions/003-reference-table-codes.md).
+/// wingId/harnessId/reserveId : trois FK optionnelles distinctes vers
+/// Equipment plutôt qu'une relation générique, même principe que
+/// takeoffPointId/landingPointId ci-dessus — chacune doit référencer un
+/// Equipment du bon EquipmentType (WING/HARNESS/RESERVE), vérifié côté
+/// applicatif (docs/domain-model.md > Règles métier > Matériel).
+/// onDelete: Restrict explicite (à la différence de
+/// Qualification.trainingCampId, en SetNull) : contrairement à un
+/// rattachement de confort, perdre silencieusement quelle voile/sellette/
+/// secours a été utilisée sur un vol corromprait un historique réel — la
+/// suppression d'un Equipment encore référencé doit être bloquée, jamais
+/// entraîner une perte silencieuse de cette donnée (voir
+/// delete-equipment.service.ts, qui vérifie explicitement avant d'appeler
+/// prisma.equipment.delete).
 model Flight {
   id                String   @id @default(uuid()) @db.Uuid
   activityId        String   @unique @db.Uuid
@@ -244,6 +258,9 @@ model Flight {
   takeoffPointId    String   @db.Uuid
   landingPointId    String   @db.Uuid
   flightTypeId      String   @db.Uuid
+  wingId            String?  @db.Uuid
+  harnessId         String?  @db.Uuid
+  reserveId         String?  @db.Uuid
   date              DateTime
   durationMin       Int
   observations      String
@@ -254,11 +271,17 @@ model Flight {
   takeoffPoint Site          @relation("FlightTakeoffPoint", fields: [takeoffPointId], references: [id])
   landingPoint Site          @relation("FlightLandingPoint", fields: [landingPointId], references: [id])
   flightType   FlightType    @relation(fields: [flightTypeId], references: [id])
+  wing         Equipment?    @relation("FlightWing", fields: [wingId], references: [id], onDelete: Restrict)
+  harness      Equipment?    @relation("FlightHarness", fields: [harnessId], references: [id], onDelete: Restrict)
+  reserve      Equipment?    @relation("FlightReserve", fields: [reserveId], references: [id], onDelete: Restrict)
 
   @@index([trainingCampId])
   @@index([takeoffPointId])
   @@index([landingPointId])
   @@index([flightTypeId])
+  @@index([wingId])
+  @@index([harnessId])
+  @@index([reserveId])
 }
 
 /// Spécialisation Stage (TrainingCamp). startDate <= endDate et les vols et
@@ -317,11 +340,17 @@ model TrainingCampType {
 }
 
 /// Spécialisation Gonflage. exercises obligatoire (règle métier docs/domain-model.md).
+/// wingId/harnessId : mêmes principes que Flight.wingId/harnessId ci-dessus
+/// (FK optionnelles distinctes vers Equipment, onDelete: Restrict). Pas de
+/// reserveId ici : un secours ne s'utilise/s'use pas pendant une séance de
+/// gonflage (docs/domain-model.md).
 model GroundHandlingSession {
   id             String   @id @default(uuid()) @db.Uuid
   activityId     String   @unique @db.Uuid
   spotId         String   @db.Uuid
   trainingCampId String?  @db.Uuid
+  wingId         String?  @db.Uuid
+  harnessId      String?  @db.Uuid
   date           DateTime
   durationMin    Int
   exercises      String
@@ -331,9 +360,13 @@ model GroundHandlingSession {
   activity     Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
   spot         Spot          @relation(fields: [spotId], references: [id])
   trainingCamp TrainingCamp? @relation(fields: [trainingCampId], references: [id])
+  wing         Equipment?    @relation("GroundHandlingSessionWing", fields: [wingId], references: [id], onDelete: Restrict)
+  harness      Equipment?    @relation("GroundHandlingSessionHarness", fields: [harnessId], references: [id], onDelete: Restrict)
 
   @@index([spotId])
   @@index([trainingCampId])
+  @@index([wingId])
+  @@index([harnessId])
 }
 
 /// Référentiel des types de brevet/qualification de pilotage (table, pas un
@@ -383,4 +416,79 @@ model Qualification {
   @@index([qualificationTypeId])
   @@index([schoolId])
   @@index([trainingCampId])
+}
+
+/// Référentiel des catégories de matériel (voile/sellette/secours — table,
+/// pas un enum : extensible sans migration, même principe qu'ActivityType/
+/// SiteType/FlightType/TrainingCampType/QualificationType,
+/// docs/decisions/003-reference-table-codes.md). Pas de label : affichage
+/// via referenceLabels.equipmentType (src/messages/fr-FR.ts, en-GB.ts). Pas
+/// d'interface admin, alimenté par le seed principal (prisma/seed.ts).
+/// Valeurs initiales : WING, HARNESS, RESERVE.
+model EquipmentType {
+  id   String @id @default(uuid()) @db.Uuid
+  code String @unique
+
+  equipment Equipment[]
+}
+
+/// condition à l'achat (neuf/occasion) : détermine si initialUsageMin a un
+/// sens (docs/domain-model.md > Règles métier > Matériel), pas un
+/// référentiel extensible comme EquipmentType — fermé au même titre que
+/// UserRole/EquipmentStatus.
+enum EquipmentCondition {
+  NEW
+  USED
+}
+
+/// Statut de circulation d'un Equipment. ACTIVE par défaut ; SOLD/RETIRED
+/// est le moyen prévu de retirer un équipement de la circulation sans le
+/// supprimer (docs/domain-model.md), pour ne jamais perdre son historique
+/// d'usage.
+enum EquipmentStatus {
+  ACTIVE
+  SOLD
+  RETIRED
+}
+
+/// Élément de matériel personnel d'un pilote (voile, sellette, secours —
+/// voir EquipmentType). Donnée personnelle par utilisateur (userId), pas un
+/// référentiel partagé comme Spot/Site/School (ADR 004,
+/// docs/decisions/004-editable-referentials.md) : chaque pilote gère son
+/// propre matériel. Référencé par Flight (wingId/harnessId/reserveId) et
+/// GroundHandlingSession (wingId/harnessId) en onDelete: Restrict (voir ces
+/// modèles ci-dessus) : jamais supprimé une fois référencé par une activité,
+/// suppression bloquée par delete-equipment.service.ts
+/// (ReferenceDataInUseError, même mécanisme que delete-spot/site/school) ;
+/// status = SOLD/RETIRED est le moyen prévu de retirer un équipement de la
+/// circulation. initialUsageMin n'a de sens que si condition = USED (règle
+/// applicative, docs/domain-model.md) ; le volume total d'usage
+/// (initialUsageMin + somme des durées des Flight/GroundHandlingSession qui
+/// le référencent) n'est jamais stocké, toujours recalculé à la demande
+/// (ADR 010, docs/decisions/010-equipment-usage-derived.md).
+model Equipment {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @db.Uuid
+  equipmentTypeId String             @db.Uuid
+  brand           String
+  model           String
+  size            String?
+  purchaseDate    DateTime           @db.Date
+  condition       EquipmentCondition
+  initialUsageMin Int                @default(0)
+  status          EquipmentStatus    @default(ACTIVE)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  equipmentType EquipmentType @relation(fields: [equipmentTypeId], references: [id])
+
+  flightsAsWing                   Flight[]                @relation("FlightWing")
+  flightsAsHarness                Flight[]                @relation("FlightHarness")
+  flightsAsReserve                Flight[]                @relation("FlightReserve")
+  groundHandlingSessionsAsWing    GroundHandlingSession[] @relation("GroundHandlingSessionWing")
+  groundHandlingSessionsAsHarness GroundHandlingSession[] @relation("GroundHandlingSessionHarness")
+
+  @@index([userId])
+  @@index([equipmentTypeId])
 }

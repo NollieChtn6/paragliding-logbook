@@ -17,6 +17,31 @@ export async function updateFlight(
   const input = flightSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
+    // Voir create-flight.service.ts pour le détail du raisonnement.
+    async function verifyEquipment(
+      equipmentId: string | undefined,
+      expectedTypeCode: "WING" | "HARNESS" | "RESERVE",
+      fieldPath: "wingId" | "harnessId" | "reserveId",
+      notFoundMessage: string,
+      wrongTypeMessage: string,
+    ) {
+      if (!equipmentId) {
+        return;
+      }
+      const equipment = await tx.equipment.findFirst({
+        where: { id: equipmentId, userId },
+        include: { equipmentType: true },
+      });
+      if (!equipment) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: notFoundMessage };
+        throw new ZodError([issue]);
+      }
+      if (equipment.equipmentType.code !== expectedTypeCode) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: wrongTypeMessage };
+        throw new ZodError([issue]);
+      }
+    }
+
     const activity = await tx.activity.findFirst({ where: { id: activityId, userId } });
     if (!activity) {
       throw new ActivityNotFoundError();
@@ -112,6 +137,24 @@ export async function updateFlight(
       }
     }
 
+    await Promise.all([
+      verifyEquipment(input.wingId, "WING", "wingId", t.wingNotFound, t.wingWrongType),
+      verifyEquipment(
+        input.harnessId,
+        "HARNESS",
+        "harnessId",
+        t.harnessNotFound,
+        t.harnessWrongType,
+      ),
+      verifyEquipment(
+        input.reserveId,
+        "RESERVE",
+        "reserveId",
+        t.reserveNotFound,
+        t.reserveWrongType,
+      ),
+    ]);
+
     return tx.flight.update({
       where: { activityId },
       data: {
@@ -124,6 +167,9 @@ export async function updateFlight(
         date: input.date,
         durationMin: input.durationMin,
         flightTypeId: input.flightTypeId,
+        wingId: input.wingId ?? null,
+        harnessId: input.harnessId ?? null,
+        reserveId: input.reserveId ?? null,
         observations: input.observations,
         improvementPoints: input.improvementPoints,
       },

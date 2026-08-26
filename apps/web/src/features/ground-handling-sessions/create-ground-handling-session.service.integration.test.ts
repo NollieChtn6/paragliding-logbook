@@ -15,6 +15,9 @@ let schoolId: string;
 let trainingCampTypeId: string;
 let trainingCampId: string;
 let otherUserTrainingCampId: string;
+let wingId: string;
+let harnessId: string;
+let otherUserWingId: string;
 
 const validGroundHandlingInput = {
   date: "2025-01-15",
@@ -80,6 +83,50 @@ beforeAll(async () => {
     trainingCampMessages,
   );
   otherUserTrainingCampId = otherUserTrainingCamp.id;
+
+  const [wingType, harnessType] = await Promise.all([
+    prisma.equipmentType.upsert({ where: { code: "WING" }, update: {}, create: { code: "WING" } }),
+    prisma.equipmentType.upsert({
+      where: { code: "HARNESS" },
+      update: {},
+      create: { code: "HARNESS" },
+    }),
+  ]);
+  const [wing, harness, otherUserWing] = await Promise.all([
+    prisma.equipment.create({
+      data: {
+        userId,
+        equipmentTypeId: wingType.id,
+        brand: "Ozone",
+        model: "Rush 6",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        userId,
+        equipmentTypeId: harnessType.id,
+        brand: "Woody Valley",
+        model: "Wani Light 2",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        userId: otherUserId,
+        equipmentTypeId: wingType.id,
+        brand: "Gin",
+        model: "Explorer",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+  ]);
+  wingId = wing.id;
+  harnessId = harness.id;
+  otherUserWingId = otherUserWing.id;
 });
 
 afterAll(async () => {
@@ -92,6 +139,7 @@ afterAll(async () => {
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.spot.delete({ where: { id: spotId } });
   await prisma.school.delete({ where: { id: schoolId } });
+  await prisma.equipment.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
 });
@@ -139,6 +187,36 @@ describe("createGroundHandlingSession (integration)", () => {
       });
       expect(activity.groundHandlingSession?.id).toBe(groundHandlingSessionId);
     });
+  });
+
+  it("accepts a wing and a harness belonging to the current user, with the right equipment type", async () => {
+    const groundHandlingSession = await createGroundHandlingSession(
+      userId,
+      { ...validGroundHandlingInput, spotId, wingId, harnessId },
+      t,
+    );
+    expect(groundHandlingSession.wingId).toBe(wingId);
+    expect(groundHandlingSession.harnessId).toBe(harnessId);
+  });
+
+  it("fails when the wing belongs to another user", async () => {
+    await expect(
+      createGroundHandlingSession(
+        userId,
+        { ...validGroundHandlingInput, spotId, wingId: otherUserWingId },
+        t,
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("fails when the harness field references equipment of the wrong type", async () => {
+    await expect(
+      createGroundHandlingSession(
+        userId,
+        { ...validGroundHandlingInput, spotId, harnessId: wingId },
+        t,
+      ),
+    ).rejects.toThrow();
   });
 
   it("fails with invalid data", async () => {

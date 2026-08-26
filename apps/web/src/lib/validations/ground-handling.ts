@@ -22,10 +22,12 @@ const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 // validée dans create-ground-handling-session.service.ts, pas ici (nécessite
 // de lire le TrainingCamp en base, hors de portée d'un schéma Zod pur).
 export function groundHandlingSchema(t: Messages["validation"]["groundHandling"]) {
-  const optionalUuid = z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.string().uuid(t.trainingCampInvalid).optional(),
-  );
+  function optionalUuid(invalidMessage: string) {
+    return z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().uuid(invalidMessage).optional(),
+    );
+  }
 
   return z
     .object({
@@ -34,7 +36,7 @@ export function groundHandlingSchema(t: Messages["validation"]["groundHandling"]
       // même jour, même raisonnement que flightSchema.
       time: z.string().regex(timeRegex, t.timeInvalid),
       spotId: z.string().uuid(t.spotInvalid),
-      trainingCampId: optionalUuid,
+      trainingCampId: optionalUuid(t.trainingCampInvalid),
       durationMin: z.coerce
         .number(t.durationInvalid)
         .int(t.durationInteger)
@@ -42,6 +44,12 @@ export function groundHandlingSchema(t: Messages["validation"]["groundHandling"]
       exercises: z.string().trim().min(1, t.exercisesRequired),
       difficulties: optionalTrimmedString,
       feeling: optionalTrimmedString,
+      // wingId/harnessId : optionnels, existence ET type (WING/HARNESS)
+      // vérifiés dans le service, même principe que flightSchema. Pas de
+      // reserveId ici : un secours ne s'utilise/s'use pas pendant une
+      // séance de gonflage (docs/domain-model.md).
+      wingId: optionalUuid(t.wingInvalid),
+      harnessId: optionalUuid(t.harnessInvalid),
     })
     .transform(({ time, ...rest }) => ({
       ...rest,

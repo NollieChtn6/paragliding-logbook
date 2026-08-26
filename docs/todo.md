@@ -215,6 +215,36 @@ Fonctionnalités :
 
 ---
 
+## Matériel 🎒
+
+Informations obligatoires (validées côté Zod) :
+
+- [x] Catégorie (voile/sellette/secours, `EquipmentType`)
+- [x] Marque
+- [x] Modèle
+- [x] Date d'achat
+- [x] État à l'achat (neuf/occasion)
+
+Informations optionnelles :
+
+- [x] Taille — libellé et placeholder adaptés à la catégorie (surface pour une voile, taille S/M/L pour une sellette, plage de poids pour un secours)
+- [x] Volume de pratique déjà accumulé avant l'achat
+
+Fonctionnalités :
+
+- [x] Modèle `Equipment`/`EquipmentType` — rattaché directement à `User`, donnée personnelle par pilote (pas un référentiel partagé comme `Spot`/`School`)
+- [x] Ajouter un équipement — `/equipment/new`, service `createEquipment` (`src/features/equipment/`), route protégée (connexion requise)
+- [x] Consulter la liste de son matériel — `/equipment`, groupée par catégorie (voile/sellette/secours)
+- [x] Consulter le détail d'un équipement — `/equipment/[id]`, avec ses statistiques dérivées (nombre de vols, nombre de séances de gonflage, volume de pratique total)
+- [x] Modifier un équipement — `/equipment/[id]/edit`, service `updateEquipment`, vérification de propriété systématique
+- [x] Supprimer un équipement — service `deleteEquipment` dédié, bloqué (`ReferenceDataInUseError`) si encore référencé par un vol ou une séance de gonflage, pour ne jamais perdre l'historique d'usage
+- [x] Statut (`ACTIVE`/`SOLD`/`RETIRED`) plutôt que suppression, pour conserver l'historique même après revente ou mise hors service
+- [x] Rattachement aux vols (voile/sellette/secours) et aux séances de gonflage (voile/sellette) — sélecteurs dans `FlightForm`/`GroundHandlingSessionForm`, limités au matériel `ACTIVE` du pilote (plus l'élément déjà sélectionné même si son statut a changé depuis)
+- [x] Volume de pratique total jamais stocké, toujours recalculé (`initialUsageMin` + durées des vols/séances qui le référencent) — ADR 010 (`docs/decisions/010-equipment-usage-derived.md`)
+- [x] Accès depuis la barre de navigation principale (`navEquipment`)
+
+---
+
 ## Dashboard 📊
 
 Page d'accueil (`/`), route protégée (connexion requise), remplace l'ancienne page publique.
@@ -233,6 +263,30 @@ Fonctionnalités :
 - [x] Cartes de statistiques (shadcn `Card`), empilées sur mobile, grille simple sur desktop
 - [x] 5 activités les plus récentes, avec lien vers l'historique complet
 - [x] Bouton principal "Ajouter une activité"
+
+---
+
+## Progression 📈
+
+Page dédiée (`/progression`), accessible depuis la barre de navigation principale (promue depuis un emplacement secondaire suite à un retour utilisatrice — voir `apps/web/src/components/layout/nav-items.ts`). Dérivée des vols déjà enregistrés, aucune donnée supplémentaire à saisir. Reste en deçà de « statistiques avancées » (backlog) : pas de records personnels, pas de corrélation météo/GPS/matériel (voir `docs/product.md`).
+
+Déjà construit (`src/features/flights/get-flight-progression.service.ts`) :
+
+- [x] Courbe du nombre de vols cumulé dans le temps (regroupement mensuel)
+- [x] Courbe du temps de vol cumulé dans le temps (regroupement mensuel)
+- [x] Historique complet des paliers franchis (nombre de vols et heures de vol : 10/25/50/100/250/500/1000 — tous les paliers réellement atteints, pas seulement le plus haut annoncé en toast)
+- [x] État vide dédié tant qu'aucun vol n'est enregistré ; message dédié tant qu'il n'y a pas assez de mois de données pour tracer une courbe (moins de 2 points)
+
+Prochaines évolutions (scope défini lors d'une session de conception, pas encore implémenté) :
+
+- [ ] Valeurs chiffrées visibles sur les points des courbes existantes (pas seulement une ligne muette)
+- [ ] Badge delta vs mois précédent (valeur absolue, ex. « +2 vols ») sur les courbes qui s'y prêtent
+- [ ] Message « pas assez de données » enrichi pour préciser ce qu'il manque (ex. nombre de mois restants)
+- [ ] Répartition par type de vol (LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER) sur toute la période enregistrée, en barres — pas de camembert, voir ADR 011 (`docs/decisions/011-progression-chart-bars-not-pie.md`)
+- [ ] Courbe cumulée du nombre de sites distincts volés dans le temps
+- [ ] Courbe de la durée moyenne des vols par mois (non cumulative)
+- [ ] Nouvelle section « Parcours » : timeline chronologique des stages terminés (placés à leur date de fin) et des brevets obtenus, séparée de la liste des paliers de vol ; masquée entièrement si aucun stage ni brevet enregistré ; les stages encore en cours n'y apparaissent pas
+- [ ] Périmètre volontairement inchangé : vols uniquement pour les courbes/paliers (stages et gonflages toujours exclus), pas d'objectifs/cibles personnalisés, granularité mensuelle uniquement (pas de bascule saison/année)
 
 ---
 
@@ -259,9 +313,9 @@ Informations prévues :
 
 Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques).
 
-- [ ] Progression dans le temps
+Progression dans le temps et répartition par type de vol : couvertes par la page `/progression` dédiée, pas par le dashboard — voir section [Progression](#progression-) ci-dessus.
+
 - [ ] Statistiques par spot
-- [ ] Statistiques par type d'activité
 - [ ] Records personnels
 - [ ] Analyse des vols
 - [ ] Comparaison de vols sur un même spot
@@ -291,7 +345,6 @@ Ces fonctionnalités sont volontairement hors MVP.
 - [ ] Import automatique depuis une application Garmin dédiée (étudier faisabilité/accès aux données en amont)
 - [ ] Carte des spots visités (incluant décollages/atterrissages, tracé des vols)
 - [ ] Météo associée aux vols
-- [ ] Gestion du matériel
 - [ ] Photos associées aux activités
 - [ ] Carnet de progression / objectifs personnels
 - [ ] Suggestions d'amélioration basées sur l'historique

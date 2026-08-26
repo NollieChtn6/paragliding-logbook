@@ -28,10 +28,12 @@ const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 // docs/decisions/005-flight-takeoff-landing-points.md) sont vérifiés dans
 // le service (nécessite une lecture en base).
 export function flightSchema(t: Messages["validation"]["flight"]) {
-  const optionalUuid = z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.string().uuid(t.trainingCampInvalid).optional(),
-  );
+  function optionalUuid(invalidMessage: string) {
+    return z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().uuid(invalidMessage).optional(),
+    );
+  }
 
   return (
     z
@@ -44,12 +46,19 @@ export function flightSchema(t: Messages["validation"]["flight"]) {
         time: z.string().regex(timeRegex, t.timeInvalid),
         takeoffPointId: z.string().uuid(t.takeoffInvalid),
         landingPointId: z.string().uuid(t.landingInvalid),
-        trainingCampId: optionalUuid,
+        trainingCampId: optionalUuid(t.trainingCampInvalid),
         durationMin: z.coerce
           .number(t.durationInvalid)
           .int(t.durationInteger)
           .positive(t.durationPositive),
         flightTypeId: z.string().uuid(t.flightTypeInvalid),
+        // wingId/harnessId/reserveId : optionnels, existence ET type
+        // (WING/HARNESS/RESERVE respectivement) vérifiés dans le service —
+        // même limitation que takeoffPointId/landingPointId ci-dessus
+        // (docs/domain-model.md > Règles métier > Matériel).
+        wingId: optionalUuid(t.wingInvalid),
+        harnessId: optionalUuid(t.harnessInvalid),
+        reserveId: optionalUuid(t.reserveInvalid),
         observations: z.string().trim().min(1, t.observationsRequired),
         improvementPoints: z.string().trim().min(1, t.improvementPointsRequired),
       })

@@ -18,6 +18,36 @@ export async function createFlight(
   const input = flightSchema(t).parse(rawInput);
 
   return prisma.$transaction(async (tx) => {
+    // wingId/harnessId/reserveId : optionnels, doivent référencer un
+    // Equipment appartenant à userId ET du bon EquipmentType (docs/domain-model.md
+    // > Règles métier > Matériel) — même principe que takeoffPoint/landingPoint
+    // ci-dessous (existence + type vérifiés ensemble), avec en plus un
+    // contrôle de propriété (Equipment est une donnée personnelle, à la
+    // différence de Site).
+    async function verifyEquipment(
+      equipmentId: string | undefined,
+      expectedTypeCode: "WING" | "HARNESS" | "RESERVE",
+      fieldPath: "wingId" | "harnessId" | "reserveId",
+      notFoundMessage: string,
+      wrongTypeMessage: string,
+    ) {
+      if (!equipmentId) {
+        return;
+      }
+      const equipment = await tx.equipment.findFirst({
+        where: { id: equipmentId, userId },
+        include: { equipmentType: true },
+      });
+      if (!equipment) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: notFoundMessage };
+        throw new ZodError([issue]);
+      }
+      if (equipment.equipmentType.code !== expectedTypeCode) {
+        const issue: ZodIssue = { code: "custom", path: [fieldPath], message: wrongTypeMessage };
+        throw new ZodError([issue]);
+      }
+    }
+
     const activityType = await tx.activityType.findUniqueOrThrow({
       where: { code: FLIGHT_ACTIVITY_TYPE_CODE },
     });
@@ -124,6 +154,24 @@ export async function createFlight(
       }
     }
 
+    await Promise.all([
+      verifyEquipment(input.wingId, "WING", "wingId", t.wingNotFound, t.wingWrongType),
+      verifyEquipment(
+        input.harnessId,
+        "HARNESS",
+        "harnessId",
+        t.harnessNotFound,
+        t.harnessWrongType,
+      ),
+      verifyEquipment(
+        input.reserveId,
+        "RESERVE",
+        "reserveId",
+        t.reserveNotFound,
+        t.reserveWrongType,
+      ),
+    ]);
+
     const activity = await tx.activity.create({
       data: {
         userId,
@@ -140,6 +188,9 @@ export async function createFlight(
         date: input.date,
         durationMin: input.durationMin,
         flightTypeId: input.flightTypeId,
+        wingId: input.wingId,
+        harnessId: input.harnessId,
+        reserveId: input.reserveId,
         observations: input.observations,
         improvementPoints: input.improvementPoints,
       },

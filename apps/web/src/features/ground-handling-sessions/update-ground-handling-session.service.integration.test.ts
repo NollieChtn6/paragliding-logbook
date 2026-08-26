@@ -19,6 +19,8 @@ let trainingCampId: string;
 let otherUserTrainingCampId: string;
 let groundHandlingSessionId: string;
 let activityId: string;
+let wingId: string;
+let otherUserWingId: string;
 
 const validGroundHandlingInput = {
   date: "2025-01-15",
@@ -77,6 +79,36 @@ beforeAll(async () => {
   );
   otherUserTrainingCampId = otherUserTrainingCamp.id;
 
+  const wingType = await prisma.equipmentType.upsert({
+    where: { code: "WING" },
+    update: {},
+    create: { code: "WING" },
+  });
+  const [wing, otherUserWing] = await Promise.all([
+    prisma.equipment.create({
+      data: {
+        userId,
+        equipmentTypeId: wingType.id,
+        brand: "Ozone",
+        model: "Rush 6",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+    prisma.equipment.create({
+      data: {
+        userId: otherUserId,
+        equipmentTypeId: wingType.id,
+        brand: "Gin",
+        model: "Explorer",
+        purchaseDate: new Date("2024-01-01"),
+        condition: "NEW",
+      },
+    }),
+  ]);
+  wingId = wing.id;
+  otherUserWingId = otherUserWing.id;
+
   const groundHandlingSession = await createGroundHandlingSession(
     userId,
     {
@@ -99,6 +131,7 @@ afterAll(async () => {
   await prisma.activity.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.spot.delete({ where: { id: spotId } });
   await prisma.school.delete({ where: { id: schoolId } });
+  await prisma.equipment.deleteMany({ where: { userId: { in: [userId, otherUserId] } } });
   await prisma.user.deleteMany({ where: { id: { in: [userId, otherUserId] } } });
   await prisma.$disconnect();
 });
@@ -150,6 +183,35 @@ describe("updateGroundHandlingSession (integration)", () => {
     expect(withoutCamp.trainingCampId).toBeNull();
     expect(withoutCamp.difficulties).toBeNull();
     expect(withoutCamp.feeling).toBeNull();
+  });
+
+  it("attaches a wing belonging to the current user, then clears it when omitted", async () => {
+    const withWing = await updateGroundHandlingSession(
+      userId,
+      activityId,
+      { ...validGroundHandlingInput, spotId, wingId },
+      t,
+    );
+    expect(withWing.wingId).toBe(wingId);
+
+    const withoutWing = await updateGroundHandlingSession(
+      userId,
+      activityId,
+      { ...validGroundHandlingInput, spotId },
+      t,
+    );
+    expect(withoutWing.wingId).toBeNull();
+  });
+
+  it("fails when the wing belongs to another user", async () => {
+    await expect(
+      updateGroundHandlingSession(
+        userId,
+        activityId,
+        { ...validGroundHandlingInput, spotId, wingId: otherUserWingId },
+        t,
+      ),
+    ).rejects.toThrow();
   });
 
   it("fails with invalid data", async () => {

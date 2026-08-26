@@ -44,6 +44,31 @@ describe.each(["fr-FR", "en-GB"] as const)("groundHandlingSchema (%s)", (locale)
     }
   });
 
+  it("accepts optional wingId and harnessId", () => {
+    const result = schema.safeParse({
+      ...validGroundHandling,
+      wingId: "660e8400-e29b-41d4-a716-446655440001",
+      harnessId: "770e8400-e29b-41d4-a716-446655440002",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("treats an empty wingId as absent", () => {
+    const result = schema.safeParse({ ...validGroundHandling, wingId: "" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.wingId).toBeUndefined();
+    }
+  });
+
+  it("rejects a malformed wingId with a user-friendly message", () => {
+    const result = schema.safeParse({ ...validGroundHandling, wingId: "not-a-uuid" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0]?.message).toBe(t.wingInvalid);
+    }
+  });
+
   it("rejects a session without a date or spot", () => {
     const { date, spotId, ...rest } = validGroundHandling;
     const result = schema.safeParse(rest);

@@ -5,6 +5,7 @@ import { updateTrainingCampAction } from "@/actions/update-training-camp";
 import { PageHeader } from "@/components/layout/page-header";
 import { LeaveFormButton } from "@/components/leave-form-button";
 import { getActivityById } from "@/features/activities";
+import { listEquipment, selectEquipmentOptions } from "@/features/equipment";
 import { FlightForm } from "@/features/flights/flight-form";
 import { GroundHandlingSessionForm } from "@/features/ground-handling-sessions/ground-handling-session-form";
 import { listTrainingCamps } from "@/features/training-camps";
@@ -35,9 +36,10 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
   const t = getDictionary(await getLocale());
 
   if (activity.flight) {
-    const [flightTypes, trainingCamps] = await Promise.all([
+    const [flightTypes, trainingCamps, equipment] = await Promise.all([
       prisma.flightType.findMany({ select: { id: true, code: true } }),
       listTrainingCamps(user.id),
+      listEquipment(user.id),
     ]);
 
     return (
@@ -55,6 +57,17 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
         <FlightForm
           flightTypes={flightTypes}
           trainingCamps={trainingCamps}
+          wings={selectEquipmentOptions(equipment, "WING", activity.flight.wingId ?? undefined)}
+          harnesses={selectEquipmentOptions(
+            equipment,
+            "HARNESS",
+            activity.flight.harnessId ?? undefined,
+          )}
+          reserves={selectEquipmentOptions(
+            equipment,
+            "RESERVE",
+            activity.flight.reserveId ?? undefined,
+          )}
           action={updateFlightAction.bind(null, activity.id)}
           defaultTakeoffPoint={activity.flight.takeoffPoint}
           defaultLandingPoint={activity.flight.landingPoint}
@@ -63,6 +76,9 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
             trainingCampId: activity.flight.trainingCampId ?? undefined,
             durationMin: activity.flight.durationMin,
             flightTypeId: activity.flight.flightTypeId,
+            wingId: activity.flight.wingId ?? undefined,
+            harnessId: activity.flight.harnessId ?? undefined,
+            reserveId: activity.flight.reserveId ?? undefined,
             observations: activity.flight.observations,
             improvementPoints: activity.flight.improvementPoints,
           }}
@@ -112,7 +128,10 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
   }
 
   if (activity.groundHandlingSession) {
-    const trainingCamps = await listTrainingCamps(user.id);
+    const [trainingCamps, equipment] = await Promise.all([
+      listTrainingCamps(user.id),
+      listEquipment(user.id),
+    ]);
 
     return (
       <div className="flex flex-col gap-6">
@@ -128,12 +147,24 @@ export default async function EditActivityPage(props: PageProps<"/activities/[id
         />
         <GroundHandlingSessionForm
           trainingCamps={trainingCamps}
+          wings={selectEquipmentOptions(
+            equipment,
+            "WING",
+            activity.groundHandlingSession.wingId ?? undefined,
+          )}
+          harnesses={selectEquipmentOptions(
+            equipment,
+            "HARNESS",
+            activity.groundHandlingSession.harnessId ?? undefined,
+          )}
           defaultSpot={activity.groundHandlingSession.spot}
           action={updateGroundHandlingSessionAction.bind(null, activity.id)}
           defaultValues={{
             date: activity.groundHandlingSession.date,
             trainingCampId: activity.groundHandlingSession.trainingCampId ?? undefined,
             durationMin: activity.groundHandlingSession.durationMin,
+            wingId: activity.groundHandlingSession.wingId ?? undefined,
+            harnessId: activity.groundHandlingSession.harnessId ?? undefined,
             exercises: activity.groundHandlingSession.exercises,
             difficulties: activity.groundHandlingSession.difficulties ?? undefined,
             feeling: activity.groundHandlingSession.feeling ?? undefined,
