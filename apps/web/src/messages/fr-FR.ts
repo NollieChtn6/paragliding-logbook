@@ -709,6 +709,7 @@ const messages = {
       "Ajoutez votre voile, votre sellette et votre secours pour suivre leur usage.",
     addEquipmentButton: "Ajouter du matériel",
     deleteButton: "Supprimer",
+    deleteButtonFor: (entity: string) => `Supprimer ${entity}`,
     deleteConfirmTitle: (entity: string) => `Supprimer ${entity} ?`,
     deleteConfirmDescription: "Cette action est définitive et ne peut pas être annulée.",
     cancel: "Annuler",

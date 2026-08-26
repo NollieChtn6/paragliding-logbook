@@ -56,8 +56,8 @@ export function EquipmentDeleteButton({ action, entityLabel }: EquipmentDeleteBu
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={te.deleteButton}
-            title={te.deleteButton}
+            aria-label={te.deleteButtonFor(entityLabel)}
+            title={te.deleteButtonFor(entityLabel)}
           >
             <Trash2 className="size-4 text-destructive" />
           </Button>

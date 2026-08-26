@@ -674,6 +674,7 @@ const messages: Messages = {
     emptyDescription: "Add your wing, harness and reserve to track their usage.",
     addEquipmentButton: "Add equipment",
     deleteButton: "Delete",
+    deleteButtonFor: (entity: string) => `Delete ${entity}`,
     deleteConfirmTitle: (entity: string) => `Delete ${entity}?`,
     deleteConfirmDescription: "This action is permanent and cannot be undone.",
     cancel: "Cancel",
