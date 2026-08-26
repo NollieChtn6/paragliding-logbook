@@ -266,6 +266,30 @@ Fonctionnalités :
 
 ---
 
+## Progression 📈
+
+Page dédiée (`/progression`), accessible depuis la barre de navigation principale (promue depuis un emplacement secondaire suite à un retour utilisatrice — voir `apps/web/src/components/layout/nav-items.ts`). Dérivée des vols déjà enregistrés, aucune donnée supplémentaire à saisir. Reste en deçà de « statistiques avancées » (backlog) : pas de records personnels, pas de corrélation météo/GPS/matériel (voir `docs/product.md`).
+
+Déjà construit (`src/features/flights/get-flight-progression.service.ts`) :
+
+- [x] Courbe du nombre de vols cumulé dans le temps (regroupement mensuel)
+- [x] Courbe du temps de vol cumulé dans le temps (regroupement mensuel)
+- [x] Historique complet des paliers franchis (nombre de vols et heures de vol : 10/25/50/100/250/500/1000 — tous les paliers réellement atteints, pas seulement le plus haut annoncé en toast)
+- [x] État vide dédié tant qu'aucun vol n'est enregistré ; message dédié tant qu'il n'y a pas assez de mois de données pour tracer une courbe (moins de 2 points)
+
+Prochaines évolutions (scope défini lors d'une session de conception, pas encore implémenté) :
+
+- [ ] Valeurs chiffrées visibles sur les points des courbes existantes (pas seulement une ligne muette)
+- [ ] Badge delta vs mois précédent (valeur absolue, ex. « +2 vols ») sur les courbes qui s'y prêtent
+- [ ] Message « pas assez de données » enrichi pour préciser ce qu'il manque (ex. nombre de mois restants)
+- [ ] Répartition par type de vol (LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER) sur toute la période enregistrée, en barres — pas de camembert, voir ADR 011 (`docs/decisions/011-progression-chart-bars-not-pie.md`)
+- [ ] Courbe cumulée du nombre de sites distincts volés dans le temps
+- [ ] Courbe de la durée moyenne des vols par mois (non cumulative)
+- [ ] Nouvelle section « Parcours » : timeline chronologique des stages terminés (placés à leur date de fin) et des brevets obtenus, séparée de la liste des paliers de vol ; masquée entièrement si aucun stage ni brevet enregistré ; les stages encore en cours n'y apparaissent pas
+- [ ] Périmètre volontairement inchangé : vols uniquement pour les courbes/paliers (stages et gonflages toujours exclus), pas d'objectifs/cibles personnalisés, granularité mensuelle uniquement (pas de bascule saison/année)
+
+---
+
 ## Rappels importants sur les notions
 
 ### Sites de vol 🌍
@@ -289,9 +313,9 @@ Informations prévues :
 
 Hors périmètre du dashboard actuel (pas de filtrage avancé, pas de graphiques).
 
-- [ ] Progression dans le temps
+Progression dans le temps et répartition par type de vol : couvertes par la page `/progression` dédiée, pas par le dashboard — voir section [Progression](#progression-) ci-dessus.
+
 - [ ] Statistiques par spot
-- [ ] Statistiques par type d'activité
 - [ ] Records personnels
 - [ ] Analyse des vols
 - [ ] Comparaison de vols sur un même spot
