@@ -1,13 +1,11 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { deleteEquipmentAction } from "@/actions/delete-equipment";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { getEquipmentUsageMinutes, listEquipment } from "@/features/equipment";
+import { listEquipment } from "@/features/equipment";
 import { EquipmentCard } from "@/features/equipment/equipment-card";
 import { requireCurrentUser } from "@/lib/current-user";
-import { formatDurationMinutes } from "@/lib/format-duration";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/messages";
 
@@ -31,14 +29,6 @@ export default async function EquipmentPage() {
     if (status === "RETIRED") return te.statusRetired;
     return undefined;
   }
-
-  // Volume d'usage jamais stocké, toujours recalculé (ADR 010) : un appel
-  // par élément affiché, voir get-equipment-usage.service.ts.
-  const usageMinutesByEquipmentId = new Map(
-    await Promise.all(
-      equipment.map(async (item) => [item.id, await getEquipmentUsageMinutes(item)] as const),
-    ),
-  );
 
   // Regroupé par catégorie (voile/sellette/secours) plutôt qu'une seule
   // liste triée par date de création : un pilote pense son équipement par
@@ -86,23 +76,17 @@ export default async function EquipmentPage() {
           {equipmentByType.map((group) => (
             <div key={group.code} className="flex flex-col gap-2">
               <h2 className="text-sm font-medium text-muted-foreground">{group.label}</h2>
-              {group.items.map((item) => {
-                const entityLabel = te.entityLabel(`${item.brand} ${item.model}`);
-                return (
-                  <EquipmentCard
-                    key={item.id}
-                    href={`/equipment/${item.id}/edit`}
-                    brand={item.brand}
-                    model={item.model}
-                    typeCode={group.code}
-                    typeLabel={formatEquipmentType(item.equipmentType)}
-                    usageLabel={`${te.usageLabel} : ${formatDurationMinutes(usageMinutesByEquipmentId.get(item.id) ?? 0)}`}
-                    statusLabel={formatStatus(item.status)}
-                    deleteAction={deleteEquipmentAction.bind(null, item.id)}
-                    deleteEntityLabel={entityLabel}
-                  />
-                );
-              })}
+              {group.items.map((item) => (
+                <EquipmentCard
+                  key={item.id}
+                  href={`/equipment/${item.id}`}
+                  brand={item.brand}
+                  model={item.model}
+                  typeCode={group.code}
+                  typeLabel={formatEquipmentType(item.equipmentType)}
+                  statusLabel={formatStatus(item.status)}
+                />
+              ))}
             </div>
           ))}
         </div>

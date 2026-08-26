@@ -704,6 +704,10 @@ const messages = {
     statusSold: "Vendu",
     statusRetired: "Retiré",
     usageLabel: "Volume de pratique total",
+    flightsCountLabel: "Vols",
+    groundHandlingSessionsCountLabel: "Séances de gonflage",
+    backToEquipment: "Retour au matériel",
+    edit: "Modifier",
     emptyTitle: "Aucun matériel enregistré",
     emptyDescription:
       "Ajoutez votre voile, votre sellette et votre secours pour suivre leur usage.",

@@ -2,6 +2,7 @@ export * from "./create-equipment.service";
 export * from "./delete-equipment.service";
 export * from "./equipment-not-found.error";
 export * from "./get-equipment.service";
+export * from "./get-equipment-stats.service";
 export * from "./get-equipment-usage.service";
 export * from "./list-equipment.service";
 export * from "./select-equipment-options";
