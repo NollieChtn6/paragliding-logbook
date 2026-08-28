@@ -270,23 +270,16 @@ Fonctionnalités :
 
 Page dédiée (`/progression`), accessible depuis la barre de navigation principale (promue depuis un emplacement secondaire suite à un retour utilisatrice — voir `apps/web/src/components/layout/nav-items.ts`). Dérivée des vols déjà enregistrés, aucune donnée supplémentaire à saisir. Reste en deçà de « statistiques avancées » (backlog) : pas de records personnels, pas de corrélation météo/GPS/matériel (voir `docs/product.md`).
 
-Déjà construit (`src/features/flights/get-flight-progression.service.ts`) :
+Déjà construit (`src/features/flights/get-flight-progression.service.ts`, `src/features/flights/flight-progression-charts.ts`, `src/features/progression/get-parcours-timeline.service.ts`) :
 
-- [x] Courbe du nombre de vols cumulé dans le temps (regroupement mensuel)
-- [x] Courbe du temps de vol cumulé dans le temps (regroupement mensuel)
+- [x] Nombre de vols cumulé et temps de vol cumulé : valeur chiffrée (total) et badge delta vs mois précédent (toujours basés sur le cumulé), avec en dessous un graphique en bâtons des 3 derniers mois en valeurs mensuelles non cumulées — un premier essai en courbe cumulée, puis en bâtons sur le cumulé, ne montrait qu'une progression monotone peu parlante (retour utilisatrice) ; le badge delta reste neutre visuellement (Soft Status Rule), jamais teinté rouge/vert
 - [x] Historique complet des paliers franchis (nombre de vols et heures de vol : 10/25/50/100/250/500/1000 — tous les paliers réellement atteints, pas seulement le plus haut annoncé en toast)
-- [x] État vide dédié tant qu'aucun vol n'est enregistré ; message dédié tant qu'il n'y a pas assez de mois de données pour tracer une courbe (moins de 2 points)
-
-Prochaines évolutions (scope défini lors d'une session de conception, pas encore implémenté) :
-
-- [ ] Valeurs chiffrées visibles sur les points des courbes existantes (pas seulement une ligne muette)
-- [ ] Badge delta vs mois précédent (valeur absolue, ex. « +2 vols ») sur les courbes qui s'y prêtent
-- [ ] Message « pas assez de données » enrichi pour préciser ce qu'il manque (ex. nombre de mois restants)
-- [ ] Répartition par type de vol (LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER) sur toute la période enregistrée, en barres — pas de camembert, voir ADR 011 (`docs/decisions/011-progression-chart-bars-not-pie.md`)
-- [ ] Courbe cumulée du nombre de sites distincts volés dans le temps
-- [ ] Courbe de la durée moyenne des vols par mois (non cumulative)
-- [ ] Nouvelle section « Parcours » : timeline chronologique des stages terminés (placés à leur date de fin) et des brevets obtenus, séparée de la liste des paliers de vol ; masquée entièrement si aucun stage ni brevet enregistré ; les stages encore en cours n'y apparaissent pas
-- [ ] Périmètre volontairement inchangé : vols uniquement pour les courbes/paliers (stages et gonflages toujours exclus), pas d'objectifs/cibles personnalisés, granularité mensuelle uniquement (pas de bascule saison/année)
+- [x] État vide dédié tant qu'aucun vol n'est enregistré ; message dédié tant qu'il n'y a pas assez de mois de données pour un graphique (moins de 2 points), précisant désormais combien de mois manquent
+- [x] Répartition par type de vol (LOCAL, CROSS_COUNTRY, SOARING, THERMAL, TRAINING, OTHER) sur toute la période enregistrée, en barres — pas de camembert (ADR 011, `docs/decisions/011-progression-chart-bars-not-pie.md`), tous les types affichés même à 0 vol
+- [x] Trois cartes statistiques simples côte à côte (grille identique au tableau de bord) : nombre de sites survolés (distincts, décollage et atterrissage confondus), vol le plus long, site préféré (site revenant le plus souvent, égalité tranchée par ordre chronologique) — aucune des trois n'a de courbe, un chiffre/nom suffit (retour utilisatrice sur la version courbe des sites)
+- [x] Durée moyenne des vols par mois : valeur chiffrée du dernier mois actif et badge delta vs mois précédent, sans courbe — une courbe mensuelle testée puis retirée, retour utilisatrice : peu parlante ; contrairement aux cartes nombre de vols/temps de vol, la valeur est visible dès le premier mois de données (pas besoin de 2 mois, il n'y a pas de ligne à tracer)
+- [x] Section « Parcours » : timeline chronologique (plus récent en premier) des stages terminés (placés à leur date de fin, un stage se terminant aujourd'hui compte comme pas encore terminé) et des brevets obtenus, séparée de la liste des paliers de vol ; section entièrement masquée si aucun stage terminé ni brevet enregistré
+- [x] Périmètre volontairement inchangé : vols uniquement pour les courbes/paliers (stages et gonflages toujours exclus, Parcours mis à part), pas d'objectifs/cibles personnalisés, granularité mensuelle uniquement (pas de bascule saison/année)
 
 ---
 
