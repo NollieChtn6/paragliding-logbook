@@ -6,13 +6,12 @@ type BarChartProps = {
 };
 
 // Barres, jamais camembert/donut (ADR 011,
-// docs/decisions/011-progression-chart-bars-not-pie.md). Contrairement à
-// TrendChart (components/trend-chart.tsx), pas de SVG ici : une barre
-// proportionnelle n'est qu'une largeur en pourcentage, plus simple à écrire
-// qu'un rectangle SVG calculé à la main et sans le risque de troncature de
-// libellés (les traductions du type de vol varient en longueur) qu'un texte
-// SVG poserait. Une valeur à 0 donne juste une piste vide, jamais de barre
-// cassée.
+// docs/decisions/011-progression-chart-bars-not-pie.md). Pas de SVG ici :
+// une barre proportionnelle n'est qu'une largeur en pourcentage, plus simple
+// à écrire qu'un rectangle SVG calculé à la main et sans le risque de
+// troncature de libellés (les traductions du type de vol varient en
+// longueur) qu'un texte SVG poserait. Une valeur à 0 donne juste une piste
+// vide, jamais de barre cassée.
 export function BarChart({ bars, tone = "primary" }: BarChartProps) {
   const maxValue = Math.max(...bars.map((bar) => bar.value), 0);
 
