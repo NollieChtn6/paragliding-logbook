@@ -80,7 +80,7 @@ Le bleu et l’orange restent les accents principaux dans les deux thèmes.
 ### Police
 
 - Utilisation de polices Open Source (pas de Google Fonts)
-- Idée : Plus Jakarta Sans (ou police similaire)
+- Tranchée depuis : **Plus Jakarta Sans**, auto-hébergée — voir `apps/web/DESIGN.md` > Typography pour le détail à jour (poids, hiérarchie).
 
 ### Hiérarchie
 

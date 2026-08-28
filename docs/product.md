@@ -63,7 +63,7 @@ Affichage chronologique.
 
 ## Vols
 
-Un vol contient :
+Vision MVP d'origine (un vol contient) :
 
 - date
 - site
@@ -75,6 +75,8 @@ Un vol contient :
 - points d'amélioration
 
 Un vol peut être associé à un stage.
+
+Modèle réellement implémenté depuis (ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`) : pas de "site" unique ni d'altitudes propres au vol — un décollage et un atterrissage distincts (chacun un `Site`, potentiellement de spots différents), dont l'altitude se déduit. Voir `docs/domain-model.md` > Flight pour le détail à jour.
 
 ---
 
