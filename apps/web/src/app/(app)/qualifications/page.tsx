@@ -51,7 +51,7 @@ export default async function QualificationsPage() {
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href="/qualifications/new">{tq.addQualificationButton}</Link>}
+              render={<Link href="/qualifications/new">{tq.newQualification}</Link>}
             />
           }
         />

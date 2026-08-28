@@ -22,7 +22,9 @@ describe("createQualificationAction", () => {
   });
 
   it("calls createQualification with the current user id and redirects on success", async () => {
-    vi.mocked(createQualification).mockResolvedValue({} as never);
+    vi.mocked(createQualification).mockResolvedValue({
+      qualificationType: { code: "PILOT" },
+    } as never);
     const formData = new FormData();
     formData.set("qualificationTypeId", "some-type");
 
@@ -34,7 +36,10 @@ describe("createQualificationAction", () => {
       t.validation.qualification,
     );
     expect(redirect).toHaveBeenCalledWith(
-      withToast("/qualifications", t.toast.qualificationCreated),
+      withToast(
+        "/qualifications",
+        t.toast.qualificationCreated(t.referenceLabels.qualificationType.PILOT),
+      ),
     );
   });
 

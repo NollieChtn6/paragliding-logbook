@@ -17,8 +17,13 @@ export async function createQualificationAction(
   const user = await requireCurrentUser();
   const t = getDictionary(await getLocale());
 
+  let qualification: Awaited<ReturnType<typeof createQualification>>;
   try {
-    await createQualification(user.id, Object.fromEntries(formData), t.validation.qualification);
+    qualification = await createQualification(
+      user.id,
+      Object.fromEntries(formData),
+      t.validation.qualification,
+    );
   } catch (error) {
     if (error instanceof ZodError) {
       return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
@@ -26,5 +31,11 @@ export async function createQualificationAction(
     return { success: false, error: t.toast.qualificationCreateError };
   }
 
-  redirect(withToast("/qualifications", t.toast.qualificationCreated));
+  // Nomme le brevet obtenu dans le toast plutôt qu'une confirmation
+  // générique (critique /impeccable, P1) : voir referenceLabels.qualificationType
+  // pour le même repli sur le code brut qu'ailleurs si le libellé manque.
+  const typeLabel =
+    t.referenceLabels.qualificationType[qualification.qualificationType.code] ??
+    qualification.qualificationType.code;
+  redirect(withToast("/qualifications", t.toast.qualificationCreated(typeLabel)));
 }
