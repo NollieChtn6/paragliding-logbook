@@ -20,6 +20,13 @@ export function SelectClearButton({ onClear, label }: SelectClearButtonProps) {
       type="button"
       variant="ghost"
       size="icon-sm"
+      // size-11 (44px) plutôt que le icon-sm par défaut (28px) : ce bouton
+      // est répété juste à côté d'un Select pleine largeur — sous la
+      // référence tactile de 44px que le reste de l'app applique partout
+      // ailleurs (voir DESIGN.md > Boutons), un vrai risque de mis-tap dans
+      // le contexte d'usage principal du produit (terrain, mains froides).
+      // Critique /impeccable, persona Casey.
+      className="size-11"
       onClick={onClear}
       aria-label={label}
       title={label}

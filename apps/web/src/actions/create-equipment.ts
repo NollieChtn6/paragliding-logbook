@@ -17,8 +17,13 @@ export async function createEquipmentAction(
   const user = await requireCurrentUser();
   const t = getDictionary(await getLocale());
 
+  let equipment: Awaited<ReturnType<typeof createEquipment>>;
   try {
-    await createEquipment(user.id, Object.fromEntries(formData), t.validation.equipment);
+    equipment = await createEquipment(
+      user.id,
+      Object.fromEntries(formData),
+      t.validation.equipment,
+    );
   } catch (error) {
     if (error instanceof ZodError) {
       return { success: false, error: error.issues[0]?.message ?? t.common.invalidForm };
@@ -26,5 +31,10 @@ export async function createEquipmentAction(
     return { success: false, error: t.toast.equipmentCreateError };
   }
 
-  redirect(withToast("/equipment", t.toast.equipmentCreated));
+  // Nomme la marque/modèle dans le toast plutôt qu'une confirmation
+  // générique (critique /impeccable, P1) — même format que
+  // equipment/[id]/page.tsx > entityLabel.
+  redirect(
+    withToast("/equipment", t.toast.equipmentCreated(`${equipment.brand} ${equipment.model}`)),
+  );
 }

@@ -70,6 +70,9 @@ export async function createQualification(
         trainingCampId: input.trainingCampId,
         notes: input.notes,
       },
+      // qualificationType inclus : le toast de succès nomme le brevet
+      // obtenu plutôt qu'une confirmation générique (actions/create-qualification.ts).
+      include: { qualificationType: true },
     });
   });
 }
