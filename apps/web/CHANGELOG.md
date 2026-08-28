@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.18.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.17.0...paragliding-logbook-v1.18.0) (2026-08-28)
+
+
+### Features
+
+* **progression:** add flight breakdown, sites/duration stats and Parcours timeline ([85a2c18](https://github.com/NollieChtn6/paragliding-logbook/commit/85a2c18342f3bae4e6eb64cb8d67a80fff19877a))
+* **progression:** add flight breakdown, sites/duration stats and Parcours timeline ([a96c5b2](https://github.com/NollieChtn6/paragliding-logbook/commit/a96c5b24305b2c848b8d8db013555ab0ffe3cf14))
+
 ## [1.17.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.16.0...paragliding-logbook-v1.17.0) (2026-08-26)
 
 
