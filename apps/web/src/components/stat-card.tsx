@@ -25,7 +25,7 @@ export function StatCard({ icon: Icon, label, value, tone = "primary" }: StatCar
         >
           <Icon className="size-4" />
         </span>
-        <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
+        <span className="block truncate text-2xl font-bold tracking-tight tabular-nums text-foreground">
           {value}
         </span>
         <span className="text-sm text-muted-foreground">{label}</span>
