@@ -9,7 +9,10 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { AccountMenu } from "./account-menu";
+import { AddEntrySheet } from "./add-entry-sheet";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
+
+const ITEM_CLASSNAME = "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors";
 
 type DesktopSidebarProps = {
   city?: string | null;
@@ -54,16 +57,33 @@ export function DesktopSidebar({ city }: DesktopSidebarProps) {
         {NAV_ITEMS.map((item) => {
           const active = isNavItemActive(pathname, item.href);
           const Icon = item.icon;
+          const stateClassName = active
+            ? "bg-primary/10 font-medium text-primary"
+            : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
+
+          // "Ajouter" ouvre une feuille de choix (Activité/Brevet/Matériel)
+          // plutôt que de naviguer directement vers /activities/new : voir
+          // add-entry-sheet.tsx.
+          if (item.labelKey === "navAdd") {
+            return (
+              <AddEntrySheet
+                key={item.href}
+                triggerClassName={cn(ITEM_CLASSNAME, "w-full text-left", stateClassName)}
+                trigger={
+                  <>
+                    <Icon className="size-4" />
+                    {t.shell[item.labelKey]}
+                  </>
+                }
+              />
+            );
+          }
+
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors",
-                active
-                  ? "bg-primary/10 font-medium text-primary"
-                  : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
+              className={cn(ITEM_CLASSNAME, stateClassName)}
               aria-current={active ? "page" : undefined}
             >
               <Icon className="size-4" />
