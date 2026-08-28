@@ -498,9 +498,24 @@ const messages: Messages = {
     subtitle: "Your evolution over time",
     flightCountTrendTitle: "Cumulative flight count",
     flightHoursTrendTitle: "Cumulative flight time",
-    notEnoughDataForTrend: "Not enough data yet for a trend.",
+    flightCountHeadline: (count: number) => `${count} flights`,
+    flightCountDelta: (delta: number) => `${delta >= 0 ? "+" : ""}${delta} vs last month`,
+    flightHoursDelta: (delta: number) => {
+      const rounded = Math.round(delta * 10) / 10;
+      return `${rounded >= 0 ? "+" : ""}${rounded}h vs last month`;
+    },
+    flightTypeBreakdownTitle: "Breakdown by flight type",
+    sitesVisitedLabel: "Sites flown",
+    longestFlightLabel: "Longest flight",
+    favoriteSiteLabel: "Favourite site",
+    averageDurationTrendTitle: "Average flight duration",
+    averageDurationDelta: (deltaMinutes: number) =>
+      `${deltaMinutes >= 0 ? "+" : ""}${Math.round(deltaMinutes)} min vs last month`,
+    notEnoughDataForTrend: (monthsNeeded: number) =>
+      `Not enough data yet for a trend: ${monthsNeeded} more month${monthsNeeded > 1 ? "s" : ""} needed.`,
     milestonesTitle: "Milestones reached",
     noMilestonesYet: "No milestone reached yet.",
+    parcoursTitle: "Journey",
     emptyTitle: "Your progression will take shape here",
     emptyDescription: "Log your first flights to see trends and milestones appear.",
   },

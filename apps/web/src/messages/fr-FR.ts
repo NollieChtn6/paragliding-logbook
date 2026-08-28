@@ -528,11 +528,33 @@ const messages = {
     subtitle: "Votre évolution dans le temps",
     flightCountTrendTitle: "Nombre de vols cumulé",
     flightHoursTrendTitle: "Temps de vol cumulé",
+    flightCountHeadline: (count: number) => `${count} vols`,
+    // Delta signé vs le mois précédent, jamais teinté rouge/vert (Soft
+    // Status Rule, DESIGN.md) : un mois plus calme ne doit pas se lire comme
+    // un échec, seul le signe +/- porte l'information de direction.
+    flightCountDelta: (delta: number) => `${delta >= 0 ? "+" : ""}${delta} vs mois précédent`,
+    flightHoursDelta: (delta: number) => {
+      const rounded = Math.round(delta * 10) / 10;
+      return `${rounded >= 0 ? "+" : ""}${rounded}h vs mois précédent`;
+    },
+    flightTypeBreakdownTitle: "Répartition par type de vol",
+    sitesVisitedLabel: "Sites survolés",
+    longestFlightLabel: "Vol le plus long",
+    favoriteSiteLabel: "Site préféré",
+    averageDurationTrendTitle: "Durée moyenne par vol",
+    averageDurationDelta: (deltaMinutes: number) =>
+      `${deltaMinutes >= 0 ? "+" : ""}${Math.round(deltaMinutes)} min vs mois précédent`,
     // < 2 mois de données actives : une courbe à un seul point n'a rien à
-    // montrer (features/flights/flight-milestone-history.ts).
-    notEnoughDataForTrend: "Pas encore assez de données pour une courbe.",
+    // montrer (features/flights/flight-milestone-history.ts,
+    // flight-progression-charts.ts). monthsNeeded précise l'effort restant
+    // plutôt qu'un simple constat d'insuffisance.
+    notEnoughDataForTrend: (monthsNeeded: number) =>
+      `Pas encore assez de données pour une courbe : encore ${monthsNeeded} mois nécessaire${monthsNeeded > 1 ? "s" : ""}.`,
     milestonesTitle: "Paliers franchis",
     noMilestonesYet: "Aucun palier franchi pour l'instant.",
+    // Section entièrement masquée si aucun stage terminé ni brevet
+    // (get-parcours-timeline.service.ts) : pas de titre affiché à vide.
+    parcoursTitle: "Parcours",
     emptyTitle: "Votre progression prendra forme ici",
     emptyDescription:
       "Enregistrez vos premiers vols pour voir apparaître vos tendances et paliers.",
