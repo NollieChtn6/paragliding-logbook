@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.18.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.18.0...paragliding-logbook-v1.18.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **pwa:** replace default Next.js favicon.ico with branded glyph ([3565310](https://github.com/NollieChtn6/paragliding-logbook/commit/356531011f76d74fa8a8f3a41b391d206a4ea21e))
+* **pwa:** replace default Next.js favicon.ico with branded glyph ([d9aafea](https://github.com/NollieChtn6/paragliding-logbook/commit/d9aafea2dabbd2b6d0b0cbd483f110b49a9e8bd3))
+
 ## [1.18.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.17.0...paragliding-logbook-v1.18.0) (2026-08-28)
 
 
