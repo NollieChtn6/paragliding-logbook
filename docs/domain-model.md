@@ -319,6 +319,10 @@ Cas particulier du Stage : les vols et séances de gonflage qui lui sont rattach
 
 ## Priorité MVP
 
+Section historique : scope du MVP initial, aujourd'hui dépassé (Equipment,
+Qualification et l'administration ont depuis été livrés — voir
+`docs/todo.md` pour le suivi d'avancement à jour).
+
 ### Inclus
 
 - User
@@ -329,9 +333,13 @@ Cas particulier du Stage : les vols et séances de gonflage qui lui sont rattach
 - TrainingCamp
 - GroundHandlingSession
 
-### Plus tard
+### Livré après le MVP
 
-- Equipment / EquipmentType — modèle défini (voir sections dédiées ci-dessus et ADR 010), non implémenté : reste dans le backlog (`docs/todo.md`, `CLAUDE.md`) jusqu'à demande explicite
+- Equipment / EquipmentType — modèle décrit dans les sections dédiées ci-dessus et ADR 010 ; implémenté (voir `docs/todo.md`, section Matériel)
+- Qualification / QualificationType — modèle décrit ci-dessus (issue #171) ; implémenté (voir `docs/todo.md`, section Brevets et qualifications)
+
+### Toujours backlog
+
 - WeatherObservation
 - IGCTrack
 - FlightStatisticsSnapshot
