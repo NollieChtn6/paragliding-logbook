@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.19.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.18.1...paragliding-logbook-v1.19.0) (2026-08-28)
+
+
+### Features
+
+* **nav:** add a type picker to the primary Ajouter action ([fb3f192](https://github.com/NollieChtn6/paragliding-logbook/commit/fb3f192af3512ee47b0585d691c705575218653f))
+
+
+### Bug Fixes
+
+* **auth:** preserve redirect destination for qualifications and equipment routes ([2e12a77](https://github.com/NollieChtn6/paragliding-logbook/commit/2e12a77de4895b1e78611f608c6e93155006f92e))
+* **forms:** validate qualification and equipment fields inline ([0e8c0b3](https://github.com/NollieChtn6/paragliding-logbook/commit/0e8c0b3f06bd30120eefd1f4741ec2a582818afd))
+* **qualifications,equipment:** improve the add-brevet/add-matériel workflow ([2d1c6b8](https://github.com/NollieChtn6/paragliding-logbook/commit/2d1c6b8208b2eb7dae83a4b2a1ba4b967f420fd4))
+* **qualifications,equipment:** reuse the header CTA copy in empty states ([9871291](https://github.com/NollieChtn6/paragliding-logbook/commit/98712915247e0de356c7a439f4354a3a31bd9d0d))
+
 ## [1.18.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.18.0...paragliding-logbook-v1.18.1) (2026-08-28)
 
 
