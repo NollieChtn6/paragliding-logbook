@@ -43,6 +43,28 @@ describe("proxy", () => {
     expect(location.searchParams.get("redirectTo")).toBe("/activities?foo=bar");
   });
 
+  it("redirects to /sign-in with a redirectTo param for /qualifications/new", () => {
+    vi.mocked(getSessionCookie).mockReturnValue(null);
+    const request = new NextRequest("http://localhost:3000/qualifications/new");
+
+    const response = proxy(request);
+
+    const location = new URL(response.headers.get("location") ?? "");
+    expect(location.pathname).toBe("/sign-in");
+    expect(location.searchParams.get("redirectTo")).toBe("/qualifications/new");
+  });
+
+  it("redirects to /sign-in with a redirectTo param for /equipment/new", () => {
+    vi.mocked(getSessionCookie).mockReturnValue(null);
+    const request = new NextRequest("http://localhost:3000/equipment/new");
+
+    const response = proxy(request);
+
+    const location = new URL(response.headers.get("location") ?? "");
+    expect(location.pathname).toBe("/sign-in");
+    expect(location.searchParams.get("redirectTo")).toBe("/equipment/new");
+  });
+
   it("lets the request through when a session cookie is present", () => {
     vi.mocked(getSessionCookie).mockReturnValue("some-session-token");
     const request = new NextRequest("http://localhost:3000/activities");

@@ -281,12 +281,20 @@ const messages = {
     schoolInUse:
       "Cette école a encore des stages associés : ils doivent être supprimés ou réaffectés d'abord.",
     activityDeleted: "Activité supprimée.",
-    qualificationCreated: "Brevet enregistré.",
+    // Nomme le brevet obtenu plutôt qu'une confirmation générique (ex.
+    // "Brevet de pilote confirmé enregistré.") — un brevet se décroche
+    // rarement dans une carrière, contrairement aux vols : pas de palier de
+    // comptage pertinent ici (voir lib/milestone-message.ts), mais la
+    // confirmation peut quand même reconnaître l'accomplissement en le
+    // nommant. Critique /impeccable, P1.
+    qualificationCreated: (typeLabel: string) => `${typeLabel} enregistré.`,
     qualificationUpdated: "Brevet modifié.",
     qualificationDeleted: "Brevet supprimé.",
     qualificationCreateError: "Erreur lors de l'enregistrement du brevet.",
     qualificationUpdateError: "Erreur lors de la modification du brevet.",
-    equipmentCreated: "Matériel enregistré.",
+    // Même principe que qualificationCreated ci-dessus (marque/modèle plutôt
+    // que "Matériel enregistré." générique) — critique /impeccable, P1.
+    equipmentCreated: (brandAndModel: string) => `${brandAndModel} enregistré.`,
     equipmentUpdated: "Matériel modifié.",
     equipmentDeleted: "Matériel supprimé.",
     equipmentCreateError: "Erreur lors de l'enregistrement du matériel.",
@@ -673,6 +681,12 @@ const messages = {
     newQualification: "Nouveau brevet",
     createQualification: "Enregistrer le brevet",
     editQualification: "Modifier le brevet",
+    // Regroupement en deux fieldsets (voir qualification-form.tsx) : même
+    // principe que equipment.identificationSectionLabel/historySectionLabel —
+    // critique /impeccable, P3 (incohérence de chunking entre les deux
+    // formulaires).
+    qualificationSectionLabel: "Brevet",
+    contextSectionLabel: "Contexte",
     typeLabel: "Type de brevet",
     chooseType: "Choisir un type de brevet",
     clearType: "Effacer le type",
@@ -688,7 +702,6 @@ const messages = {
     emptyTitle: "Aucun brevet enregistré",
     emptyDescription:
       "Ajoutez vos brevets et qualifications de pilotage au fil de votre progression.",
-    addQualificationButton: "Ajouter un brevet",
     deleteButton: "Supprimer",
     deleteConfirmTitle: (entity: string) => `Supprimer ${entity} ?`,
     deleteConfirmDescription: "Cette action est définitive et ne peut pas être annulée.",
@@ -733,7 +746,6 @@ const messages = {
     emptyTitle: "Aucun matériel enregistré",
     emptyDescription:
       "Ajoutez votre voile, votre sellette et votre secours pour suivre leur usage.",
-    addEquipmentButton: "Ajouter du matériel",
     deleteButton: "Supprimer",
     deleteButtonFor: (entity: string) => `Supprimer ${entity}`,
     deleteConfirmTitle: (entity: string) => `Supprimer ${entity} ?`,

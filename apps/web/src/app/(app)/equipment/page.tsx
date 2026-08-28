@@ -67,7 +67,7 @@ export default async function EquipmentPage() {
             <Button
               nativeButton={false}
               variant="outline"
-              render={<Link href="/equipment/new">{te.addEquipmentButton}</Link>}
+              render={<Link href="/equipment/new">{te.newEquipment}</Link>}
             />
           }
         />

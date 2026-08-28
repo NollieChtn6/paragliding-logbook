@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useT } from "@/components/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/toast";
+import { getFieldErrors } from "@/lib/form-validation";
 
 type EquipmentFormActionState = { success: true } | { success: false; error: string };
 
@@ -28,6 +29,11 @@ type EquipmentFormDefaultValues = {
 };
 
 type EquipmentTypeOption = { id: string; code: string };
+
+// condition/status ont toujours une valeur (state contrôlé avec défaut, pas
+// de placeholder vide) : pas besoin de les inclure ici. size est optionnel,
+// initialUsageMin n'a pas l'attribut required (voir plus bas).
+const REQUIRED_FIELDS = ["equipmentTypeId", "brand", "model", "purchaseDate"];
 
 type EquipmentFormProps = {
   equipmentTypes: EquipmentTypeOption[];
@@ -61,6 +67,11 @@ export function EquipmentForm({
   showStatus = false,
 }: EquipmentFormProps) {
   const [state, formAction, isPending] = useActionState(action, null);
+  const formRef = useRef<HTMLFormElement>(null);
+  // Erreurs de validation affichées en ligne sous chaque champ : voir
+  // flight-form.tsx/training-camp-form.tsx pour la justification (toasts
+  // réservés à la soumission/succès).
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [equipmentTypeId, setEquipmentTypeId] = useState(defaultValues?.equipmentTypeId ?? "");
   // condition affiché en state (pas seulement défaut non contrôlé) : affiche/
   // masque initialUsageMin selon la valeur choisie, sans aller-retour serveur.
@@ -108,8 +119,24 @@ export function EquipmentForm({
     }
   }, [state, t]);
 
+  // Voir flight-form.tsx pour le détail du raisonnement (bulle de validation
+  // navigateur non localisée sans noValidate + handleSubmit).
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const errors = getFieldErrors(event.currentTarget, REQUIRED_FIELDS, t.common);
+    if (Object.keys(errors).length > 0) {
+      event.preventDefault();
+      setFieldErrors(errors);
+    }
+  }
+
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={handleSubmit}
+      noValidate
+      className="flex flex-col gap-6"
+    >
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-2 text-sm font-medium text-muted-foreground">
           {te.identificationSectionLabel}
@@ -123,7 +150,11 @@ export function EquipmentForm({
             onValueChange={(value) => setEquipmentTypeId(value ?? "")}
             required
           >
-            <SelectTrigger id="equipmentTypeId" className="w-full">
+            <SelectTrigger
+              id="equipmentTypeId"
+              className="w-full"
+              aria-invalid={!!fieldErrors.equipmentTypeId}
+            >
               <SelectValue placeholder={te.chooseType}>
                 {(value: string | null) => {
                   const equipmentType = equipmentTypes.find((option) => option.id === value);
@@ -139,16 +170,33 @@ export function EquipmentForm({
               ))}
             </SelectContent>
           </Select>
+          {fieldErrors.equipmentTypeId && (
+            <p className="text-sm text-destructive">{fieldErrors.equipmentTypeId}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="brand">{te.brandLabel}</Label>
-          <Input id="brand" name="brand" defaultValue={defaultValues?.brand} required />
+          <Input
+            id="brand"
+            name="brand"
+            defaultValue={defaultValues?.brand}
+            required
+            aria-invalid={!!fieldErrors.brand}
+          />
+          {fieldErrors.brand && <p className="text-sm text-destructive">{fieldErrors.brand}</p>}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="model">{te.modelLabel}</Label>
-          <Input id="model" name="model" defaultValue={defaultValues?.model} required />
+          <Input
+            id="model"
+            name="model"
+            defaultValue={defaultValues?.model}
+            required
+            aria-invalid={!!fieldErrors.model}
+          />
+          {fieldErrors.model && <p className="text-sm text-destructive">{fieldErrors.model}</p>}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -177,7 +225,11 @@ export function EquipmentForm({
               defaultValues?.purchaseDate ? toDateInputValue(defaultValues.purchaseDate) : undefined
             }
             required
+            aria-invalid={!!fieldErrors.purchaseDate}
           />
+          {fieldErrors.purchaseDate && (
+            <p className="text-sm text-destructive">{fieldErrors.purchaseDate}</p>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
