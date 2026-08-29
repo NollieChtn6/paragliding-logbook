@@ -71,6 +71,11 @@ export default async function ProgressionPage() {
   const flightHoursMonthlyBars = toMonthlyValues(progression.trend.map((p) => p.cumulativeHours))
     .slice(-RECENT_MONTHS_SHOWN)
     .map((value) => ({ value }));
+  // Pas de toMonthlyValues ici : averageDurationTrend n'est déjà pas cumulé
+  // (flight-progression-charts.ts), une moyenne mensuelle brute par point.
+  const averageDurationMonthlyBars = progression.averageDurationTrend
+    .slice(-RECENT_MONTHS_SHOWN)
+    .map((point) => ({ value: point.averageMinutes }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -177,7 +182,7 @@ export default async function ProgressionPage() {
               <CardHeader>
                 <CardTitle as="h2">{tp.averageDurationTrendTitle}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
                     {formatDurationMinutes(Math.round(lastAverageDurationPoint.averageMinutes))}
@@ -188,6 +193,14 @@ export default async function ProgressionPage() {
                     </span>
                   )}
                 </div>
+                {averageDurationMonthlyBars.length >= 2 && (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.recentMonthsCaption(RECENT_MONTHS_SHOWN)}
+                    </p>
+                    <ColumnChart points={averageDurationMonthlyBars} />
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
