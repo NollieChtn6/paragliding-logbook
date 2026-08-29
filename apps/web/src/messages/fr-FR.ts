@@ -546,6 +546,10 @@ const messages = {
       return `${rounded >= 0 ? "+" : ""}${rounded}h vs mois précédent`;
     },
     flightTypeBreakdownTitle: "Répartition par type de vol",
+    // Les 3 tuiles StatCard qui suivent n'ont pas de CardTitle propre (pas de
+    // section visuelle appropriée pour un titre de carte) : ce libellé ne
+    // sert qu'à annoncer le groupe aux lecteurs d'écran (section aria-label).
+    statsGroupLabel: "Statistiques générales",
     sitesVisitedLabel: "Sites survolés",
     longestFlightLabel: "Vol le plus long",
     favoriteSiteLabel: "Site préféré",

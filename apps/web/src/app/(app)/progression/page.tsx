@@ -64,7 +64,7 @@ export default async function ProgressionPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Card size="sm">
               <CardHeader>
-                <CardTitle>{tp.flightCountTrendTitle}</CardTitle>
+                <CardTitle as="h2">{tp.flightCountTrendTitle}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 {progression.trend.length < 2 || !lastTrendPoint ? (
@@ -90,7 +90,7 @@ export default async function ProgressionPage() {
             </Card>
             <Card size="sm">
               <CardHeader>
-                <CardTitle>{tp.flightHoursTrendTitle}</CardTitle>
+                <CardTitle as="h2">{tp.flightHoursTrendTitle}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 {progression.trend.length < 2 || !lastTrendPoint ? (
@@ -118,14 +118,17 @@ export default async function ProgressionPage() {
 
           <Card size="sm">
             <CardHeader>
-              <CardTitle>{tp.flightTypeBreakdownTitle}</CardTitle>
+              <CardTitle as="h2">{tp.flightTypeBreakdownTitle}</CardTitle>
             </CardHeader>
             <CardContent>
               <BarChart bars={flightTypeBars} />
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <section
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+            aria-label={tp.statsGroupLabel}
+          >
             <StatCard icon={MapPin} label={tp.sitesVisitedLabel} value={progression.sitesCount} />
             {progression.longestFlightDuration !== undefined && (
               <StatCard
@@ -142,12 +145,12 @@ export default async function ProgressionPage() {
                 value={progression.favoriteSite.label}
               />
             )}
-          </div>
+          </section>
 
           {lastAverageDurationPoint && (
             <Card size="sm">
               <CardHeader>
-                <CardTitle>{tp.averageDurationTrendTitle}</CardTitle>
+                <CardTitle as="h2">{tp.averageDurationTrendTitle}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between gap-2">

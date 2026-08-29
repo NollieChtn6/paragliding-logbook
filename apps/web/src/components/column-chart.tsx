@@ -21,7 +21,7 @@ export function ColumnChart({ points, tone = "primary" }: ColumnChartProps) {
   const maxValue = Math.max(...points.map((point) => point.value), 0);
 
   return (
-    <div className="flex items-end gap-1" style={{ height: CHART_HEIGHT }}>
+    <div className="flex items-end gap-1" style={{ height: CHART_HEIGHT }} aria-hidden="true">
       {points.map((point, index) => {
         const heightPercent = maxValue === 0 ? 0 : (point.value / maxValue) * 100;
         return (

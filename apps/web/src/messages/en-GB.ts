@@ -505,6 +505,7 @@ const messages: Messages = {
       return `${rounded >= 0 ? "+" : ""}${rounded}h vs last month`;
     },
     flightTypeBreakdownTitle: "Breakdown by flight type",
+    statsGroupLabel: "Overall stats",
     sitesVisitedLabel: "Sites flown",
     longestFlightLabel: "Longest flight",
     favoriteSiteLabel: "Favourite site",
