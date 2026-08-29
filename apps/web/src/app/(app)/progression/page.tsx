@@ -35,6 +35,25 @@ export default async function ProgressionPage() {
     (a, b) => b.date.getTime() - a.date.getTime(),
   );
 
+  // Un vol exceptionnellement long peut faire franchir plusieurs paliers le
+  // même jour (flight-milestone-history.ts) : les regrouper par date plutôt
+  // que d'empiler des cartes quasi identiques répétant la même date. Map
+  // conserve l'ordre d'insertion, donc les groupes restent triés du plus
+  // récent au plus ancien sans re-tri.
+  const milestoneGroups = (() => {
+    const byDate = new Map<number, typeof milestonesByRecency>();
+    for (const entry of milestonesByRecency) {
+      const key = entry.date.getTime();
+      const existing = byDate.get(key);
+      if (existing) {
+        existing.push(entry);
+      } else {
+        byDate.set(key, [entry]);
+      }
+    }
+    return [...byDate.entries()].map(([time, entries]) => ({ date: new Date(time), entries }));
+  })();
+
   const lastTrendPoint = progression.trend.at(-1);
   const lastAverageDurationPoint = progression.averageDurationTrend.at(-1);
   const flightTypeBars = progression.flightTypeBreakdown.map((entry) => ({
@@ -83,6 +102,9 @@ export default async function ProgressionPage() {
                         </span>
                       )}
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.recentMonthsCaption(RECENT_MONTHS_SHOWN)}
+                    </p>
                     <ColumnChart points={flightCountMonthlyBars} />
                   </>
                 )}
@@ -109,6 +131,9 @@ export default async function ProgressionPage() {
                         </span>
                       )}
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.recentMonthsCaption(RECENT_MONTHS_SHOWN)}
+                    </p>
                     <ColumnChart points={flightHoursMonthlyBars} tone="accent" />
                   </>
                 )}
@@ -171,35 +196,57 @@ export default async function ProgressionPage() {
             <h2 className="text-lg font-medium tracking-tight text-foreground">
               {tp.milestonesTitle}
             </h2>
-            {milestonesByRecency.length === 0 ? (
+            {milestoneGroups.length === 0 ? (
               <p className="text-sm text-muted-foreground">{tp.noMilestonesYet}</p>
             ) : (
               <div className="flex flex-col gap-2">
-                {milestonesByRecency.map((entry) => (
-                  <div
-                    // Pas d'identifiant stable côté paliers (dérivés en
-                    // mémoire, jamais persistés) : kind+valeur est déjà
-                    // unique par construction, un palier donné n'est franchi
-                    // qu'une fois dans tout le carnet.
-                    key={`${entry.milestone.kind}-${"count" in entry.milestone ? entry.milestone.count : entry.milestone.hours}`}
-                    className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
-                  >
-                    <span
-                      className="flex size-9 flex-none items-center justify-center rounded-xl bg-accent/15 text-accent"
-                      aria-hidden
+                {milestoneGroups.map((group) => {
+                  const isGrouped = group.entries.length > 1;
+                  const firstEntry = group.entries[0];
+                  if (!firstEntry) return null;
+                  // Un groupe mixte (compte + heures franchis le même jour)
+                  // n'a pas un seul type à représenter : Award reste le
+                  // symbole générique "achievement" dans ce cas.
+                  const isHomogeneous = group.entries.every(
+                    (entry) => entry.milestone.kind === firstEntry.milestone.kind,
+                  );
+                  const GroupIcon =
+                    isHomogeneous && firstEntry.milestone.kind === "flight-hours" ? Timer : Award;
+                  return (
+                    <div
+                      // Pas d'identifiant stable côté paliers (dérivés en
+                      // mémoire, jamais persistés) : la date du groupe est
+                      // déjà unique par construction (un jour donné n'a
+                      // qu'un seul groupe de paliers dans tout le carnet).
+                      key={group.date.getTime()}
+                      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
                     >
-                      <Award className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-foreground">
-                        {getMilestoneToastMessage(entry.milestone, t.toast)}
+                      <span
+                        className="flex size-9 flex-none items-center justify-center rounded-xl bg-accent/15 text-accent"
+                        aria-hidden
+                      >
+                        <GroupIcon className="size-4" />
                       </span>
-                      <span className="block truncate text-sm text-muted-foreground">
-                        {formatDate(entry.date, locale)}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-foreground">
+                          {isGrouped
+                            ? tp.multipleMilestonesTitle(group.entries.length)
+                            : getMilestoneToastMessage(firstEntry.milestone, t.toast)}
+                        </span>
+                        {isGrouped && (
+                          <span className="block text-sm text-muted-foreground">
+                            {group.entries
+                              .map((entry) => getMilestoneToastMessage(entry.milestone, t.toast))
+                              .join(" · ")}
+                          </span>
+                        )}
+                        <span className="block truncate text-sm text-muted-foreground">
+                          {formatDate(group.date, locale)}
+                        </span>
                       </span>
-                    </span>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

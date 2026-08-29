@@ -562,8 +562,17 @@ const messages = {
     // plutôt qu'un simple constat d'insuffisance.
     notEnoughDataForTrend: (monthsNeeded: number) =>
       `Pas encore assez de données pour une courbe : encore ${monthsNeeded} mois nécessaire${monthsNeeded > 1 ? "s" : ""}.`,
+    // Légende des bâtons mensuels (toMonthlyValues) : le titre de carte
+    // ci-dessus décrit le chiffre cumulé, pas ces bâtons — sans cette
+    // légende rien ne signale que les bâtons ne sont pas, eux, cumulés.
+    recentMonthsCaption: (months: number) => `${months} derniers mois`,
     milestonesTitle: "Paliers franchis",
     noMilestonesYet: "Aucun palier franchi pour l'instant.",
+    // Plusieurs paliers peuvent partager la même date : un seul vol
+    // exceptionnellement long peut faire franchir plusieurs seuils d'un coup
+    // (flight-milestone-history.ts). Les regrouper en une seule carte plutôt
+    // que d'empiler des cartes quasi identiques répétant la même date.
+    multipleMilestonesTitle: (count: number) => `${count} paliers franchis d'un coup`,
     // Section entièrement masquée si aucun stage terminé ni brevet
     // (get-parcours-timeline.service.ts) : pas de titre affiché à vide.
     parcoursTitle: "Parcours",

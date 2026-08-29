@@ -514,8 +514,10 @@ const messages: Messages = {
       `${deltaMinutes >= 0 ? "+" : ""}${Math.round(deltaMinutes)} min vs last month`,
     notEnoughDataForTrend: (monthsNeeded: number) =>
       `Not enough data yet for a trend: ${monthsNeeded} more month${monthsNeeded > 1 ? "s" : ""} needed.`,
+    recentMonthsCaption: (months: number) => `Last ${months} months`,
     milestonesTitle: "Milestones reached",
     noMilestonesYet: "No milestone reached yet.",
+    multipleMilestonesTitle: (count: number) => `${count} milestones reached at once`,
     parcoursTitle: "Journey",
     emptyTitle: "Your progression will take shape here",
     emptyDescription: "Log your first flights to see trends and milestones appear.",
