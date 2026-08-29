@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.19.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.19.0...paragliding-logbook-v1.19.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* **progression:** add screen-reader headings and stat group label ([ff4f3dd](https://github.com/NollieChtn6/paragliding-logbook/commit/ff4f3dd633d27ebde0680dc8cd1676241a87308b))
+* **progression:** disambiguate trend charts and group same-day milestones ([33bc3f6](https://github.com/NollieChtn6/paragliding-logbook/commit/33bc3f6fcea6c326d121e1596f1a57d14d8eb0f4))
+* **progression:** trend chart clarity, milestone grouping and a11y ([87e29b0](https://github.com/NollieChtn6/paragliding-logbook/commit/87e29b04e7a42210969ab50e60d188e4d776a2b7))
+* **progression:** trend chart clarity, milestone grouping and a11y ([c40daf2](https://github.com/NollieChtn6/paragliding-logbook/commit/c40daf2594de647dcef6d5dc2339a110f4dc3114))
+
 ## [1.19.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.18.1...paragliding-logbook-v1.19.0) (2026-08-28)
 
 
