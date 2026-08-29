@@ -35,6 +35,25 @@ export default async function ProgressionPage() {
     (a, b) => b.date.getTime() - a.date.getTime(),
   );
 
+  // Un vol exceptionnellement long peut faire franchir plusieurs paliers le
+  // même jour (flight-milestone-history.ts) : les regrouper par date plutôt
+  // que d'empiler des cartes quasi identiques répétant la même date. Map
+  // conserve l'ordre d'insertion, donc les groupes restent triés du plus
+  // récent au plus ancien sans re-tri.
+  const milestoneGroups = (() => {
+    const byDate = new Map<number, typeof milestonesByRecency>();
+    for (const entry of milestonesByRecency) {
+      const key = entry.date.getTime();
+      const existing = byDate.get(key);
+      if (existing) {
+        existing.push(entry);
+      } else {
+        byDate.set(key, [entry]);
+      }
+    }
+    return [...byDate.entries()].map(([time, entries]) => ({ date: new Date(time), entries }));
+  })();
+
   const lastTrendPoint = progression.trend.at(-1);
   const lastAverageDurationPoint = progression.averageDurationTrend.at(-1);
   const flightTypeBars = progression.flightTypeBreakdown.map((entry) => ({
@@ -52,6 +71,11 @@ export default async function ProgressionPage() {
   const flightHoursMonthlyBars = toMonthlyValues(progression.trend.map((p) => p.cumulativeHours))
     .slice(-RECENT_MONTHS_SHOWN)
     .map((value) => ({ value }));
+  // Pas de toMonthlyValues ici : averageDurationTrend n'est déjà pas cumulé
+  // (flight-progression-charts.ts), une moyenne mensuelle brute par point.
+  const averageDurationMonthlyBars = progression.averageDurationTrend
+    .slice(-RECENT_MONTHS_SHOWN)
+    .map((point) => ({ value: point.averageMinutes }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -64,7 +88,7 @@ export default async function ProgressionPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Card size="sm">
               <CardHeader>
-                <CardTitle>{tp.flightCountTrendTitle}</CardTitle>
+                <CardTitle as="h2">{tp.flightCountTrendTitle}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 {progression.trend.length < 2 || !lastTrendPoint ? (
@@ -83,6 +107,9 @@ export default async function ProgressionPage() {
                         </span>
                       )}
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.recentMonthsCaption(RECENT_MONTHS_SHOWN)}
+                    </p>
                     <ColumnChart points={flightCountMonthlyBars} />
                   </>
                 )}
@@ -90,7 +117,7 @@ export default async function ProgressionPage() {
             </Card>
             <Card size="sm">
               <CardHeader>
-                <CardTitle>{tp.flightHoursTrendTitle}</CardTitle>
+                <CardTitle as="h2">{tp.flightHoursTrendTitle}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
                 {progression.trend.length < 2 || !lastTrendPoint ? (
@@ -109,6 +136,9 @@ export default async function ProgressionPage() {
                         </span>
                       )}
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.recentMonthsCaption(RECENT_MONTHS_SHOWN)}
+                    </p>
                     <ColumnChart points={flightHoursMonthlyBars} tone="accent" />
                   </>
                 )}
@@ -118,14 +148,17 @@ export default async function ProgressionPage() {
 
           <Card size="sm">
             <CardHeader>
-              <CardTitle>{tp.flightTypeBreakdownTitle}</CardTitle>
+              <CardTitle as="h2">{tp.flightTypeBreakdownTitle}</CardTitle>
             </CardHeader>
             <CardContent>
               <BarChart bars={flightTypeBars} />
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <section
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+            aria-label={tp.statsGroupLabel}
+          >
             <StatCard icon={MapPin} label={tp.sitesVisitedLabel} value={progression.sitesCount} />
             {progression.longestFlightDuration !== undefined && (
               <StatCard
@@ -142,14 +175,14 @@ export default async function ProgressionPage() {
                 value={progression.favoriteSite.label}
               />
             )}
-          </div>
+          </section>
 
           {lastAverageDurationPoint && (
             <Card size="sm">
               <CardHeader>
-                <CardTitle>{tp.averageDurationTrendTitle}</CardTitle>
+                <CardTitle as="h2">{tp.averageDurationTrendTitle}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
                     {formatDurationMinutes(Math.round(lastAverageDurationPoint.averageMinutes))}
@@ -160,6 +193,14 @@ export default async function ProgressionPage() {
                     </span>
                   )}
                 </div>
+                {averageDurationMonthlyBars.length >= 2 && (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      {tp.recentMonthsCaption(RECENT_MONTHS_SHOWN)}
+                    </p>
+                    <ColumnChart points={averageDurationMonthlyBars} />
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
@@ -168,35 +209,57 @@ export default async function ProgressionPage() {
             <h2 className="text-lg font-medium tracking-tight text-foreground">
               {tp.milestonesTitle}
             </h2>
-            {milestonesByRecency.length === 0 ? (
+            {milestoneGroups.length === 0 ? (
               <p className="text-sm text-muted-foreground">{tp.noMilestonesYet}</p>
             ) : (
               <div className="flex flex-col gap-2">
-                {milestonesByRecency.map((entry) => (
-                  <div
-                    // Pas d'identifiant stable côté paliers (dérivés en
-                    // mémoire, jamais persistés) : kind+valeur est déjà
-                    // unique par construction, un palier donné n'est franchi
-                    // qu'une fois dans tout le carnet.
-                    key={`${entry.milestone.kind}-${"count" in entry.milestone ? entry.milestone.count : entry.milestone.hours}`}
-                    className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
-                  >
-                    <span
-                      className="flex size-9 flex-none items-center justify-center rounded-xl bg-accent/15 text-accent"
-                      aria-hidden
+                {milestoneGroups.map((group) => {
+                  const isGrouped = group.entries.length > 1;
+                  const firstEntry = group.entries[0];
+                  if (!firstEntry) return null;
+                  // Un groupe mixte (compte + heures franchis le même jour)
+                  // n'a pas un seul type à représenter : Award reste le
+                  // symbole générique "achievement" dans ce cas.
+                  const isHomogeneous = group.entries.every(
+                    (entry) => entry.milestone.kind === firstEntry.milestone.kind,
+                  );
+                  const GroupIcon =
+                    isHomogeneous && firstEntry.milestone.kind === "flight-hours" ? Timer : Award;
+                  return (
+                    <div
+                      // Pas d'identifiant stable côté paliers (dérivés en
+                      // mémoire, jamais persistés) : la date du groupe est
+                      // déjà unique par construction (un jour donné n'a
+                      // qu'un seul groupe de paliers dans tout le carnet).
+                      key={group.date.getTime()}
+                      className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm"
                     >
-                      <Award className="size-4" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-foreground">
-                        {getMilestoneToastMessage(entry.milestone, t.toast)}
+                      <span
+                        className="flex size-9 flex-none items-center justify-center rounded-xl bg-accent/15 text-accent"
+                        aria-hidden
+                      >
+                        <GroupIcon className="size-4" />
                       </span>
-                      <span className="block truncate text-sm text-muted-foreground">
-                        {formatDate(entry.date, locale)}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-foreground">
+                          {isGrouped
+                            ? tp.multipleMilestonesTitle(group.entries.length)
+                            : getMilestoneToastMessage(firstEntry.milestone, t.toast)}
+                        </span>
+                        {isGrouped && (
+                          <span className="block text-sm text-muted-foreground">
+                            {group.entries
+                              .map((entry) => getMilestoneToastMessage(entry.milestone, t.toast))
+                              .join(" · ")}
+                          </span>
+                        )}
+                        <span className="block truncate text-sm text-muted-foreground">
+                          {formatDate(group.date, locale)}
+                        </span>
                       </span>
-                    </span>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
