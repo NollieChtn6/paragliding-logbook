@@ -8,7 +8,7 @@ export const contentType = "image/png";
 // automatiquement <link rel="apple-touch-icon">) : fond opaque obligatoire,
 // iOS rend toute transparence en noir plein — voir docs/decisions/008.
 // Glyphe dessiné, pas l'emoji encore utilisé ailleurs dans l'UI — voir
-// docs/decisions/009.
+// docs/decisions/010.
 export default function AppleIcon() {
   return new ImageResponse(
     <div

@@ -235,7 +235,7 @@ Pas de `reserveId` ici, à la différence de `Flight` : le secours ne s'utilise/
 
 Référencé par `Flight` (`wingId`/`harnessId`/`reserveId`) et `GroundHandlingSession` (`wingId`/`harnessId`) — voir ci-dessus.
 
-Le volume total de pratique d'un `Equipment` (`initialUsageMin` + somme des `durationMin` de tous les `Flight`/`GroundHandlingSession` qui le référencent) n'est **jamais stocké** : toujours calculé à la demande, même principe que les statistiques du tableau de bord (`docs/product.md`) — voir ADR 010 (`docs/decisions/010-equipment-usage-derived.md`).
+Le volume total de pratique d'un `Equipment` (`initialUsageMin` + somme des `durationMin` de tous les `Flight`/`GroundHandlingSession` qui le référencent) n'est **jamais stocké** : toujours calculé à la demande, même principe que les statistiques du tableau de bord (`docs/product.md`) — voir ADR 011 (`docs/decisions/011-equipment-usage-derived.md`).
 
 Jamais supprimé une fois référencé par une activité : suppression bloquée (`ReferenceDataInUseError`), même principe que `Spot`/`Site`/`School` (voir `docs/admin.md`), pour ne jamais perdre l'historique d'usage d'un équipement revendu. `status = SOLD`/`RETIRED` est le moyen prévu de retirer un équipement de la circulation sans perdre son historique.
 
@@ -306,7 +306,7 @@ Table de référence (pas un enum), même principe qu'`ActivityType`/`SiteType`/
 
 - `initialUsageMin` n'a de sens que si `condition = USED` ; si `condition = NEW`, il vaut 0 ;
 - `wingId`/`harnessId`/`reserveId` (sur `Flight`) et `wingId`/`harnessId` (sur `GroundHandlingSession`) doivent référencer un `Equipment` appartenant à l'utilisateur courant et du bon `EquipmentType` (ex. `wingId` doit pointer vers un `Equipment` de type WING) ;
-- le volume total de pratique d'un `Equipment` n'est jamais stocké, toujours recalculé (voir ci-dessus, ADR 010) ;
+- le volume total de pratique d'un `Equipment` n'est jamais stocké, toujours recalculé (voir ci-dessus, ADR 011) ;
 - un `Equipment` référencé par au moins un `Flight`/`GroundHandlingSession` ne peut pas être supprimé (`ReferenceDataInUseError`) ; le retirer de la circulation passe par `status = SOLD`/`RETIRED`, jamais par une suppression.
 
 ### Suppression
@@ -335,7 +335,7 @@ Qualification et l'administration ont depuis été livrés — voir
 
 ### Livré après le MVP
 
-- Equipment / EquipmentType — modèle décrit dans les sections dédiées ci-dessus et ADR 010 ; implémenté (voir `docs/todo.md`, section Matériel)
+- Equipment / EquipmentType — modèle décrit dans les sections dédiées ci-dessus et ADR 011 ; implémenté (voir `docs/todo.md`, section Matériel)
 - Qualification / QualificationType — modèle décrit ci-dessus (issue #171) ; implémenté (voir `docs/todo.md`, section Brevets et qualifications)
 
 ### Toujours backlog

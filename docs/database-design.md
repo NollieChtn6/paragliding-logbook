@@ -120,6 +120,7 @@ Relations :
 - takeoffPoint et landingPoint : chacun un Site, potentiellement de spots différents (voir Site ci-dessous)
 - peut appartenir à un TrainingCamp
 - appartient à un FlightType
+- peut référencer jusqu'à trois `Equipment` : `wing` (voile), `harness` (sellette), `reserve` (secours)
 
 Champs :
 
@@ -129,6 +130,8 @@ Champs :
 - improvementPoints
 
 Pas de `spotId` ni d'altitudes propres (`takeoffAltitudeM`/`landingAltitudeM` retirés) : redondants avec `takeoffPoint.altitudeM`/`landingPoint.altitudeM`. Le `Flight` ne référence jamais un `Spot` directement (voir ADR 005, `docs/decisions/005-flight-takeoff-landing-points.md`, et ADR 007, `docs/decisions/007-site-spot-terminology-rename.md`, pour le vocabulaire actuel) : `takeoffPointId` doit référencer un `Site` de type TAKEOFF, `landingPointId` un `Site` de type LANDING — non exprimable en contrainte SQL (le type dépend d'une autre table), vérifié côté applicatif.
+
+`wingId`/`harnessId`/`reserveId` (optionnels) : trois FK distinctes vers `Equipment` plutôt qu'une relation générique, même principe que `takeoffPointId`/`landingPointId` — chacune doit référencer un `Equipment` du bon `EquipmentType` (`wingId` → WING, `harnessId` → HARNESS, `reserveId` → RESERVE), vérifié côté applicatif (voir `docs/domain-model.md` > Règles métier > Matériel). `onDelete: Restrict` explicite : la suppression d'un `Equipment` encore référencé par un vol est bloquée, jamais silencieuse (voir Equipment ci-dessous).
 
 ---
 
@@ -220,6 +223,7 @@ Relations :
 - appartient à une Activity
 - appartient à un Spot
 - peut appartenir à un TrainingCamp
+- peut référencer jusqu'à deux `Equipment` : `wing` (voile), `harness` (sellette)
 
 Champs :
 
@@ -228,6 +232,8 @@ Champs :
 - exercises
 - difficulties (optionnel)
 - feeling (optionnel)
+
+`wingId`/`harnessId` (optionnels) : mêmes principes que `Flight.wingId`/`harnessId` ci-dessus (`onDelete: Restrict`). Pas de `reserveId` ici : un secours ne s'utilise/s'use pas pendant une séance de gonflage.
 
 ---
 
@@ -366,6 +372,51 @@ Valeurs initiales :
 
 ---
 
+### EquipmentType
+
+Référentiel des catégories de matériel (table, pas un enum : extensible sans migration, même principe qu'`ActivityType`/`SiteType`/`FlightType`/`TrainingCampType`/`QualificationType`).
+
+Champs :
+
+- id
+- code (unique)
+
+Pas de `label`, même principe que les autres tables de référence ci-dessus.
+
+Valeurs initiales (peuplées par le seed) :
+
+- WING
+- HARNESS
+- RESERVE
+
+---
+
+### Equipment
+
+Élément de matériel personnel d'un pilote (voile, sellette, secours). Donnée personnelle par utilisateur (`userId`), pas un référentiel partagé comme `Spot`/`Site`/`School` (ADR 004, docs/decisions/004-editable-referentials.md) : chaque pilote gère son propre matériel.
+
+Relations :
+
+- appartient à un User
+- appartient à un EquipmentType
+- référencé par des Flight (`wing`/`harness`/`reserve`) et des GroundHandlingSession (`wing`/`harness`)
+
+Champs :
+
+- brand
+- model
+- size (optionnel) — texte libre, le format varie selon la catégorie
+- purchaseDate (date sans heure)
+- condition (`NEW`/`USED`)
+- initialUsageMin (0 par défaut) — volume de pratique accumulé avant l'achat, pertinent seulement si `condition = USED`
+- status (`ACTIVE`/`SOLD`/`RETIRED`, défaut `ACTIVE`)
+- createdAt
+- updatedAt
+
+Jamais supprimé une fois référencé par un `Flight`/`GroundHandlingSession` : suppression bloquée (`ReferenceDataInUseError`), même principe que `Spot`/`Site`/`School` (voir `docs/admin.md`) — `status = SOLD`/`RETIRED` est le moyen prévu de retirer un équipement de la circulation sans perdre son historique. Le volume total de pratique n'est jamais stocké, toujours recalculé (`initialUsageMin` + durées des vols/séances qui le référencent) — voir ADR 011 (`docs/decisions/011-equipment-usage-derived.md`).
+
+---
+
 ## Relations
 
 User 1,N Activity
@@ -411,3 +462,17 @@ QualificationType 1,N Qualification
 School 0..1,N Qualification
 
 TrainingCamp 0..1,N Qualification
+
+User 1,N Equipment
+
+EquipmentType 1,N Equipment
+
+Equipment 0..1,N Flight (wing)
+
+Equipment 0..1,N Flight (harness)
+
+Equipment 0..1,N Flight (reserve)
+
+Equipment 0..1,N GroundHandlingSession (wing)
+
+Equipment 0..1,N GroundHandlingSession (harness)

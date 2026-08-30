@@ -6,7 +6,7 @@ type ParagliderWingGlyphProps = {
 // Glyphe partagé par toutes les icônes générées (favicon, PWA, iOS, écran de
 // lancement) : silhouette de voile de parapente stylisée — arc large côté
 // bord d'attaque, effilé côté bord de fuite, pointes aux extrémités. Remplace
-// l'emoji 🪂 historique dans ces surfaces uniquement (docs/decisions/009) ;
+// l'emoji 🪂 historique dans ces surfaces uniquement (docs/decisions/010) ;
 // l'emoji reste utilisé tel quel ailleurs dans l'UI (connexion, inscription,
 // DesktopSidebar). Un simple <path> plutôt qu'un détail multi-lignes : reste
 // lisible à 32px (favicon) comme à 512px (icône PWA), un motif chargé se

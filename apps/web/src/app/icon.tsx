@@ -6,7 +6,7 @@ export const contentType = "image/png";
 
 // Favicon complémentaire de favicon.ico : convention de fichier App Router,
 // câble automatiquement <link rel="icon"> (voir layout.tsx, aucun champ
-// metadata.icons à ajouter à la main). Glyphe dessiné (docs/decisions/009),
+// metadata.icons à ajouter à la main). Glyphe dessiné (docs/decisions/010),
 // pas l'emoji 🪂 encore utilisé ailleurs dans l'UI (connexion, inscription,
 // AppShell/AdminShell, DesktopSidebar).
 //

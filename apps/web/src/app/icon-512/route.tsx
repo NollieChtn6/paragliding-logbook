@@ -5,7 +5,7 @@ import { ParagliderWingGlyph } from "@/lib/icon-glyph";
 // icône 512×512 purpose "any" référencée par manifest.ts. Générée plutôt que
 // committée en PNG statique, pour rester dérivée de la même source (glyphe +
 // couleurs de marque) — voir docs/decisions/008. Glyphe dessiné depuis
-// docs/decisions/009, plus l'appel au CDN emoji de next/og qu'implique le
+// docs/decisions/010, plus l'appel au CDN emoji de next/og qu'implique le
 // commentaire ci-dessous sur force-static.
 //
 // force-static : sans ça, un Route Handler ordinaire est régénéré à chaque

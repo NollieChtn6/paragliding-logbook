@@ -8,8 +8,8 @@ type EquipmentUsageInput = { id: string; initialUsageMin: number };
 
 // Volume total de pratique d'un Equipment : initialUsageMin + somme des
 // durées des Flight/GroundHandlingSession qui le référencent — jamais
-// stocké, toujours recalculé à la demande (ADR 010,
-// docs/decisions/010-equipment-usage-derived.md). Agrégations dédiées côté
+// stocké, toujours recalculé à la demande (ADR 011,
+// docs/decisions/011-equipment-usage-derived.md). Agrégations dédiées côté
 // base (même principe que flight-totals.service.ts), pas un calcul en
 // mémoire sur une liste déjà chargée (dashboard-stats.ts) : la page
 // /equipment n'a pas déjà listActivities en mémoire. Prend l'Equipment déjà
