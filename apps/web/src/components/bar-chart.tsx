@@ -5,8 +5,8 @@ type BarChartProps = {
   tone?: "primary" | "accent";
 };
 
-// Barres, jamais camembert/donut (ADR 011,
-// docs/decisions/011-progression-chart-bars-not-pie.md). Pas de SVG ici :
+// Barres, jamais camembert/donut (ADR 012,
+// docs/decisions/012-progression-chart-bars-not-pie.md). Pas de SVG ici :
 // une barre proportionnelle n'est qu'une largeur en pourcentage, plus simple
 // à écrire qu'un rectangle SVG calculé à la main et sans le risque de
 // troncature de libellés (les traductions du type de vol varient en

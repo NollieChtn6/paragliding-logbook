@@ -2,7 +2,7 @@ export type FlightTypeBreakdownEntry = { code: string; count: number };
 
 // allFlightTypeCodes vient du référentiel FlightType (pas déduit des vols) :
 // un type jamais volé doit quand même apparaître, avec un compte à 0 — sinon
-// le graphique en barres (ADR 011) ne montrerait que les types déjà
+// le graphique en barres (ADR 012) ne montrerait que les types déjà
 // pratiqués, ce qui ne dit rien sur ceux qui manquent encore.
 export function getFlightTypeBreakdown(
   flights: { flightTypeCode: string }[],

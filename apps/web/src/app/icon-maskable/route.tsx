@@ -7,7 +7,7 @@ import { ParagliderWingGlyph } from "@/lib/icon-glyph";
 // masque de forme Android (cercle/squircle/...) peut le rogner de façon
 // imprévisible selon l'appareil. Taille volontairement plus petite que
 // icon-512/route.tsx pour respecter cette marge — voir docs/decisions/008.
-// Glyphe dessiné depuis docs/decisions/009.
+// Glyphe dessiné depuis docs/decisions/010.
 //
 // force-static : voir icon-512/route.tsx pour la justification.
 export const dynamic = "force-static";
