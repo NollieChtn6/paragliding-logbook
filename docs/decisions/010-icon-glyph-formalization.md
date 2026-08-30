@@ -1,4 +1,4 @@
-# ADR 009 - Glyphe dessiné pour les icônes/écran de lancement, emoji conservé dans l'UI
+# ADR 010 - Glyphe dessiné pour les icônes/écran de lancement, emoji conservé dans l'UI
 
 ## Contexte
 

@@ -465,7 +465,7 @@ enum EquipmentStatus {
 /// applicative, docs/domain-model.md) ; le volume total d'usage
 /// (initialUsageMin + somme des durées des Flight/GroundHandlingSession qui
 /// le référencent) n'est jamais stocké, toujours recalculé à la demande
-/// (ADR 010, docs/decisions/010-equipment-usage-derived.md).
+/// (ADR 011, docs/decisions/011-equipment-usage-derived.md).
 model Equipment {
   id              String             @id @default(uuid()) @db.Uuid
   userId          String             @db.Uuid
