@@ -441,8 +441,7 @@ const messages = {
     statTotalGroundHandlingTime: "Temps de gonflage cumulé",
     statTrainingCamps: "Formations suivies",
     minutesSuffix: (minutes: number) => `${minutes} min`,
-    recentActivities: "Activités récentes",
-    totalCount: (count: number) => `${count} au total`,
+    logbookTitle: "Votre carnet",
     seeAll: "Voir tout",
     // Distinct de activities.emptyTitle/emptyDescription : ici, c'est le
     // tout premier écran qu'un nouvel utilisateur voit (avant même la

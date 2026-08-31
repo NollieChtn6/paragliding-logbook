@@ -1,6 +1,6 @@
-import { Clock3, GraduationCap, Hourglass, Plane, Wind } from "lucide-react";
+import { Clock3, GraduationCap, Hourglass, Plane, Plus, Wind } from "lucide-react";
 import Link from "next/link";
-import { ActivityCard, getActivityCardType } from "@/components/activity-card";
+import { ACTIVITY_TYPE_STYLE, getActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
@@ -37,7 +37,12 @@ export default async function Home() {
         actions={
           <Button
             nativeButton={false}
-            render={<Link href="/activities/new">{t.dashboard.addButton}</Link>}
+            render={
+              <Link href="/activities/new">
+                <Plus className="size-4" aria-hidden />
+                {t.dashboard.addButton}
+              </Link>
+            }
           />
         }
       />
@@ -113,14 +118,10 @@ export default async function Home() {
         <InstallPrompt hasActivities={stats.totalActivityCount > 0} />
       </div>
 
-      <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium tracking-tight text-foreground">
-            {t.dashboard.recentActivities}
-            <span className="text-muted-foreground">
-              {" "}
-              · {t.dashboard.totalCount(stats.totalActivityCount)}
-            </span>
+      <div className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-sm md:min-h-0 md:flex-1">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
+            {t.dashboard.logbookTitle}
           </h2>
           <Link href="/activities" className="text-sm font-medium text-primary hover:underline">
             {t.dashboard.seeAll}
@@ -140,21 +141,33 @@ export default async function Home() {
             }
           />
         ) : (
-          <div className="flex flex-col gap-2 md:overflow-y-auto">
+          // border-l pointillée sur la <ol> + badges rond -left-[30px] :
+          // les badges (size-5, soit 20px) doivent avoir leur centre exactement
+          // sur cette ligne, qui démarre au bord de la <ol> (avant son pl-5) —
+          // d'où -30px = pl-5 (20px) + moitié de la largeur du badge (10px).
+          <ol className="relative flex flex-col gap-5 border-l border-dashed border-border pl-5 md:overflow-y-auto">
             {recentActivities.map((activity) => {
               const summary = getActivitySummary(activity, locale, t);
+              const { icon: Icon, className } = ACTIVITY_TYPE_STYLE[getActivityCardType(activity)];
               return (
-                <ActivityCard
-                  key={activity.id}
-                  href={`/activities/${activity.id}`}
-                  type={getActivityCardType(activity)}
-                  title={summary.title}
-                  location={summary.location}
-                  dateInfo={summary.dateInfo}
-                />
+                <li key={activity.id} className="relative">
+                  <span
+                    className={`absolute top-0.5 -left-[30px] flex size-5 items-center justify-center rounded-full border-2 border-card ${className}`}
+                  >
+                    <Icon className="size-3.5" aria-hidden />
+                  </span>
+                  <Link href={`/activities/${activity.id}`} className="block">
+                    <p className="text-sm font-medium text-foreground">{summary.title}</p>
+                    <p className="text-sm text-muted-foreground">{summary.location}</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock3 className="size-3" aria-hidden />
+                      {summary.dateInfo}
+                    </p>
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ol>
         )}
       </div>
     </div>
