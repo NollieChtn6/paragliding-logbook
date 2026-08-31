@@ -47,10 +47,11 @@ type ActivityCardProps = {
   duplicateLabel?: string;
 };
 
-// Ligne de liste réutilisée par /activities et le dashboard (activités
-// récentes). Le glyphe par type vient de activity.activityType.code — pas
-// de dépendance à getActivitySummary (qui ne renvoie que du texte),
-// l'appelant a toujours l'Activity complète sous la main.
+// Ligne de liste de /activities. Le glyphe par type vient de
+// activity.activityType.code — pas de dépendance à getActivitySummary (qui
+// ne renvoie que du texte), l'appelant a toujours l'Activity complète sous
+// la main. Le dashboard réutilise ACTIVITY_TYPE_STYLE seul (voir
+// app/(app)/page.tsx) pour sa timeline "Votre carnet", pas ce composant.
 export function ActivityCard({
   href,
   type,
