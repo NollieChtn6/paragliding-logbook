@@ -25,12 +25,7 @@ export default async function Home() {
   const t = getDictionary(locale);
 
   return (
-    // md:h-full/overflow-hidden : sur desktop, seule la liste d'activités
-    // récentes (plus bas, md:overflow-y-auto) doit défiler — pas le header
-    // ni les stats. <main> (AppShell) reste le filet de sécurité générique
-    // pour les autres pages, mais ne défile jamais réellement ici puisque ce
-    // conteneur absorbe toute la hauteur disponible lui-même.
-    <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={getGreeting(user.name, t.dashboard)}
         description={t.dashboard.subtitle}
@@ -109,16 +104,19 @@ export default async function Home() {
       + titre + QR + 2 lignes de texte) s'intercalait entre les stats et la
       vraie raison de la visite (confirmer que l'activité vient d'être
       enregistrée), à l'encontre de la promesse "en un coup d'œil" du
-      sous-titre — repoussée après la liste. Sur desktop (>= md), la mise en
-      page en deux zones (stats+prompt qui défilent naturellement, liste
-      d'activités qui défile dans son propre conteneur borné) n'a pas ce
-      problème : order-none y restaure l'ordre du DOM, entre les stats et la
-      liste. */}
+      sous-titre — repoussée après la liste. Sur desktop (>= md), les deux
+      colonnes de contenu ont assez de place l'une sous l'autre : order-none
+      y restaure l'ordre du DOM, entre les stats et le carnet. */}
       <div className="order-1 md:order-none">
         <InstallPrompt hasActivities={stats.totalActivityCount > 0} />
       </div>
 
-      <div className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-sm md:min-h-0 md:flex-1">
+      {/* Ni md:flex-1 ni md:overflow-y-auto ici : recentActivities est
+      plafonné à 5 (RECENT_ACTIVITIES_LIMIT, get-dashboard-data.service.ts),
+      donc le carnet n'a jamais besoin de défiler dans son propre conteneur —
+      étirer la carte à toute la hauteur disponible ne faisait que creuser un
+      grand vide sous une liste courte sur les écrans hauts. */}
+      <div className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
             {t.dashboard.logbookTitle}
@@ -141,18 +139,25 @@ export default async function Home() {
             }
           />
         ) : (
-          // border-l pointillée sur la <ol> + badges rond -left-[30px] :
-          // les badges (size-5, soit 20px) doivent avoir leur centre exactement
-          // sur cette ligne, qui démarre au bord de la <ol> (avant son pl-5) —
-          // d'où -30px = pl-5 (20px) + moitié de la largeur du badge (10px).
-          <ol className="relative flex flex-col gap-5 border-l border-dashed border-border pl-5 md:overflow-y-auto">
+          // Ligne pointillée en <span> séparé plutôt qu'un border-l sur la
+          // <ol> elle-même (et badges en -left-X négatif) : un axe overflow
+          // non-visible (ex. overflow-y-auto pour une liste défilante) force
+          // l'autre axe à "auto" (règle CSS) et rognerait tout ce qui dépasse
+          // à gauche du bord de la <ol>. Ici rien ne sort jamais de la boîte
+          // — la ligne (left-[10px]) et les badges (left-0, size-5=20px,
+          // centre à x=10) restent tous les deux à l'intérieur.
+          <ol className="relative flex flex-col gap-5">
+            <span
+              className="absolute top-0 bottom-0 left-[10px] border-l border-dashed border-border"
+              aria-hidden
+            />
             {recentActivities.map((activity) => {
               const summary = getActivitySummary(activity, locale, t);
               const { icon: Icon, className } = ACTIVITY_TYPE_STYLE[getActivityCardType(activity)];
               return (
-                <li key={activity.id} className="relative">
+                <li key={activity.id} className="relative pl-8">
                   <span
-                    className={`absolute top-0.5 -left-[30px] flex size-5 items-center justify-center rounded-full border-2 border-card ${className}`}
+                    className={`absolute top-0.5 left-0 flex size-5 items-center justify-center rounded-full border-2 border-card ${className}`}
                   >
                     <Icon className="size-3.5" aria-hidden />
                   </span>
