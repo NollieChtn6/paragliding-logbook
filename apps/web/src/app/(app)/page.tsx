@@ -1,6 +1,6 @@
-import { Clock3, GraduationCap, Hourglass, Plane, Wind } from "lucide-react";
+import { Clock3, GraduationCap, Hourglass, Plane, Plus, Wind } from "lucide-react";
 import Link from "next/link";
-import { ActivityCard, getActivityCardType } from "@/components/activity-card";
+import { ACTIVITY_TYPE_STYLE, getActivityCardType } from "@/components/activity-card";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
@@ -25,19 +25,19 @@ export default async function Home() {
   const t = getDictionary(locale);
 
   return (
-    // md:h-full/overflow-hidden : sur desktop, seule la liste d'activités
-    // récentes (plus bas, md:overflow-y-auto) doit défiler — pas le header
-    // ni les stats. <main> (AppShell) reste le filet de sécurité générique
-    // pour les autres pages, mais ne défile jamais réellement ici puisque ce
-    // conteneur absorbe toute la hauteur disponible lui-même.
-    <div className="flex flex-col gap-6 md:h-full md:overflow-hidden">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={getGreeting(user.name, t.dashboard)}
         description={t.dashboard.subtitle}
         actions={
           <Button
             nativeButton={false}
-            render={<Link href="/activities/new">{t.dashboard.addButton}</Link>}
+            render={
+              <Link href="/activities/new">
+                <Plus className="size-4" aria-hidden />
+                {t.dashboard.addButton}
+              </Link>
+            }
           />
         }
       />
@@ -104,23 +104,22 @@ export default async function Home() {
       + titre + QR + 2 lignes de texte) s'intercalait entre les stats et la
       vraie raison de la visite (confirmer que l'activité vient d'être
       enregistrée), à l'encontre de la promesse "en un coup d'œil" du
-      sous-titre — repoussée après la liste. Sur desktop (>= md), la mise en
-      page en deux zones (stats+prompt qui défilent naturellement, liste
-      d'activités qui défile dans son propre conteneur borné) n'a pas ce
-      problème : order-none y restaure l'ordre du DOM, entre les stats et la
-      liste. */}
+      sous-titre — repoussée après la liste. Sur desktop (>= md), les deux
+      colonnes de contenu ont assez de place l'une sous l'autre : order-none
+      y restaure l'ordre du DOM, entre les stats et le carnet. */}
       <div className="order-1 md:order-none">
         <InstallPrompt hasActivities={stats.totalActivityCount > 0} />
       </div>
 
-      <div className="flex flex-col gap-3 md:min-h-0 md:flex-1">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium tracking-tight text-foreground">
-            {t.dashboard.recentActivities}
-            <span className="text-muted-foreground">
-              {" "}
-              · {t.dashboard.totalCount(stats.totalActivityCount)}
-            </span>
+      {/* Ni md:flex-1 ni md:overflow-y-auto ici : recentActivities est
+      plafonné à 5 (RECENT_ACTIVITIES_LIMIT, get-dashboard-data.service.ts),
+      donc le carnet n'a jamais besoin de défiler dans son propre conteneur —
+      étirer la carte à toute la hauteur disponible ne faisait que creuser un
+      grand vide sous une liste courte sur les écrans hauts. */}
+      <div className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
+            {t.dashboard.logbookTitle}
           </h2>
           <Link href="/activities" className="text-sm font-medium text-primary hover:underline">
             {t.dashboard.seeAll}
@@ -140,21 +139,40 @@ export default async function Home() {
             }
           />
         ) : (
-          <div className="flex flex-col gap-2 md:overflow-y-auto">
+          // Ligne pointillée en <span> séparé plutôt qu'un border-l sur la
+          // <ol> elle-même (et badges en -left-X négatif) : un axe overflow
+          // non-visible (ex. overflow-y-auto pour une liste défilante) force
+          // l'autre axe à "auto" (règle CSS) et rognerait tout ce qui dépasse
+          // à gauche du bord de la <ol>. Ici rien ne sort jamais de la boîte
+          // — la ligne (left-[10px]) et les badges (left-0, size-5=20px,
+          // centre à x=10) restent tous les deux à l'intérieur.
+          <ol className="relative flex flex-col gap-5">
+            <span
+              className="absolute top-0 bottom-0 left-[10px] border-l border-dashed border-border"
+              aria-hidden
+            />
             {recentActivities.map((activity) => {
               const summary = getActivitySummary(activity, locale, t);
+              const { icon: Icon, className } = ACTIVITY_TYPE_STYLE[getActivityCardType(activity)];
               return (
-                <ActivityCard
-                  key={activity.id}
-                  href={`/activities/${activity.id}`}
-                  type={getActivityCardType(activity)}
-                  title={summary.title}
-                  location={summary.location}
-                  dateInfo={summary.dateInfo}
-                />
+                <li key={activity.id} className="relative pl-8">
+                  <span
+                    className={`absolute top-0.5 left-0 flex size-5 items-center justify-center rounded-full border-2 border-card ${className}`}
+                  >
+                    <Icon className="size-3.5" aria-hidden />
+                  </span>
+                  <Link href={`/activities/${activity.id}`} className="block">
+                    <p className="text-sm font-medium text-foreground">{summary.title}</p>
+                    <p className="text-sm text-muted-foreground">{summary.location}</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock3 className="size-3" aria-hidden />
+                      {summary.dateInfo}
+                    </p>
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ol>
         )}
       </div>
     </div>

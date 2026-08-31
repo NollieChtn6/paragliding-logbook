@@ -414,8 +414,7 @@ const messages: Messages = {
     statTotalGroundHandlingTime: "Total ground handling time",
     statTrainingCamps: "Training camps completed",
     minutesSuffix: (minutes: number) => `${minutes} min`,
-    recentActivities: "Recent activities",
-    totalCount: (count: number) => `${count} in total`,
+    logbookTitle: "Your logbook",
     seeAll: "See all",
     emptyTitle: "Your logbook starts here",
     emptyDescription:
