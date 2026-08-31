@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.20.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.19.1...paragliding-logbook-v1.20.0) (2026-08-31)
+
+
+### Features
+
+* **dashboard:** redesign recent activities as a logbook timeline ([0df212c](https://github.com/NollieChtn6/paragliding-logbook/commit/0df212c92d7dd01053513a08e33249ea50d2262d))
+* **dashboard:** redesign recent activities as a logbook timeline ([9a7e1a9](https://github.com/NollieChtn6/paragliding-logbook/commit/9a7e1a9ca09e240811f9b6a6401475e65657b889))
+
+
+### Bug Fixes
+
+* **dashboard:** stop stretching the logbook card and fix icon clipping ([6a53876](https://github.com/NollieChtn6/paragliding-logbook/commit/6a5387639dbd6572637c09b99f85135396dbd35c))
+
 ## [1.19.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.19.0...paragliding-logbook-v1.19.1) (2026-08-29)
 
 
