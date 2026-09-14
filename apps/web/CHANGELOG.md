@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.21.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.20.0...paragliding-logbook-v1.21.0) (2026-09-14)
+
+
+### Features
+
+* **account:** replace sidebar account menu with identity sheet ([4238fb8](https://github.com/NollieChtn6/paragliding-logbook/commit/4238fb8052647d9a41a33884b27c9b58bf478b8d))
+* **account:** replace sidebar account menu with identity sheet ([8758039](https://github.com/NollieChtn6/paragliding-logbook/commit/87580399a22f1a5a96ae8fdb48026ce9e562973c))
+
 ## [1.20.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.19.1...paragliding-logbook-v1.20.0) (2026-08-31)
 
 
