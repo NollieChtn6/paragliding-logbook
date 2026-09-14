@@ -1,8 +1,6 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { InstallSettingsCard } from "@/components/pwa/install-settings-card";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChangePasswordForm } from "@/features/account/change-password-form";
-import { ProfileForm } from "@/features/account/profile-form";
+import { AccountOverview } from "@/features/account/account-overview";
 import { requireCurrentUser } from "@/lib/current-user";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/messages";
@@ -19,33 +17,12 @@ export default async function SecuritySettingsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title={t.pageTitle} description={t.pageDescription} />
 
-      {/* Avant Profil/Sécurité (pas après) : sur mobile, visible sans
-      défiler — utile pour montrer rapidement le QR code à quelqu'un depuis
-      son téléphone, le but même de cette carte. */}
+      {/* Avant le bandeau d'identité/onglets (pas après) : sur mobile,
+      visible sans défiler — utile pour montrer rapidement le QR code à
+      quelqu'un depuis son téléphone, le but même de cette carte. */}
       <InstallSettingsCard />
 
-      {/* Côte à côte à partir de md : les deux formulaires sont courts et
-      indépendants, pas besoin de forcer un défilement vertical sur desktop.
-      Empilés sur mobile (flex-col par défaut). */}
-      <div className="flex flex-col gap-6 md:flex-row">
-        <Card className="md:flex-1">
-          <CardHeader>
-            <CardTitle>{t.profileCardTitle}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProfileForm name={user.name} city={user.city} />
-          </CardContent>
-        </Card>
-
-        <Card className="md:flex-1">
-          <CardHeader>
-            <CardTitle>{t.securityCardTitle}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChangePasswordForm email={user.email} />
-          </CardContent>
-        </Card>
-      </div>
+      <AccountOverview user={user} />
     </div>
   );
 }

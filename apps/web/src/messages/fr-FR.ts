@@ -775,7 +775,7 @@ const messages = {
     navQualifications: "Brevets",
     navEquipment: "Matériel",
     navAdd: "Ajouter",
-    securitySettings: "Paramètres de sécurité",
+    securitySettings: "Paramètres",
     switchToLightTheme: "Passer en thème clair",
     switchToDarkTheme: "Passer en thème sombre",
     menu: "Menu",

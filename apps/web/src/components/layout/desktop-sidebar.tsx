@@ -8,13 +8,15 @@ import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
-import { AccountMenu } from "./account-menu";
+import { AccountSheet } from "./account-sheet";
 import { AddEntrySheet } from "./add-entry-sheet";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
 const ITEM_CLASSNAME = "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors";
 
 type DesktopSidebarProps = {
+  name?: string | null;
+  email?: string | null;
   city?: string | null;
 };
 
@@ -23,7 +25,7 @@ type DesktopSidebarProps = {
 // en pied — MobileBottomNav n'a que la navigation, ces deux actions vivent
 // dans la bande haute mobile d'AppShell. Jamais rendue pour un rôle ADMIN
 // (voir app-shell.tsx), donc pas de lien Administration ici.
-export function DesktopSidebar({ city }: DesktopSidebarProps) {
+export function DesktopSidebar({ name, email, city }: DesktopSidebarProps) {
   const pathname = usePathname();
   const t = useT();
 
@@ -98,7 +100,7 @@ export function DesktopSidebar({ city }: DesktopSidebarProps) {
           <ThemeToggle />
           <LocaleToggle />
         </div>
-        <AccountMenu trigger="full" />
+        {name && email && <AccountSheet user={{ name, email, city }} />}
       </div>
       <VersionBadge className="mt-2 text-center" />
     </aside>

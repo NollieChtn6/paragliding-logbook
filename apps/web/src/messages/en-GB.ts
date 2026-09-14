@@ -711,7 +711,7 @@ const messages: Messages = {
     navQualifications: "Licences",
     navEquipment: "Equipment",
     navAdd: "Add",
-    securitySettings: "Security settings",
+    securitySettings: "Settings",
     switchToLightTheme: "Switch to light theme",
     switchToDarkTheme: "Switch to dark theme",
     menu: "Menu",

@@ -10,6 +10,8 @@ import { MobileBottomNav } from "./mobile-bottom-nav";
 
 type AppShellProps = {
   children: React.ReactNode;
+  name?: string | null;
+  email?: string | null;
   city?: string | null;
 };
 
@@ -21,7 +23,7 @@ type AppShellProps = {
 // marque + thème + déconnexion à partir de md ; en dessous, une bande haute
 // minimale assure la même fonction puisque DesktopSidebar est masquée en
 // mobile.
-export function AppShell({ children, city }: AppShellProps) {
+export function AppShell({ children, name, email, city }: AppShellProps) {
   return (
     // h-svh + overflow-hidden, sans condition de largeur : la coquille
     // (sidebar comprise sur desktop) reste toujours calée sur la hauteur de
@@ -32,7 +34,7 @@ export function AppShell({ children, city }: AppShellProps) {
     // de le contenir proprement entre les deux.
     <div className="flex h-svh overflow-hidden">
       <AmbientArc />
-      <DesktopSidebar city={city} />
+      <DesktopSidebar name={name} email={email} city={city} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-border px-4 py-3 md:hidden">
