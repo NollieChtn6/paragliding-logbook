@@ -5,29 +5,54 @@ import Link from "next/link";
 import { useState } from "react";
 import { signOutAction } from "@/actions/sign-out";
 import { useT } from "@/components/locale-provider";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { ProfileAvatar, type ProfileSummary } from "./profile-avatar";
 
-// Pied de DesktopSidebar : bulle d'identité compacte (avatar + prénom) qui
-// ouvre un panneau latéral avec l'identité complète (email, ville) et les
-// deux actions (Paramètres, déconnexion). Remplace l'ancien bouton "Compte"
-// générique (AccountMenu trigger="full", toujours utilisé par AdminShell —
-// pas touché ici, hors périmètre) : un menu déroulant classique masquait
-// l'identité de l'utilisatrice derrière un libellé générique, sans avatar
-// ni nom visibles en permanence. Issu d'un prototype comparant 3 pistes
-// (voir branche prototype/profile-access), cette variante retenue.
-export function AccountSheet({ user }: { user: ProfileSummary }) {
+type AccountSheetProps = {
+  user: ProfileSummary;
+  // "full" : bulle d'identité pleine largeur (avatar + prénom), pied de
+  // DesktopSidebar/AdminShell (aside, place non comptée). "icon" : même
+  // avatar seul, dans un bouton icône 44px — en-tête mobile d'AppShell/
+  // AdminShell, où AccountMenu (menu hamburger générique, sans identité
+  // visible) vivait auparavant. Unifié sous ce seul composant, avec ces deux
+  // présentations, pour que mobile et desktop partagent la même identité
+  // visible plutôt que deux métaphores différentes d'accès au compte
+  // (critique /impeccable, P0). Remplace l'ancien bouton "Compte" générique
+  // (AccountMenu trigger="full") : un menu déroulant classique masquait
+  // l'identité de l'utilisatrice derrière un libellé générique, sans avatar
+  // ni nom visibles en permanence. Issu d'un prototype comparant 3 pistes
+  // (voir branche prototype/profile-access), cette variante retenue.
+  trigger?: "full" | "icon";
+};
+
+export function AccountSheet({ user, trigger = "full" }: AccountSheetProps) {
   const [open, setOpen] = useState(false);
   const t = useT();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-background px-2.5 py-2 text-left transition-colors hover:bg-muted">
-        <ProfileAvatar user={user} className="size-8 text-xs" />
-        <span className="truncate text-sm font-medium text-foreground">{user.name}</span>
-      </SheetTrigger>
+      {trigger === "full" ? (
+        <SheetTrigger className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-background px-2.5 py-2 text-left transition-colors hover:bg-muted">
+          <ProfileAvatar user={user} className="size-8 text-xs" />
+          <span className="truncate text-sm font-medium text-foreground">{user.name}</span>
+        </SheetTrigger>
+      ) : (
+        <SheetTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={t.account.pageTitle}
+              title={t.account.pageTitle}
+            />
+          }
+        >
+          <ProfileAvatar user={user} className="size-8 text-xs" />
+        </SheetTrigger>
+      )}
       <SheetContent side="left">
         <SheetHeader>
           <SheetTitle>{t.account.pageTitle}</SheetTitle>
@@ -49,7 +74,7 @@ export function AccountSheet({ user }: { user: ProfileSummary }) {
             className={cn(buttonVariants({ variant: "outline" }), "w-full justify-start gap-2")}
           >
             <Settings className="size-4" />
-            {t.shell.securitySettings}
+            {t.shell.accountSettings}
           </Link>
           <button
             type="button"

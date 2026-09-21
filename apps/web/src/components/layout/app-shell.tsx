@@ -4,7 +4,7 @@ import type * as React from "react";
 import { AmbientArc } from "@/components/ambient-arc";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { AccountMenu } from "./account-menu";
+import { AccountSheet } from "./account-sheet";
 import { DesktopSidebar } from "./desktop-sidebar";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 
@@ -56,10 +56,10 @@ export function AppShell({ children, name, email, city }: AppShellProps) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             <LocaleToggle />
-            <AccountMenu />
+            {name && email && <AccountSheet user={{ name, email, city }} trigger="icon" />}
           </div>
         </header>
 

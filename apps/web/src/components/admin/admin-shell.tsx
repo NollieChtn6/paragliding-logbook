@@ -3,13 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
-import { AccountMenu } from "@/components/layout/account-menu";
+import { AccountSheet } from "@/components/layout/account-sheet";
 import { useT } from "@/components/locale-provider";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { ADMIN_NAV_ITEMS, isAdminNavItemActive } from "./admin-nav-items";
+
+type AdminShellProps = {
+  children: React.ReactNode;
+  name?: string | null;
+  email?: string | null;
+  city?: string | null;
+};
 
 // Chrome dédié à /admin (docs/admin.md > Interface, Navigation) : mêmes
 // tokens/composants que AppShell (components/layout/app-shell.tsx) — pas de
@@ -19,11 +26,12 @@ import { ADMIN_NAV_ITEMS, isAdminNavItemActive } from "./admin-nav-items";
 // autres utilisateurs (app/(app)/layout.tsx y redirige vers /admin), donc
 // seule la déconnexion a du sens ici. Le changement de mot de passe
 // (/settings/security), lui, doit rester accessible aux deux rôles — même
-// bouton icône que dans AppShell/DesktopSidebar, la page vit hors du route
-// group (app), voir app/settings/layout.tsx. Pas de barre de navigation
-// basse façon MobileBottomNav sur mobile : une rangée d'onglets défilante
-// suffit pour un espace secondaire, sans surcharger l'écran.
-export function AdminShell({ children }: { children: React.ReactNode }) {
+// composant AccountSheet que dans AppShell/DesktopSidebar (identité visible
+// plutôt qu'un menu anonyme, critique /impeccable P0), la page vit hors du
+// route group (app), voir app/settings/layout.tsx. Pas de barre de
+// navigation basse façon MobileBottomNav sur mobile : une rangée d'onglets
+// défilante suffit pour un espace secondaire, sans surcharger l'écran.
+export function AdminShell({ children, name, email, city }: AdminShellProps) {
   const pathname = usePathname();
   const t = useT();
 
@@ -72,7 +80,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <ThemeToggle />
             <LocaleToggle />
           </div>
-          <AccountMenu trigger="full" />
+          {name && email && <AccountSheet user={{ name, email, city }} />}
         </div>
         <VersionBadge className="mt-2 text-center" />
       </aside>
@@ -82,10 +90,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <span className="text-sm font-semibold tracking-tight text-foreground">
             {t.admin.title}
           </span>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             <LocaleToggle />
-            <AccountMenu />
+            {name && email && <AccountSheet user={{ name, email, city }} trigger="icon" />}
           </div>
         </header>
 
