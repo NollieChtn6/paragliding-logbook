@@ -182,6 +182,7 @@ Radius scales with a surface's size and importance, derived from a single `--rad
 ### Buttons
 
 - **Shape:** `rounded-lg` (10px), 44px height at default size (`h-11`, raised from the original 32px for a proper touch target — one-handed, outdoor, field use), border-transparent.
+- **Icon-only (`size="icon"`):** 44px square (`size-11`), matching the default height — same touch-target rationale applies to theme/locale/account icon buttons in headers, not just labeled buttons.
 - **Primary:** `bg-primary` / `text-primary-foreground`, hover deepens to 80% opacity of the same blue (no color-shift, no darken-via-different-hex).
 - **Destructive:** soft-tinted, `bg-destructive/10 text-destructive`, not a solid fill — consistent with the Soft Status Rule.
 - **Outline / Ghost / Secondary / Link:** all share the same shape and press behavior; they differ only in resting background (transparent-with-border, transparent, `bg-secondary`, and no-background-underlined-text respectively).
@@ -207,6 +208,8 @@ Radius scales with a surface's size and importance, derived from a single `--rad
 - **Desktop (`≥md`):** persistent 240px left sidebar. Inactive items: `text-muted-foreground`, icon + label, `rounded-xl` hover highlight in `sidebar-accent`. Active item: `bg-primary/10 text-primary`, `font-medium`, `rounded-xl`, plus `aria-current="page"`.
 - **Mobile (`<md`):** fixed bottom tab bar, icon above label, `text-xs`. Active: `text-primary font-medium`. Safe-area-aware bottom padding for notched devices.
 - Both variants read the same active-state color rule (`text-primary`, medium weight) — only position and icon/label arrangement change between breakpoints.
+- The one creation item ("Ajouter") gets a Tinted Icon Badge (`bg-accent/15 text-accent`, `size-8`) around its icon on both breakpoints, distinguishing the single "do" action from the surrounding "browse" destinations.
+- **Account access:** a single `AccountSheet` component (avatar + name, opens a left-side sheet with the full identity, security link, and sign-out) is used everywhere the authenticated shell shows account access — the sidebar footer (`trigger="full"`, avatar + name row) and the mobile/admin header (`trigger="icon"`, avatar-only in a 44px button). Never a generic icon-menu with no visible identity in `AppShell`/`AdminShell` — that pattern (`AccountMenu`) is reserved for `/settings`, the one authenticated chrome with no sidebar to host the sheet.
 
 ### Tinted Icon Badges (signature pattern)
 
