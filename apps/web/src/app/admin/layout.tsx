@@ -9,7 +9,11 @@ import { requireAdmin } from "@/lib/current-user";
 // Action admin revérifie aussi par elle-même (voir actions/create-site.ts) :
 // ce layout protège les pages, pas les mutations.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <AdminShell name={admin.name} email={admin.email} city={admin.city}>
+      {children}
+    </AdminShell>
+  );
 }
