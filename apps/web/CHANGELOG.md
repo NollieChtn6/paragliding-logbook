@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.21.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.21.0...paragliding-logbook-v1.21.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **nav:** drop the add-entry sheet detour and highlight Ajouter as the create action ([6255be0](https://github.com/NollieChtn6/paragliding-logbook/commit/6255be08593166fad7c3e7b6df271fc1b53d6674))
+* **nav:** show account identity on mobile and admin instead of a generic menu ([2c8dc1e](https://github.com/NollieChtn6/paragliding-logbook/commit/2c8dc1e0a859112eca2cf16fd31fefcea16f8bd0))
+* **nav:** sidebar and mobile navigation consistency ([68ef264](https://github.com/NollieChtn6/paragliding-logbook/commit/68ef264e56d74a9e3c68c1f3a808342cf297bbc6))
+* **ui:** raise icon-only buttons to a 44px touch target ([273f88f](https://github.com/NollieChtn6/paragliding-logbook/commit/273f88f4ff3ccddcf2e60b8e337f2328b4e533a1))
+
 ## [1.21.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.20.0...paragliding-logbook-v1.21.0) (2026-09-14)
 
 
