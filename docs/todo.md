@@ -282,6 +282,27 @@ Déjà construit (`src/features/flights/get-flight-progression.service.ts`, `src
 
 ---
 
+## Export PDF du carnet 📄
+
+Cadrage complet (session de grilling), pas encore implémenté — voir ADR 013 (`docs/decisions/013-pdf-export-generation.md`) pour les choix techniques (génération côté serveur, `@react-pdf/renderer`, police embarquée).
+
+Contenu :
+
+- [ ] Historique complet par défaut, avec un filtre de dates optionnel (boîte de dialogue au moment de l'export, sans impact sur l'affichage de `/progression`)
+- [ ] Les trois types d'activités (Vol, Stage, Gonflage), triées **du plus ancien au plus récent** — à l'inverse de `/activities`, pour raconter la progression comme une histoire
+- [ ] Section de synthèse statistique en tête (nombre de vols, temps de vol cumulé, paliers franchis, spot préféré, vol le plus long) — texte/chiffres uniquement, pas de graphique dans cette v1
+- [ ] Section Qualifications (brevets obtenus : type + date), distincte de la liste d'activités, dans le même esprit que `/qualifications` et le "Parcours" de `/progression`
+- [ ] Liste des activités en format compact par défaut (date, type, spot, durée) ; texte complet (observations, points d'amélioration) affiché uniquement si l'export est filtré par dates
+- [ ] Couverture : "Carnet de progression de {prénom}" (prénom extrait du `User.name` de l'utilisateur connecté)
+- [ ] Date d'édition (jour seul, pas d'heure) affichée sur la couverture et en pied de page de chaque page intérieure
+- [ ] Format A5 portrait uniquement pour cette v1 (pas de choix de format à l'export)
+
+Accès :
+
+- [ ] Bouton "Exporter en PDF" sur `/progression`
+
+---
+
 ## Rappels importants sur les notions
 
 ### Sites de vol 🌍
@@ -343,7 +364,7 @@ Ces fonctionnalités sont volontairement hors MVP.
 - [ ] Calendrier des activités
 - [ ] Notifications / rappels
 - [ ] Partage public optionnel d'un vol
-- [ ] Export des données personnelles (JSON, PDF)
+- [ ] Export des données personnelles en JSON — l'export PDF est cadré séparément, voir [Export PDF du carnet](#export-pdf-du-carnet-) ci-dessus
 
 ---
 
