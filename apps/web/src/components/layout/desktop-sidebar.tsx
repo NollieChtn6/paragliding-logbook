@@ -9,7 +9,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { VersionBadge } from "@/components/version-badge";
 import { cn } from "@/lib/utils";
 import { AccountSheet } from "./account-sheet";
-import { AddEntrySheet } from "./add-entry-sheet";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
 const ITEM_CLASSNAME = "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors";
@@ -59,27 +58,10 @@ export function DesktopSidebar({ name, email, city }: DesktopSidebarProps) {
         {NAV_ITEMS.map((item) => {
           const active = isNavItemActive(pathname, item.href);
           const Icon = item.icon;
+          const isAdd = item.labelKey === "navAdd";
           const stateClassName = active
             ? "bg-primary/10 font-medium text-primary"
             : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
-
-          // "Ajouter" ouvre une feuille de choix (Activité/Brevet/Matériel)
-          // plutôt que de naviguer directement vers /activities/new : voir
-          // add-entry-sheet.tsx.
-          if (item.labelKey === "navAdd") {
-            return (
-              <AddEntrySheet
-                key={item.href}
-                triggerClassName={cn(ITEM_CLASSNAME, "w-full text-left", stateClassName)}
-                trigger={
-                  <>
-                    <Icon className="size-4" />
-                    {t.shell[item.labelKey]}
-                  </>
-                }
-              />
-            );
-          }
 
           return (
             <Link
@@ -88,7 +70,20 @@ export function DesktopSidebar({ name, email, city }: DesktopSidebarProps) {
               className={cn(ITEM_CLASSNAME, stateClassName)}
               aria-current={active ? "page" : undefined}
             >
-              <Icon className="size-4" />
+              {isAdd ? (
+                // Seule action de création de la barre : badge teinté Ambre
+                // Thermique (Tinted Icon Badge, voir DESIGN.md) pour la
+                // distinguer des 5 items de consultation, plutôt que le même
+                // poids visuel pour tout (critique /impeccable, P2).
+                <span
+                  className="flex size-8 flex-none items-center justify-center rounded-lg bg-accent/15 text-accent"
+                  aria-hidden
+                >
+                  <Icon className="size-4" />
+                </span>
+              ) : (
+                <Icon className="size-4" />
+              )}
               {t.shell[item.labelKey]}
             </Link>
           );

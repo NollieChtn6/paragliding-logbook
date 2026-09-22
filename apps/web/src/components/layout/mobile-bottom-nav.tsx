@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useT } from "@/components/locale-provider";
 import { cn } from "@/lib/utils";
-import { AddEntrySheet } from "./add-entry-sheet";
 import { isNavItemActive, NAV_ITEMS } from "./nav-items";
 
 const ITEM_CLASSNAME =
@@ -21,27 +20,7 @@ export function MobileBottomNav() {
       {NAV_ITEMS.map((item) => {
         const active = isNavItemActive(pathname, item.href);
         const Icon = item.icon;
-
-        // "Ajouter" ouvre une feuille de choix (Activité/Brevet/Matériel)
-        // plutôt que de naviguer directement vers /activities/new : voir
-        // add-entry-sheet.tsx.
-        if (item.labelKey === "navAdd") {
-          return (
-            <AddEntrySheet
-              key={item.href}
-              triggerClassName={cn(
-                ITEM_CLASSNAME,
-                active ? "font-medium text-primary" : "text-muted-foreground",
-              )}
-              trigger={
-                <>
-                  <Icon className="size-5" />
-                  {t.shell[item.labelKey]}
-                </>
-              }
-            />
-          );
-        }
+        const isAdd = item.labelKey === "navAdd";
 
         return (
           <Link
@@ -53,7 +32,20 @@ export function MobileBottomNav() {
             )}
             aria-current={active ? "page" : undefined}
           >
-            <Icon className="size-5" />
+            {isAdd ? (
+              // Seule action de création de la barre : badge teinté Ambre
+              // Thermique (Tinted Icon Badge, voir DESIGN.md) pour la
+              // distinguer des 5 items de consultation, plutôt que le même
+              // poids visuel pour tout (critique /impeccable, P2).
+              <span
+                className="flex size-8 items-center justify-center rounded-lg bg-accent/15 text-accent"
+                aria-hidden
+              >
+                <Icon className="size-4" />
+              </span>
+            ) : (
+              <Icon className="size-5" />
+            )}
             {t.shell[item.labelKey]}
           </Link>
         );
