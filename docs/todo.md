@@ -209,8 +209,7 @@ Fonctionnalités :
 - [x] Modifier un brevet — `/qualifications/[id]/edit`, service `updateQualification`, vérification de propriété systématique
 - [x] Supprimer un brevet — service `deleteQualification` dédié (pas de passage par `deleteActivity`, `Qualification` n'étant pas une spécialisation d'`Activity`)
 - [x] Référentiel `QualificationType` alimenté par un seed séparé (`prisma/seed-qualification-types.ts`, `pnpm --filter web prisma:seed:qualification-types`), exécutable indépendamment sur preview et production — pas de CRUD admin pour l'instant
-- [x] Accès depuis le menu de compte (`AccountMenu`), pas dans la barre de navigation principale (4 emplacements déjà occupés)
-- [x] Raccourci additionnel depuis la page Progression (bouton dans l'en-tête, y compris à vide)
+- [x] Accès depuis la barre de navigation principale (`navQualifications`) — promu depuis le menu de compte et l'ancien raccourci de la page Progression (tous deux retirés), pour un accès direct plutôt que secondaire
 - [x] Ancien champ `TrainingCamp.certification` (texte libre) remplacé par `TrainingCamp.qualificationTypeId`, un select vers `QualificationType` dans le formulaire de stage (`/activities/new`, `/activities/[id]/edit`), affiché de façon résolue (pas en texte brut) sur le détail du stage — champ d'affichage propre au stage, ne crée pas automatiquement de `Qualification` personnelle
 
 ---
