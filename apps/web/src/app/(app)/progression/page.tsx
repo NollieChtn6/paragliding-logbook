@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExportCarnetDialog } from "@/features/export/export-carnet-dialog";
 import { getFlightProgression, toMonthlyValues } from "@/features/flights";
 import { getParcoursTimeline } from "@/features/progression";
 import { requireCurrentUser } from "@/lib/current-user";
@@ -79,7 +80,13 @@ export default async function ProgressionPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={tp.pageTitle} description={tp.subtitle} />
+      <PageHeader
+        title={tp.pageTitle}
+        description={tp.subtitle}
+        // Pas d'export tant que /progression est dans son EmptyState (aucune
+        // activité) : rien de significatif à exporter dans ce cas.
+        actions={progression.flightCount > 0 ? <ExportCarnetDialog /> : undefined}
+      />
 
       {progression.flightCount === 0 ? (
         <EmptyState title={tp.emptyTitle} description={tp.emptyDescription} />

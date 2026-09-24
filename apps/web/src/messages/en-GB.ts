@@ -521,6 +521,39 @@ const messages: Messages = {
     emptyTitle: "Your progression will take shape here",
     emptyDescription: "Log your first flights to see trends and milestones appear.",
   },
+  export: {
+    exportButton: "Export as PDF",
+    dialogTitle: "Export logbook as PDF",
+    dialogDescription:
+      "Generate a PDF document of your logbook. Without a filter, the export covers your entire history in compact format.",
+    dateRangeHint:
+      "Filtering by date automatically switches the export to full detail (observations and improvement points included).",
+    confirmButton: "Export",
+    // PDF document content stays French regardless of locale (ADR 013) —
+    // these values are never read by the PDF template, only kept here to
+    // satisfy the shared Messages type.
+    coverTitle: (firstName: string) => `Carnet de progression de ${firstName}`,
+    editionDate: (date: string) => `Édité le ${date}`,
+    scopeFullHistory: "Historique complet",
+    scopeDateRange: (from: string, to: string) => `Du ${from} au ${to}`,
+    scopeFrom: (from: string) => `Depuis le ${from}`,
+    scopeTo: (to: string) => `Jusqu'au ${to}`,
+    tableOfContentsTitle: "Sommaire",
+    statsTitle: "Résumé",
+    flightCountLabel: "Nombre de vols",
+    cumulativeFlightTimeLabel: "Temps de vol cumulé",
+    milestonesCrossedLabel: "Paliers franchis",
+    favoriteSiteLabel: "Site préféré",
+    longestFlightLabel: "Vol le plus long",
+    noValue: "—",
+    qualificationsTitle: "Qualifications",
+    noQualificationsYet: "Aucun brevet obtenu pour l'instant.",
+    activitiesTitle: "Historique",
+    noActivitiesYet: "Aucune activité enregistrée.",
+    flightsSectionTitle: "Vols",
+    trainingCampsSectionTitle: "Stages",
+    groundHandlingSectionTitle: "Gonflages",
+  },
   flights: {
     newFlight: "New flight",
     detailsHeading: "Details",
