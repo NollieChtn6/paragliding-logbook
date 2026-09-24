@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // La route d'export PDF (api/export/carnet) lit ses polices TTF via un
+  // chemin dynamique (path.join(process.cwd(), ...), voir lib/pdf/fonts.ts)
+  // au lieu d'un require/import statique : le traceur de build de Vercel
+  // (@vercel/nft) ne peut pas détecter cette dépendance par analyse
+  // statique et n'embarquerait pas ces fichiers dans la fonction serverless
+  // sans cette déclaration explicite.
+  outputFileTracingIncludes: {
+    "/api/export/carnet": ["./src/lib/pdf/fonts/*.ttf"],
+  },
   env: {
     // VERCEL_GIT_COMMIT_SHA est fournie par Vercel au build, mais jamais
     // exposée au bundle client sans le préfixe NEXT_PUBLIC_ (Next.js exige
