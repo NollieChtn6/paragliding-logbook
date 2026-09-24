@@ -282,6 +282,28 @@ Déjà construit (`src/features/flights/get-flight-progression.service.ts`, `src
 
 ---
 
+## Export PDF du carnet 📄
+
+Cadrage complet (session de grilling) puis implémenté — voir ADR 013 (`docs/decisions/013-pdf-export-generation.md`) pour les choix techniques (génération côté serveur, `@react-pdf/renderer`, police embarquée) et `src/features/export/` (données + template PDF).
+
+Contenu :
+
+- [x] Historique complet par défaut, avec un filtre de dates optionnel (boîte de dialogue au moment de l'export, sans impact sur l'affichage de `/progression`)
+- [x] Les trois types d'activités (Vol, Stage, Gonflage), regroupés en sous-sections distinctes dans l'historique (une par type, chacune triée **du plus ancien au plus récent**, masquée si vide) — retour utilisateur après premier essai en liste unique mêlée, jugée moins lisible que trois sous-sections
+- [x] Section de synthèse statistique en tête (nombre de vols, temps de vol cumulé, paliers franchis, spot préféré, vol le plus long) — texte/chiffres uniquement, pas de graphique dans cette v1
+- [x] Section Qualifications (brevets obtenus : type + date), distincte de la liste d'activités, dans le même esprit que `/qualifications` et le "Parcours" de `/progression`
+- [x] Sommaire en tête de document, listant les sections avec leur numéro de page (Résumé, Qualifications, Historique — chacune sur sa propre page, numéro connu à l'avance sans calcul post-mise en page) et les sous-sections de l'historique présentes — retour utilisateur après deux essais successifs (sommaire manquant, puis sans numéros de page)
+- [x] Liste des activités en format compact par défaut (date, type, spot, durée) ; texte complet (observations, points d'amélioration) affiché uniquement si l'export est filtré par dates
+- [x] Couverture : "Carnet de progression de {prénom}" (prénom extrait du `User.name` de l'utilisateur connecté), portée de l'export affichée sous la date d'édition ("Historique complet" ou plage de dates précise) — retour utilisateur après premier essai où cette portée n'apparaissait nulle part
+- [x] Date d'édition (jour seul, pas d'heure) affichée sur la couverture et en pied de page de chaque page intérieure
+- [x] Format A5 portrait uniquement pour cette v1 (pas de choix de format à l'export)
+
+Accès :
+
+- [x] Bouton "Exporter en PDF" sur `/progression`
+
+---
+
 ## Rappels importants sur les notions
 
 ### Sites de vol 🌍
@@ -343,7 +365,7 @@ Ces fonctionnalités sont volontairement hors MVP.
 - [ ] Calendrier des activités
 - [ ] Notifications / rappels
 - [ ] Partage public optionnel d'un vol
-- [ ] Export des données personnelles (JSON, PDF)
+- [ ] Export des données personnelles en JSON — l'export PDF est cadré séparément, voir [Export PDF du carnet](#export-pdf-du-carnet-) ci-dessus
 
 ---
 

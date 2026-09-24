@@ -579,6 +579,49 @@ const messages = {
     emptyDescription:
       "Enregistrez vos premiers vols pour voir apparaître vos tendances et paliers.",
   },
+  export: {
+    // Bouton/dialogue d'export (progression/page.tsx, export-carnet-dialog.tsx)
+    // : locale-aware, comme le reste de l'UI.
+    exportButton: "Exporter en PDF",
+    dialogTitle: "Exporter le carnet en PDF",
+    dialogDescription:
+      "Générez un document PDF de votre carnet. Sans filtre, l'export couvre tout votre historique en format compact.",
+    dateRangeHint:
+      "Filtrer par dates bascule automatiquement l'export en détail complet (observations et points d'amélioration inclus).",
+    confirmButton: "Exporter",
+    // Contenu du document PDF (get-carnet-export-data.service.ts,
+    // carnet-pdf-document.tsx) : toujours en français, indépendamment de la
+    // locale de l'utilisateur (ADR 013) — cette section est lue directement
+    // depuis ce dictionnaire, jamais via getDictionary(locale) côté PDF.
+    coverTitle: (firstName: string) => `Carnet de progression de ${firstName}`,
+    editionDate: (date: string) => `Édité le ${date}`,
+    // Portée de l'export (couverture, sous la date d'édition) : distingue
+    // un historique complet d'un export filtré par dates, dont les bornes
+    // ne sont sinon visibles nulle part dans le document (retour
+    // utilisateur).
+    scopeFullHistory: "Historique complet",
+    scopeDateRange: (from: string, to: string) => `Du ${from} au ${to}`,
+    scopeFrom: (from: string) => `Depuis le ${from}`,
+    scopeTo: (to: string) => `Jusqu'au ${to}`,
+    tableOfContentsTitle: "Sommaire",
+    statsTitle: "Résumé",
+    flightCountLabel: "Nombre de vols",
+    cumulativeFlightTimeLabel: "Temps de vol cumulé",
+    milestonesCrossedLabel: "Paliers franchis",
+    favoriteSiteLabel: "Site préféré",
+    longestFlightLabel: "Vol le plus long",
+    noValue: "—",
+    qualificationsTitle: "Qualifications",
+    noQualificationsYet: "Aucun brevet obtenu pour l'instant.",
+    activitiesTitle: "Historique",
+    noActivitiesYet: "Aucune activité enregistrée.",
+    // Sous-sections de l'historique (retour utilisateur : séparer
+    // visuellement les trois types plutôt qu'une liste unique mêlée) :
+    // chacune triée chronologiquement en interne, masquée si vide.
+    flightsSectionTitle: "Vols",
+    trainingCampsSectionTitle: "Stages",
+    groundHandlingSectionTitle: "Gonflages",
+  },
   flights: {
     newFlight: "Nouveau vol",
     detailsHeading: "Détails",
