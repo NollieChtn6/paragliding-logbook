@@ -593,7 +593,10 @@ const messages = {
     // carnet-pdf-document.tsx) : toujours en français, indépendamment de la
     // locale de l'utilisateur (ADR 013) — cette section est lue directement
     // depuis ce dictionnaire, jamais via getDictionary(locale) côté PDF.
-    coverTitle: (firstName: string) => `Carnet de progression de ${firstName}`,
+    coverTitle: "Carnet de progression",
+    // Mention de propriétaire sous le titre, façon page de garde d'un carnet
+    // papier : le prénom est affiché juste en dessous.
+    coverOwnerLabel: "Ce carnet appartient à",
     editionDate: (date: string) => `Édité le ${date}`,
     // Portée de l'export (couverture, sous la date d'édition) : distingue
     // un historique complet d'un export filtré par dates, dont les bornes
@@ -621,6 +624,10 @@ const messages = {
     flightsSectionTitle: "Vols",
     trainingCampsSectionTitle: "Stages",
     groundHandlingSectionTitle: "Gonflages",
+    // En-têtes du tableau de l'historique.
+    tableDateHeader: "Date",
+    tableSiteHeader: "Site",
+    tableDurationHeader: "Durée",
   },
   flights: {
     newFlight: "Nouveau vol",
