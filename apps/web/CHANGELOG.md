@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.22.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.21.1...paragliding-logbook-v1.22.0) (2026-09-24)
+
+
+### Features
+
+* **export:** add PDF logbook export (carnet) ([3bb0242](https://github.com/NollieChtn6/paragliding-logbook/commit/3bb0242c60e8ed8dda9b803fc99448402ba72578))
+* **export:** add PDF logbook export (carnet) ([c1ee5cf](https://github.com/NollieChtn6/paragliding-logbook/commit/c1ee5cfec66cce3841f52553a6e8bd55b400f538))
+
 ## [1.21.1](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.21.0...paragliding-logbook-v1.21.1) (2026-09-22)
 
 
