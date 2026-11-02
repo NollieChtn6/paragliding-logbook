@@ -294,9 +294,10 @@ Contenu :
 - [x] Section Qualifications (brevets obtenus : type + date), distincte de la liste d'activités, dans le même esprit que `/qualifications` et le "Parcours" de `/progression`
 - [x] Sommaire en tête de document, listant les sections avec leur numéro de page (Résumé, Qualifications, Historique — chacune sur sa propre page, numéro connu à l'avance sans calcul post-mise en page) et les sous-sections de l'historique présentes — retour utilisateur après deux essais successifs (sommaire manquant, puis sans numéros de page)
 - [x] Liste des activités en format compact par défaut (date, type, spot, durée) ; texte complet (observations, points d'amélioration) affiché uniquement si l'export est filtré par dates
-- [x] Couverture : "Carnet de progression de {prénom}" (prénom extrait du `User.name` de l'utilisateur connecté), portée de l'export affichée sous la date d'édition ("Historique complet" ou plage de dates précise) — retour utilisateur après premier essai où cette portée n'apparaissait nulle part
+- [x] Couverture : titre "Carnet de progression" puis "Ce carnet appartient à {prénom}" (prénom extrait du `User.name` de l'utilisateur connecté), portée de l'export affichée sous la date d'édition ("Historique complet" ou plage de dates précise) — retour utilisateur après premier essai où cette portée n'apparaissait nulle part
 - [x] Date d'édition (jour seul, pas d'heure) affichée sur la couverture et en pied de page de chaque page intérieure
 - [x] Format A5 portrait uniquement pour cette v1 (pas de choix de format à l'export)
+- [x] Direction visuelle « carnet papier » (fond crème, titres en Fraunces, historique en tableaux) — voir ADR 013
 
 Accès :
 

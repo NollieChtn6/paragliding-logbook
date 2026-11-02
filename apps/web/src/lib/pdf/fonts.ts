@@ -2,6 +2,10 @@ import path from "node:path";
 import { Font } from "@react-pdf/renderer";
 
 export const PDF_FONT_FAMILY = "Plus Jakarta Sans";
+// Police à empattement réservée aux titres (couverture, titres de section et
+// de sous-section) : donne son côté "carnet papier" au document, le corps de
+// texte reste en Plus Jakarta Sans.
+export const PDF_SERIF_FONT_FAMILY = "Fraunces";
 
 const FONTS_DIR = path.join(process.cwd(), "src", "lib", "pdf", "fonts");
 
@@ -14,6 +18,10 @@ const FONTS_DIR = path.join(process.cwd(), "src", "lib", "pdf", "fonts");
 // (process.cwd(), pas un chemin relatif) : Font.register lit le fichier
 // depuis le système de fichiers du serveur, indépendamment du module
 // appelant.
+//
+// Fraunces (titres uniquement, un seul graisse SemiBold) : même démarche,
+// TTF statique obtenu via l'API Google Fonts (opsz=36, wght=600), licence
+// OFL (./fonts/fraunces-LICENSE.txt).
 let registered = false;
 
 export function registerPdfFonts(): void {
@@ -26,6 +34,11 @@ export function registerPdfFonts(): void {
       { src: path.join(FONTS_DIR, "plus-jakarta-sans-medium.ttf"), fontWeight: "medium" },
       { src: path.join(FONTS_DIR, "plus-jakarta-sans-bold.ttf"), fontWeight: "bold" },
     ],
+  });
+
+  Font.register({
+    family: PDF_SERIF_FONT_FAMILY,
+    fonts: [{ src: path.join(FONTS_DIR, "fraunces-semibold.ttf"), fontWeight: "semibold" }],
   });
 
   registered = true;

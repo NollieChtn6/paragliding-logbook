@@ -532,7 +532,8 @@ const messages: Messages = {
     // PDF document content stays French regardless of locale (ADR 013) —
     // these values are never read by the PDF template, only kept here to
     // satisfy the shared Messages type.
-    coverTitle: (firstName: string) => `Carnet de progression de ${firstName}`,
+    coverTitle: "Carnet de progression",
+    coverOwnerLabel: "Ce carnet appartient à",
     editionDate: (date: string) => `Édité le ${date}`,
     scopeFullHistory: "Historique complet",
     scopeDateRange: (from: string, to: string) => `Du ${from} au ${to}`,
@@ -553,6 +554,9 @@ const messages: Messages = {
     flightsSectionTitle: "Vols",
     trainingCampsSectionTitle: "Stages",
     groundHandlingSectionTitle: "Gonflages",
+    tableDateHeader: "Date",
+    tableSiteHeader: "Site",
+    tableDurationHeader: "Durée",
   },
   flights: {
     newFlight: "New flight",

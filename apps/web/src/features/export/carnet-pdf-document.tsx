@@ -4,7 +4,7 @@ import { getActivitySummary } from "@/features/activities";
 import { formatDate } from "@/lib/format-date";
 import { formatDurationMinutes } from "@/lib/format-duration";
 import { PDF_COLORS } from "@/lib/pdf/colors";
-import { PDF_FONT_FAMILY, registerPdfFonts } from "@/lib/pdf/fonts";
+import { PDF_FONT_FAMILY, PDF_SERIF_FONT_FAMILY, registerPdfFonts } from "@/lib/pdf/fonts";
 import { getDictionary } from "@/messages";
 import type { CarnetExportData } from "./get-carnet-export-data.service";
 
@@ -30,51 +30,100 @@ const PAGE_NUMBERS = {
 } as const;
 
 const styles = StyleSheet.create({
+  // Couverture façon page de garde de carnet papier (retour utilisateur,
+  // variante "Carnet papier") : double filet encre autour de la page, pas
+  // d'aplat plein cadre (jugé trop lourd visuellement dans un essai
+  // précédent) — la couleur ne vient que de la marque et de l'ornement.
   coverPage: {
     fontFamily: PDF_FONT_FAMILY,
     backgroundColor: PDF_COLORS.background,
-    padding: 32,
+    padding: 22,
+  },
+  coverOuterFrame: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: PDF_COLORS.foreground,
+    padding: 4,
+  },
+  coverInnerFrame: {
+    flex: 1,
+    borderWidth: 0.5,
+    borderColor: PDF_COLORS.foreground,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  coverBrand: {
+    fontSize: 8.5,
+    fontWeight: "bold",
+    letterSpacing: 4,
+    color: PDF_COLORS.primaryDark,
+  },
+  // Ornement : filet ambre traversé d'un losange (carré pivoté de 45°, fond
+  // papier pour "couper" le filet).
+  ornament: {
+    width: 60,
+    height: 9,
+    marginVertical: 14,
+    alignItems: "center",
     justifyContent: "center",
   },
-  // Trait de couleur en kicker plutôt qu'un aplat plein cadre sur toute la
-  // couverture (retour utilisateur — trop lourd visuellement) : même
-  // logique que le badge de marque de apple-splash/route.tsx, une touche de
-  // couleur plutôt qu'un fond entièrement teinté.
-  coverAccentBar: {
-    width: 48,
-    height: 4,
-    borderRadius: 2,
+  ornamentLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 4,
+    height: 1,
     backgroundColor: PDF_COLORS.accent,
-    marginBottom: 16,
   },
-  coverKicker: {
-    fontSize: 11,
-    fontWeight: "bold",
-    color: PDF_COLORS.primary,
-    marginBottom: 4,
+  ornamentDiamond: {
+    width: 7,
+    height: 7,
+    backgroundColor: PDF_COLORS.background,
+    borderWidth: 1,
+    borderColor: PDF_COLORS.accent,
+    transform: "rotate(45deg)",
   },
   coverTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontFamily: PDF_SERIF_FONT_FAMILY,
+    fontWeight: "semibold",
+    fontSize: 30,
+    lineHeight: 1.1,
+    textAlign: "center",
+    color: PDF_COLORS.foreground,
+  },
+  coverOwnerLabel: {
+    marginTop: 4,
+    fontSize: 9,
+    color: PDF_COLORS.mutedForeground,
+  },
+  coverOwnerName: {
+    marginTop: 3,
+    fontFamily: PDF_SERIF_FONT_FAMILY,
+    fontWeight: "semibold",
+    fontSize: 15,
     color: PDF_COLORS.foreground,
   },
   coverDate: {
-    marginTop: 8,
-    fontSize: 11,
-    fontWeight: "normal",
+    marginTop: 36,
+    fontSize: 8,
+    letterSpacing: 1,
+    textTransform: "uppercase",
     color: PDF_COLORS.mutedForeground,
   },
   coverScope: {
-    marginTop: 2,
-    fontSize: 11,
-    fontWeight: "normal",
+    marginTop: 3,
+    fontSize: 8,
+    letterSpacing: 1,
+    textTransform: "uppercase",
     color: PDF_COLORS.mutedForeground,
   },
   contentPage: {
     fontFamily: PDF_FONT_FAMILY,
     backgroundColor: PDF_COLORS.background,
-    padding: 28,
-    paddingBottom: 40,
+    paddingTop: 34,
+    paddingHorizontal: 32,
+    paddingBottom: 50,
     fontSize: 10,
     color: PDF_COLORS.foreground,
   },
@@ -82,87 +131,145 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: PDF_COLORS.primary,
-    marginBottom: 6,
-  },
-  statRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 2,
-    borderBottomWidth: 1,
-    borderBottomColor: PDF_COLORS.border,
-  },
-  statLabel: {
-    fontWeight: "normal",
-    color: PDF_COLORS.mutedForeground,
-  },
-  statValue: {
-    fontWeight: "medium",
+    fontFamily: PDF_SERIF_FONT_FAMILY,
+    fontWeight: "semibold",
+    fontSize: 20,
     color: PDF_COLORS.foreground,
+    paddingBottom: 6,
+    marginBottom: 14,
+    borderBottomWidth: 1.5,
+    borderBottomColor: PDF_COLORS.foreground,
   },
   emptyText: {
     fontWeight: "normal",
     color: PDF_COLORS.mutedForeground,
   },
-  tocRow: {
+  // Ligne à points de conduite (sommaire et résumé) : libellé, filet
+  // pointillé qui occupe l'espace restant, puis valeur à droite.
+  leaderRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 3,
+    alignItems: "flex-end",
+    paddingVertical: 6,
   },
-  tocItem: {
-    fontWeight: "medium",
+  leaderLabel: {
+    fontSize: 11,
+    fontWeight: "normal",
     color: PDF_COLORS.foreground,
   },
-  tocPageNumber: {
-    fontWeight: "medium",
-    color: PDF_COLORS.mutedForeground,
+  leaderDots: {
+    flex: 1,
+    marginHorizontal: 4,
+    marginBottom: 3,
+    borderBottomWidth: 1,
+    borderBottomStyle: "dotted",
+    borderBottomColor: PDF_COLORS.dotted,
   },
-  tocSubItem: {
-    fontWeight: "normal",
-    color: PDF_COLORS.mutedForeground,
-    marginTop: 1,
-    marginLeft: 12,
-  },
-  subsectionTitle: {
+  leaderValue: {
     fontSize: 11,
     fontWeight: "bold",
-    color: PDF_COLORS.accent,
-    marginTop: 10,
-    marginBottom: 4,
+    color: PDF_COLORS.foreground,
+  },
+  leaderSubLabel: {
+    fontSize: 9,
+    fontWeight: "normal",
+    color: PDF_COLORS.mutedForeground,
+  },
+  leaderSubRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    paddingVertical: 4,
+    paddingLeft: 14,
   },
   qualificationRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 3,
-  },
-  activityRow: {
-    paddingVertical: 4,
-    borderBottomWidth: 1,
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 0.5,
     borderBottomColor: PDF_COLORS.border,
   },
-  activityHeadline: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  qualificationNumber: {
+    width: 26,
+    fontFamily: PDF_SERIF_FONT_FAMILY,
+    fontWeight: "semibold",
+    fontSize: 13,
+    color: PDF_COLORS.accent,
   },
-  activityTitle: {
-    fontWeight: "medium",
-    color: PDF_COLORS.foreground,
+  qualificationName: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: "bold",
   },
-  activityMeta: {
-    marginTop: 1,
+  qualificationDate: {
+    fontSize: 9,
     color: PDF_COLORS.mutedForeground,
   },
-  activityDetail: {
-    marginTop: 2,
+  // Sous-section par type d'activité : titre en serif, tableau réglé dessous.
+  subsectionTitle: {
+    fontFamily: PDF_SERIF_FONT_FAMILY,
+    fontWeight: "semibold",
+    fontSize: 12,
     color: PDF_COLORS.foreground,
+    marginTop: 16,
+    marginBottom: 6,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: PDF_COLORS.foreground,
+  },
+  tableHeaderText: {
+    fontSize: 6.5,
+    fontWeight: "bold",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: PDF_COLORS.mutedForeground,
+  },
+  tableRow: {
+    flexDirection: "row",
+    paddingVertical: 5.5,
+    borderBottomWidth: 0.5,
+    borderBottomColor: PDF_COLORS.border,
+    fontSize: 8.5,
+  },
+  // Largeurs fixes des colonnes Date et Durée : le Site prend le reste.
+  // La date d'un vol inclut l'heure ("08/06/2024 à 10:00") et celle d'un
+  // stage couvre deux dates ("03/06/2024 → 07/06/2024"), d'où une colonne
+  // large, avec une gouttière à droite pour ne pas coller au Site.
+  dateColumn: {
+    width: 112,
+    paddingRight: 8,
+    color: PDF_COLORS.foreground,
+  },
+  siteColumn: {
+    flex: 1,
+    fontWeight: "bold",
+  },
+  durationColumn: {
+    width: 46,
+    textAlign: "right",
+  },
+  // Texte complet d'un vol (export filtré par dates) : filet ambre à gauche,
+  // sous le nom du site, comme une remarque manuscrite en marge.
+  activityDetail: {
+    marginTop: 3,
+    paddingLeft: 7,
+    borderLeftWidth: 1.5,
+    borderLeftColor: PDF_COLORS.accent,
+    fontWeight: "normal",
+    fontSize: 8.3,
+    color: PDF_COLORS.foreground,
+  },
+  activityDetailLabel: {
+    fontWeight: "bold",
   },
   footer: {
     position: "absolute",
-    bottom: 16,
-    left: 28,
-    right: 28,
+    bottom: 18,
+    left: 32,
+    right: 32,
+    fontFamily: PDF_SERIF_FONT_FAMILY,
+    fontWeight: "semibold",
     fontSize: 8,
     color: PDF_COLORS.mutedForeground,
     textAlign: "center",
@@ -213,11 +320,18 @@ export function CarnetPdfDocument({
   return (
     <Document>
       <Page size="A5" style={styles.coverPage}>
-        <View style={styles.coverAccentBar} />
-        <Text style={styles.coverKicker}>THERMIK</Text>
-        <Text style={styles.coverTitle}>{te.coverTitle(pilotFirstName)}</Text>
-        <Text style={styles.coverDate}>{te.editionDate(editionDateLabel)}</Text>
-        <Text style={styles.coverScope}>{scopeLabel}</Text>
+        <View style={styles.coverOuterFrame}>
+          <View style={styles.coverInnerFrame}>
+            <Text style={styles.coverBrand}>THERMIK</Text>
+            <Ornament />
+            <Text style={styles.coverTitle}>{te.coverTitle}</Text>
+            <Ornament />
+            <Text style={styles.coverOwnerLabel}>{te.coverOwnerLabel}</Text>
+            <Text style={styles.coverOwnerName}>{pilotFirstName}</Text>
+            <Text style={styles.coverDate}>{te.editionDate(editionDateLabel)}</Text>
+            <Text style={styles.coverScope}>{scopeLabel}</Text>
+          </View>
+        </View>
       </Page>
 
       <ContentPage editionDateLabel={editionDateLabel}>
@@ -265,10 +379,38 @@ function ContentPage({
   return (
     <Page size="A5" style={styles.contentPage} wrap>
       {children}
-      <Text style={styles.footer} fixed>
-        {te.editionDate(editionDateLabel)}
-      </Text>
+      {/* Numéro de page réel (render) plutôt que PAGE_NUMBERS : l'Historique
+          peut déborder sur plusieurs pages. Tirets de part et d'autre, comme
+          le folio d'un carnet imprimé. */}
+      <Text
+        style={styles.footer}
+        fixed
+        render={({ pageNumber }) => `— ${te.editionDate(editionDateLabel)} · ${pageNumber} —`}
+      />
     </Page>
+  );
+}
+
+// Ornement de couverture : filet ambre traversé d'un losange.
+function Ornament() {
+  return (
+    <View style={styles.ornament}>
+      <View style={styles.ornamentLine} />
+      <View style={styles.ornamentDiamond} />
+    </View>
+  );
+}
+
+// Ligne "libellé ........ valeur" : points de conduite du sommaire et du
+// résumé. `sub` pour une entrée de second niveau (sous-section de
+// l'historique), plus petite et décalée.
+function LeaderRow({ label, value, sub }: { label: string; value?: string; sub?: boolean }) {
+  return (
+    <View style={sub ? styles.leaderSubRow : styles.leaderRow}>
+      <Text style={sub ? styles.leaderSubLabel : styles.leaderLabel}>{label}</Text>
+      <View style={styles.leaderDots} />
+      {value !== undefined && <Text style={styles.leaderValue}>{value}</Text>}
+    </View>
   );
 }
 
@@ -284,21 +426,26 @@ function TableOfContentsSection({
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{te.tableOfContentsTitle}</Text>
-      <View style={styles.tocRow}>
-        <Text style={styles.tocItem}>{te.statsTitle}</Text>
-        <Text style={styles.tocPageNumber}>{PAGE_NUMBERS.stats}</Text>
-      </View>
-      <View style={styles.tocRow}>
-        <Text style={styles.tocItem}>{te.qualificationsTitle}</Text>
-        <Text style={styles.tocPageNumber}>{PAGE_NUMBERS.qualifications}</Text>
-      </View>
-      <View style={styles.tocRow}>
-        <Text style={styles.tocItem}>{te.activitiesTitle}</Text>
-        <Text style={styles.tocPageNumber}>{PAGE_NUMBERS.activities}</Text>
-      </View>
-      {hasFlights && <Text style={styles.tocSubItem}>{te.flightsSectionTitle}</Text>}
-      {hasTrainingCamps && <Text style={styles.tocSubItem}>{te.trainingCampsSectionTitle}</Text>}
-      {hasGroundHandling && <Text style={styles.tocSubItem}>{te.groundHandlingSectionTitle}</Text>}
+      <LeaderRow label={te.statsTitle} value={String(PAGE_NUMBERS.stats)} />
+      <LeaderRow label={te.qualificationsTitle} value={String(PAGE_NUMBERS.qualifications)} />
+      <LeaderRow label={te.activitiesTitle} value={String(PAGE_NUMBERS.activities)} />
+      {hasFlights && (
+        <LeaderRow sub label={te.flightsSectionTitle} value={String(PAGE_NUMBERS.activities)} />
+      )}
+      {hasTrainingCamps && (
+        <LeaderRow
+          sub
+          label={te.trainingCampsSectionTitle}
+          value={String(PAGE_NUMBERS.activities)}
+        />
+      )}
+      {hasGroundHandling && (
+        <LeaderRow
+          sub
+          label={te.groundHandlingSectionTitle}
+          value={String(PAGE_NUMBERS.activities)}
+        />
+      )}
     </View>
   );
 }
@@ -324,10 +471,7 @@ function StatsSection({ stats }: { stats: CarnetExportData["stats"] }) {
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{te.statsTitle}</Text>
       {rows.map(([label, value]) => (
-        <View key={label} style={styles.statRow}>
-          <Text style={styles.statLabel}>{label}</Text>
-          <Text style={styles.statValue}>{value}</Text>
-        </View>
+        <LeaderRow key={label} label={label} value={value} />
       ))}
     </View>
   );
@@ -344,13 +488,16 @@ function QualificationsSection({
       {qualifications.length === 0 ? (
         <Text style={styles.emptyText}>{te.noQualificationsYet}</Text>
       ) : (
-        qualifications.map((qualification) => (
+        qualifications.map((qualification, index) => (
           <View key={qualification.id} style={styles.qualificationRow}>
-            <Text>
+            <Text style={styles.qualificationNumber}>{index + 1}</Text>
+            <Text style={styles.qualificationName}>
               {t.referenceLabels.qualificationType[qualification.qualificationType.code] ??
                 qualification.qualificationType.code}
             </Text>
-            <Text>{formatDate(qualification.obtainedDate, "fr-FR")}</Text>
+            <Text style={styles.qualificationDate}>
+              {formatDate(qualification.obtainedDate, "fr-FR")}
+            </Text>
           </View>
         ))
       )}
@@ -423,30 +570,45 @@ function ActivityTypeGroup({
   return (
     <View>
       <Text style={styles.subsectionTitle}>{title}</Text>
+      <View style={styles.tableHeader}>
+        <Text style={[styles.tableHeaderText, styles.dateColumn]}>{te.tableDateHeader}</Text>
+        <Text style={[styles.tableHeaderText, styles.siteColumn]}>{te.tableSiteHeader}</Text>
+        <Text style={[styles.tableHeaderText, styles.durationColumn]}>
+          {te.tableDurationHeader}
+        </Text>
+      </View>
       {activities.map((activity) => {
         const summary = getActivitySummary(activity, "fr-FR", t);
         const durationMin =
           activity.flight?.durationMin ?? activity.groundHandlingSession?.durationMin;
 
         return (
-          <View key={activity.id} style={styles.activityRow}>
-            <View style={styles.activityHeadline}>
-              <Text style={styles.activityTitle}>{summary.location || summary.title}</Text>
-              {durationMin !== undefined && (
-                <Text style={styles.activityTitle}>{formatDurationMinutes(durationMin)}</Text>
+          // wrap={false} : une ligne (et son texte complet) ne se coupe
+          // jamais entre deux pages.
+          <View key={activity.id} style={styles.tableRow} wrap={false}>
+            <Text style={styles.dateColumn}>{summary.dateInfo}</Text>
+            <View style={styles.siteColumn}>
+              <Text>{summary.location || summary.title}</Text>
+              {detailLevel === "full" && activity.flight && (
+                <View style={styles.activityDetail}>
+                  <Text>
+                    <Text style={styles.activityDetailLabel}>
+                      {t.activities.observationsTitle}.
+                    </Text>{" "}
+                    {activity.flight.observations}
+                  </Text>
+                  <Text>
+                    <Text style={styles.activityDetailLabel}>
+                      {t.activities.improvementPointsTitle}.
+                    </Text>{" "}
+                    {activity.flight.improvementPoints}
+                  </Text>
+                </View>
               )}
             </View>
-            <Text style={styles.activityMeta}>{summary.dateInfo}</Text>
-            {detailLevel === "full" && activity.flight && (
-              <>
-                <Text style={styles.activityDetail}>
-                  {t.activities.observationsTitle} : {activity.flight.observations}
-                </Text>
-                <Text style={styles.activityDetail}>
-                  {t.activities.improvementPointsTitle} : {activity.flight.improvementPoints}
-                </Text>
-              </>
-            )}
+            <Text style={styles.durationColumn}>
+              {durationMin !== undefined ? formatDurationMinutes(durationMin) : te.noValue}
+            </Text>
           </View>
         );
       })}

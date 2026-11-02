@@ -21,6 +21,10 @@ La police Plus Jakarta Sans est embarquée dans le PDF via des fichiers **TTF st
 
 Les tokens de couleur (`primary` `#2563EB`, `accent` `#F59E0B`, etc.) sont redéclarés manuellement dans le template PDF, faute de pouvoir consommer les variables CSS Tailwind existantes depuis `@react-pdf/renderer`.
 
+### Direction visuelle du document : « carnet papier »
+
+Après plusieurs variantes comparées (éditorial, ciel et reliefs, carnet papier, chronologie), le document adopte l'esthétique d'un carnet de bord papier : fond crème (`#fbf7ee`) et encre bleu nuit (`#1b2a41`) au lieu des teintes ardoise de l'app, titres en **Fraunces SemiBold** (police à empattement, TTF statique OFL, réservée aux titres), corps en Plus Jakarta Sans, couverture à double filet sans aplat plein cadre, sommaire et résumé à points de conduite, historique en tableaux Date / Site / Durée. Seuls `primary` et `accent` restent ceux de l'app ; les autres tokens de `lib/pdf/colors.ts` sont volontairement propres au PDF.
+
 ## Conséquences
 
 Avantages :
