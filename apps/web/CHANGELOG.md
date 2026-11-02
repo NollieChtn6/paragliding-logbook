@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.23.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.22.0...paragliding-logbook-v1.23.0) (2026-11-02)
+
+
+### Features
+
+* **export:** release PDF logbook paper notebook restyle ([cae1054](https://github.com/NollieChtn6/paragliding-logbook/commit/cae10540b3046e898ffb1138f12ae17161f5226f))
+* **export:** restyle PDF logbook as a paper notebook ([1b1fff0](https://github.com/NollieChtn6/paragliding-logbook/commit/1b1fff0e8826673922ea9e653b425a3c32c9ac38))
+* **export:** restyle PDF logbook as a paper notebook ([c817a25](https://github.com/NollieChtn6/paragliding-logbook/commit/c817a25fb5cc6f443c69eb70f31e842d3c28cb96))
+
 ## [1.22.0](https://github.com/NollieChtn6/paragliding-logbook/compare/paragliding-logbook-v1.21.1...paragliding-logbook-v1.22.0) (2026-09-24)
 
 
